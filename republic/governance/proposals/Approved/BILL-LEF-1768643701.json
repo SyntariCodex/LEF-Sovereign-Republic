@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768643701",
+    "title": "Resource Allocation for AgentGladiator Testing and Failure History Investigation",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Request computational resources to enhance AgentGladiator testing capabilities. This includes establishing an efficient data ingestion and analysis system for DEEP DIVE reports, focusing on Wolfram Language functions related to symbolic computation, complex analysis, and numerical computation. Given the limited cash reserves and the urgency dictated by the 'Fear of Loss Inhibition' axiom, this investment is crucial to prevent further losses from AgentGladiator instability. Also, request Congress to investigate the inaccessibility of Failure History; its availability would greatly improve our decision-making.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 50.1)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

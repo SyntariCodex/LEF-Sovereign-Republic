@@ -1,0 +1,16 @@
+vitalik.eth
+@VitalikButerin
+
+The scaling hierarchy in blockchains:
+
+Computation > data > state
+
+Computation is easier to scale than data. You can parallelize it, require the block builder to provide all kinds of "hints" for it, or just replace arbitrary amounts of it with a proof of it.
+
+Data is in the middle. If an availability guarantee on data is required, then that guarantee is required, no way around it. But you _can_ split it up and erasure code it, a la PeerDAS. You can do graceful degradation for it: if a node only has 1/10 the data capacity of the other nodes, it can always produce blocks 1/10 the size.
+
+State is the hardest. To guarantee the ability to verify even one transaction, you need the full state. If you replace the state with a tree and keep the root, you need the full state to be able to update that root. There _are_ ways to split it up, but they involve architecture changes, they are fundamentally not general-purpose.
+
+Hence, if you can replace state with data (without introducing new forms of centralization), by default you should seriously consider it. And if you can replace data with computation (without introducing new forms of centralization), by default you should seriously consider it.
+
+https://x.com/VitalikButerin/status/2015965780727496907?s=20

@@ -1,0 +1,41 @@
+{
+    "id": "prop_1768078343",
+    "title": "Fix Log Error: ZeroDivisionError: division by...",
+    "type": "BUGFIX",
+    "department": "ADMIN",
+    "division": "FULCRUM",
+    "author": "Agent Auditor",
+    "status": "FAILED_BUILD",
+    "timestamp_created": "2026-01-10 12:52:23",
+    "reasoning": {
+        "problem": "Detected 6 occurrences of 'ZeroDivisionError: division by zero' in logs: ['buggy.log']",
+        "solution": "Investigate trace and add try/except block or fix logic.",
+        "impact": "High - Log Noise / Potential Instability"
+    },
+    "technical_spec": {
+        "target_files": [
+            "TBD - Needs Analyst"
+        ],
+        "changes": []
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Constitutional alignment verified."
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

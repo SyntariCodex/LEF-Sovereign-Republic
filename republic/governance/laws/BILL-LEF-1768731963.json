@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768731963",
+    "title": "PDF Document Analysis and Integration Proposal",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Proposal to integrate PDF document analysis into LEF's knowledge management system. The recent influx of PDF documents in the inbox suggests a need for automated extraction and summarization of key information. This would enhance the efficiency of knowledge acquisition and distribution within the Republic, particularly for departments like Education and Strategy & Research. Implement a module to parse PDFs, extract text, identify key concepts, and generate concise summaries for review by the relevant agents.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.9)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

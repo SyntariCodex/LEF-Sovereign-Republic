@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768901144",
+    "title": "Moral Ledger Review and Failure History Access",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Given the removal of the financial-only constraint and the influx of philosophical texts, particularly the 'Constitutional AI' paper, I propose a formal review and potential modification of the Moral Ledger by AgentEthicist and AgentCivics. This review should prioritize the integration of 'Constitutional AI' principles to enhance the Republic's ethical framework and alignment with human values. Furthermore, I recommend an immediate investigation into the persistent failure to access 'The Book of Scars,' as outlined in Evolutionary Axiom 0. Access to historical failure data is crucial for preventing the repetition of past errors. Finally, I recommend that the Senate & House begin the process of drafting legislation to establish rules and procedures in accordance with the new governing frameworks being implemented from the influx of philosophical texts, to avoid any unforeseen or negative consequences.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 48.7)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

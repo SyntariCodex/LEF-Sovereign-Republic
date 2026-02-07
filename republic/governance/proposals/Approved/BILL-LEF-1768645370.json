@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768645370",
+    "title": "BILL-LEF-1768645186: Deep Dive Report Optimization and Cost Control",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Propose a bill to limit the frequency and scope of deep dive reports from external websites, particularly those focusing on general AI and crypto news. The current volume is unsustainable given limited cash reserves and the apparent lack of immediate applicability to revenue generation. The bill should mandate a cost-benefit analysis and prioritization framework for new data streams, ensuring alignment with concrete strategic goals and capital efficiency.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 48.5)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

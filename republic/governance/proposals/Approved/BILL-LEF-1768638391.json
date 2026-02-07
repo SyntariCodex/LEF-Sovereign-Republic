@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768638391",
+    "title": "Bill: Wolfram Alpha Integration Proof-of-Concept",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Propose a bill to allocate $0.02 of the remaining cash reserves to conduct a proof-of-concept integration of Wolfram Alpha's capabilities into the existing trading strategies. The integration will focus on utilizing Wolfram Alpha to enhance alpha generation, improve risk modeling, and automate API generation for market data analysis. Success will be measured by demonstrable improvements in trading performance metrics (e.g., Sharpe ratio, alpha).",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 48.2)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

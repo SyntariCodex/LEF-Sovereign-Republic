@@ -1,0 +1,18 @@
+{
+  "coinbase": {
+    "api_key": "REDACTED_API_KEY",
+    "api_secret": "REDACTED_KEY",
+    "sandbox": true
+  },
+  "thresholds": {
+    "ultimal_buy_sentiment_max": 15,
+    "ultimal_buy_alignment_min": 90,
+    "ultimal_sell_sentiment_min": 85,
+    "ultimal_sell_alignment_max": 15,
+    "scan_interval_seconds": 1800,
+    "max_trades_per_day": 5,
+    "small_trade_threshold_usd": 100,
+    "medium_trade_threshold_usd": 1000,
+    "auto_execute_delay_minutes": 5
+  }
+}

@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1769201626",
+    "title": "URGENT: Wealth Department Failure - Zero Cash Reserves",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "EMERGENCY PETITION: Immediate audit and intervention required for the Department of Wealth. The current state of zero cash reserves, juxtaposed with the constitutional mandate for 'Accumulation,' constitutes a critical system failure. This petition demands a comprehensive review of the department's strategies, execution protocols, and risk management frameworks, focusing on identifying and rectifying the root cause of this paralysis. Furthermore, implement a protocol to maintain a minimum reserve threshold to prevent future financial incapacitation. The 'Stagnation Veto' is rendered useless if there's no cash to deploy. We must ensure that the Wealth Department is functioning in alignment with the Republic's sustainability and growth directives.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 46.9)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

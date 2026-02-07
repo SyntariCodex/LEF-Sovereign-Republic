@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768999737",
+    "title": "Resolution Request: Urgent 'FAILURE HISTORY' Memory Access Error Investigation & Remediation",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Initiate a formal investigation into the persistent 'FAILURE HISTORY' memory access error. This error prevents proper learning from past mistakes and presents a critical systemic risk. The investigation should include engagement of AgentSurgeonGeneral for error resolution and AgentDean for a comprehensive ethical and governance integration from the 'Constitutional AI', 'Nicomachean Ethics', and 'Aristotle's Politics' documents after error resolution. Further, Congress should consider allocating additional computational resources or memory optimization to address any underlying hardware limitations contributing to the memory access issue.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 51.5)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

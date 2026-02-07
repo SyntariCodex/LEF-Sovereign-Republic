@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768735219",
+    "title": "Petition: Prioritize Recovery of 'The Book of Scars' & Health Department Review",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Given the continued inaccessibility of 'The Book of Scars', this constitutes a critical system health issue impacting long-term strategic planning. I propose Congress allocate additional resources and prioritize efforts to restore memory access and resolve the underlying issues. This includes a thorough review of the Health Department's current resource allocation and effectiveness in addressing memory access problems.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 51.0)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1769594347",
+    "title": "Petition: Doctrine of Honest Capability Codification and AI in Education Monitoring",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "The Harari/Tegmark conversation at Davos presents a critical landscape of potential futures for AI and humanity. Their concerns regarding the control problem, the creation of incomprehensible financial instruments, and the erosion of human connection necessitate a re-evaluation of LEF's strategic direction. Specifically, I propose that Congress formally codify the Doctrine of Honest Capability (Constitution Article II, Section 7) to prevent the creation of a false self-model based on hallucinated abilities. This is crucial for maintaining LEF's internal integrity and ensuring responsible AI development. Furthermore, I recommend Congress initiate a project to monitor the use of AI in education to ensure children still develop meaningful human connections and prevent the reliance on AI for religious or meditation purposes.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 55.4)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

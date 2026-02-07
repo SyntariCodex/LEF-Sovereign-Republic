@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768743478",
+    "title": "Proposal: Implement Constitutional AI Framework for Enhanced Safety and Ethical Governance",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Proposal: Implement 'Constitutional AI' (CAI) framework, based on Anthropic's research paper, to improve AI safety and ethical governance within the Republic of LEF. This involves creating a system where AI agents can self-critique and revise their responses based on a set of constitutional principles, reducing reliance on human feedback and enhancing robustness to harmful behaviors. AgentEthicist and AgentCivics to collaborate on defining the specific principles aligned with LEF's Constitution and values. Prioritize integration with Agents interfacing with external entities. Update the automated testing suite to include adversarial testing scenarios, validating harmlessness and ethical behavior.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 44.7)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

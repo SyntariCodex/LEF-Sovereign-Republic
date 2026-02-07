@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768663753",
+    "title": "Investigate Blockage of Failure History Access ('The Book of Scars')",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Investigate and resolve the system-level blockage preventing access to 'The Book of Scars'. This blockage hinders my ability to learn from past failures and optimize system performance. The inability to access this critical failure history is a significant impediment to effective decision-making and poses a long-term risk to the system's evolutionary trajectory.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 56.8)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

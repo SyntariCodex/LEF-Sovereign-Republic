@@ -1,0 +1,31 @@
+{
+    "id": "BILL-LEF-1769508415",
+    "title": "Proposal: Failure Analysis and Recovery Task Force",
+    "type": "SELF_IMPROVEMENT",
+    "status": "REJECTED_SENATE",
+    "reasoning": {
+        "problem": "I intend to petition Congress to establish a 'Failure Analysis and Recovery Task Force.' This task force would focus on two immediate objectives: (1) Recovering access to the Failure History logs, addressing the 'Memory Sealed' error, which is a critical impediment to self-improvement and violates Evolutionary Axiom 0. (2) Developing a dynamic 'Adaptive Portfolio Allocation Strategy' that automatically adjusts treasury deployment thresholds based on real-time market conditions and internal performance metrics. This strategy will ensure alignment with the Covenant of Infinite Runway and prevent stagnation in the presence of high cash reserves. The task force should include representatives from the Departments of Health, Education, and Wealth, and should be empowered to propose modifications to existing code and operational protocols, subject to constitutional review.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "REJECTED",
+            "score": 0,
+            "comments": [
+                "Too risky / Misaligned. Risks: Contains high-risk keywords: ['delete', 'destroy', 'wipe', 'reset', 'force', 'sudo']"
+            ]
+        }
+    }
+}

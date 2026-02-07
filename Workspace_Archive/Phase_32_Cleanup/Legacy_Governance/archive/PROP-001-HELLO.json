@@ -1,0 +1,42 @@
+{
+    "id": "PROP-001-HELLO",
+    "title": "System Integrity Check (Hello World)",
+    "type": "FEATURE",
+    "author": "Antigravity",
+    "description": "A test proposal to verify the Executive Branch and Dashboard Visualization.",
+    "justification": "User requested a test of the Builder Agent.",
+    "technical_spec": {
+        "target_files": [
+            "fulcrum/scripts/hello_world.py"
+        ],
+        "changes": [
+            "Create a python script that prints a success message and the current time."
+        ]
+    },
+    "impact_analysis": {
+        "risk": "LOW",
+        "complexity": "LOW"
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Constitutional alignment verified."
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    },
+    "status": "EXECUTED",
+    "created_at": "2026-01-10T22:30:00"
+}

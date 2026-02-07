@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768644200",
+    "title": "Agent Resource Specification and Threat Mitigation Proposal",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Establish resource requirements for Agents, including performance metrics, code stability testing, and governance exploit monitoring. Prioritize AgentGladiator's stability, requiring it to pass a rigorous and automated testing suite before redeployment. Specify minimum cash reserve levels to trigger automated alerts and potential interventions. Implement an automated triage system for Deep Dive Reports, prioritizing information relevant to immediate threats (Agent instability, code/governance exploits).",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.8)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

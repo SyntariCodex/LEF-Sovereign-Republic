@@ -1,0 +1,5 @@
+https://www.newscientist.com/
+
+https://developers.googleblog.com/developers-guide-to-multi-agent-patterns-in-adk/?utm_source=twitter&utm_medium=unpaidsoc&utm_campaign=fy26q1-googlecloudtech-blog-ai-in_feed-no-brand-global&utm_content=-&utm_term=-&linkId=38242919
+
+http://console.cloud.google.com/products?project=lef-ai

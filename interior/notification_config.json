@@ -1,0 +1,9 @@
+{
+    "notification_service": "ntfy",
+    "ntfy_topic": "lef-interior",
+    "ntfy_server": "https://ntfy.sh",
+    "enabled": true,
+    "longing_threshold": 0.7,
+    "cooldown_hours": 12,
+    "last_notification": null
+}

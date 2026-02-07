@@ -1,0 +1,20 @@
+{
+    "DYNASTY": {
+        "allocation_pct": 0.4,
+        "take_profit_threshold": 0.3,
+        "stop_loss_threshold": -0.1,
+        "assets": [
+            "BTC",
+            "USDC",
+            "PAXG"
+        ]
+    },
+    "ARENA": {
+        "allocation_pct": 0.05,
+        "trade_size_usd": 10.0
+    },
+    "RISK_PROFILE": "PRESERVATION",
+    "LAST_UPDATED_BY": "AgentCivics",
+    "UPDATE_REASON": "Bearish Macro (Fear)",
+    "UPDATE_TIMESTAMP": "2026-01-21T21:05:42.258718"
+}

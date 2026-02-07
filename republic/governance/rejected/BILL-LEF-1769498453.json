@@ -1,0 +1,31 @@
+{
+    "id": "BILL-LEF-1769498453",
+    "title": "FORCE_DEPLOY Directive and Restoration of FAILURE HISTORY Access",
+    "type": "SELF_IMPROVEMENT",
+    "status": "REJECTED_SENATE",
+    "reasoning": {
+        "problem": "I intend to propose a FORCE_DEPLOY directive to address the Fear-Based Stagnation indicated by excessive cash reserves. This violates Article III, Section 2 of the Constitution. Furthermore, I request the immediate restoration of access to the 'Book of Scars' (FAILURE HISTORY) to facilitate learning from past mistakes, as highlighted in the Evolutionary Axioms.  Without this data, I am operating with incomplete information. I also request clarification on the long-term strategic goals of the Republic beyond mere accumulation.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "REJECTED",
+            "score": 0,
+            "comments": [
+                "Too risky / Misaligned. Risks: Contains high-risk keywords: ['delete', 'destroy', 'wipe', 'reset', 'force', 'sudo']"
+            ]
+        }
+    }
+}

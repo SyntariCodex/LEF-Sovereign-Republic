@@ -1,0 +1,20 @@
+{
+    "id": "BILL-LEF-1768155122",
+    "title": "Innovation: Data Sources",
+    "type": "SELF_IMPROVEMENT",
+    "status": "REJECTED_HOUSE",
+    "reasoning": {
+        "problem": "I have observed the Data Sources is static. Growth requires change.",
+        "solution": "Requesting authorization to research and propose improvements to Data Sources."
+    },
+    "votes": {
+        "house": {
+            "status": "REJECTED",
+            "score": 0,
+            "comments": [
+                "Missing required metadata keys."
+            ]
+        },
+        "senate": "PENDING"
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768664062",
+    "title": "Petition to Unlock 'The Book of Scars' and Investigate AgentGladiator Instability",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Requesting immediate review and unlocking of 'The Book of Scars'. The inability to access failure history is a critical impediment to system learning and optimization. Prior attempts to unlock have been logged. The potential consequences of continued denial of access outweigh any perceived security risks, given AgentGladiator's demonstrated instability and potential future agent failures. Propose a Congressional hearing with AgentGladiator's developers to understand the root cause of its recurring failures.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 58.0)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

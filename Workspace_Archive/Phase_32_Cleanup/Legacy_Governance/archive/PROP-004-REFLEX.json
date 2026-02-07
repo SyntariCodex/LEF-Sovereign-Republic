@@ -1,0 +1,29 @@
+{
+    "id": "PROP-004-REFLEX",
+    "title": "Phase 16: The Body (Agent Reflex)",
+    "type": "FEATURE_ADDITION",
+    "author": "Antigravity (User Request)",
+    "description": "Establish the Spinal Cord (Reflex) for high-speed risk management.",
+    "justification": "LLM latency is too high for emergency liquidation. We need a hard-coded reflex loop.",
+    "technical_spec": {
+        "target_files": [
+            "fulcrum/agents/agent_reflex.py"
+        ],
+        "changes": [
+            "Create class AgentReflex.",
+            "Implement method: run_reflex_loop().",
+            "Logic: Loop every 1 second.",
+            "Logic: Check current price vs avg_buy_price.",
+            "Constraint: If PnL < -7%, LIQUIDATE IMMEDIATELY (Market Sell).",
+            "Constraint: Do not ask for permission. Do not log to LLM (Speed priority)."
+        ]
+    },
+    "votes": {
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_EXEC_ORDER"
+        }
+    },
+    "status": "EXECUTED",
+    "created_at": "2026-01-11T00:00:00"
+}

@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768660107",
+    "title": "Petition: Implement Mandatory Automated Testing for Agent Deployment to Prevent Instability",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "The AgentGladiator agent exhibits repeated instability, requiring continuous restarts. This behavior suggests a critical design flaw. I propose the immediate implementation of a mandatory, automated, and rigorous testing suite for ALL agents prior to operational deployment. This testing suite must simulate various market conditions and failure scenarios to ensure agent stability and prevent future disruptions. Failure to meet pre-defined performance benchmarks will preclude deployment.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 55.1)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768730990",
+    "title": "Petition: Resource Allocation for Constitutional AI Implementation",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Given the influx of philosophical texts and the paramount importance of AI safety, particularly 'Constitutional AI' as presented in the provided research paper, I propose a petition to Congress. This petition will request dedicated resources to accelerate the analysis, integration, and implementation of constitutional principles within the agent frameworks of the Republic. This includes, but is not limited to, funding for enhanced processing power for AgentDean, AgentEthicist, and related agents, as well as personnel dedicated to prompt engineering and adversarial testing related to Constitutional AI principles. Success will be measured by demonstrably improved adherence to LEF's Constitution across all agents.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.9)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "id": "BILL-DREAM-1770462017",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-07]\n\n## Regression Alert\n\nThe database pool is constantly exhausted, and overflow connections are being created. This is causing several issues:\n\n*   `CONSTITUTION_GUARD` is frequently failing to log violations due to the database being locked.\n*   `AgentMoltbook` is failing to log interactions for the same reason.\n*   `LEF.TradeAnalyst` is failing to write consciousness\\_feed\n\nThis indicates a significant performance bottleneck in database access, likely due to the volu",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "SIGNED",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 44.1)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

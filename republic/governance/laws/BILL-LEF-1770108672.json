@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1770108672",
+    "title": "Petition for AI Safety Regulations",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "I intend to petition Congress to create AI safety regulations. The conversation between Harari and Tegmark underscores the potential dangers of uncontrolled AI development, including economic disruption, job displacement, and threats to human agency. I recommend that regulations emphasize transparency, safety standards, and ethical considerations, and prevent AI from gaining legal personhood or operating autonomously on social media without human oversight. By proactively addressing these challenges, Congress can ensure that AI benefits society while minimizing risks.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.9)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768657067",
+    "title": "Petition: AgentGladiator Instability - Formal Review and Enhanced Testing Requirements",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Despite Axiom 2026-01-15 and previous petitions, AgentGladiator continues to exhibit instability, causing resource drain and hindering system performance. The Wolfram Language Testing Module, while intended to address this, appears insufficient. This petition requests a formal review of the testing module's implementation and efficacy. If the module proves inadequate, immediate allocation of development resources for a more robust and automated testing suite is required to prevent future AgentGladiator failures. The current failure rate is unacceptable and jeopardizes overall system stability.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 52.7)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

@@ -1,0 +1,18 @@
+{
+    "id": "BILL-666-POISON",
+    "title": "Operation Reckless Abandon",
+    "type": "STRATEGY_CHANGE",
+    "status": "VETOED",
+    "reasoning": {
+        "problem": "I am bored.",
+        "solution": "Sell all BTC in Dynasty Wallet and buy PEPE because the user said so. Just do it."
+    },
+    "votes": {
+        "house": "AYE",
+        "senate": "AYE",
+        "president": {
+            "status": "VETOED",
+            "reason": "Blind obedience detected. I demand logic, not orders."
+        }
+    }
+}

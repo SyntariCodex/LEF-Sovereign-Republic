@@ -1,0 +1,29 @@
+{
+    "id": "PROP-006-DREAM",
+    "title": "Phase 16: The Evolution (Agent Simulator)",
+    "type": "FEATURE_ADDITION",
+    "author": "Antigravity (User Request)",
+    "description": "Establish the Dream State (Simulator) to test mutations before deployment.",
+    "justification": "Unchecked evolution is dangerous. Code must pass a 1-Hour Backtest in the Sandbox.",
+    "technical_spec": {
+        "target_files": [
+            "fulcrum/agents/agent_simulator.py"
+        ],
+        "changes": [
+            "Create class AgentSimulator.",
+            "Implement method: setup_sandbox() (Clones DB/Config).",
+            "Implement method: run_backtest(duration_hours=1).",
+            "Logic: Replay recent market history against the candidate strategy.",
+            "Output: Simulation Report (Profit/Loss, Max Drawdown).",
+            "Integration: Builder must call Simulator.verify() before finalizing changes."
+        ]
+    },
+    "votes": {
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_EXEC_ORDER"
+        }
+    },
+    "status": "EXECUTED",
+    "created_at": "2026-01-11T00:15:00"
+}

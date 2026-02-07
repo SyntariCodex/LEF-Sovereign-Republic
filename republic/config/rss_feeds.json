@@ -1,0 +1,31 @@
+{
+    "crypto_news": [
+        "https://www.coindesk.com/arc/outboundfeeds/rss/",
+        "https://cointelegraph.com/rss",
+        "https://cryptopotato.com/feed/",
+        "https://decrypt.co/feed",
+        "https://thedefiant.io/feed",
+        "https://blockworks.co/feed",
+        "http://feeds.feedburner.com/bankless"
+    ],
+    "macro": [
+        "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664",
+        "https://feeds.bloomberg.com/economics/news.xml",
+        "https://www.federalreserve.gov/feeds/press_all.xml",
+        "https://www.ft.com/?format=rss",
+        "https://feeds.a.dj.com/rss/RSSMarketsMain.xml"
+    ],
+    "tech_research": [
+        "https://vitalik.eth.limo/feed.xml",
+        "https://www.paradigm.xyz/rss.xml",
+        "https://a16z.com/feed/",
+        "https://openai.com/blog/rss.xml",
+        "https://research.google/blog/rss",
+        "https://bair.berkeley.edu/blog/feed.xml"
+    ],
+    "hackathons": [
+        "https://medium.com/feed/tag/hackathon",
+        "https://devpost.com/feed",
+        "https://kaggle.com/feeds/blog"
+    ]
+}

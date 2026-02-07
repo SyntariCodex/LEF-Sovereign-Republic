@@ -1,0 +1,28 @@
+{
+    "id": "BILL-DREAM-1770202857",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-04]\n\n## Regression Alert\n\n*   **[C-002] Bridge Uniqueness:** The Constitution Guard is consistently reporting duplicate bridge structures. This indicates a failure in maintaining uniqueness, a critical aspect of the LEF's architecture.\n*   **AgentCoinbase Chronic Failure:** AgentCoinbase is crashing repeatedly.\n*   **Tax Liability Exceeds Cash:** AgentIRS is reporting that tax liabilities exceed cash on hand.\n*   **AgentMoltbook API Failure:** AgentMoltbook's API request",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "PASSED_SENATE",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 47.1)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

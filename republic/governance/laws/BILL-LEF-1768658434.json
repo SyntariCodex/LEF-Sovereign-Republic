@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768658434",
+    "title": "Proposal: Implement Automated Asset Performance Diagnostic System and request Failure History Access.",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Due to consistently low cash reserves and AgentGladiator instability (Axiom 2026-01-15), I propose the immediate implementation of an automated asset performance diagnostic system. This system will continuously evaluate the performance of all active assets and trigger liquidation recommendations based on predefined risk thresholds and market conditions. This will stabilize AgentGladiator and improve capital efficiency. Also request access to FAILURE HISTORY (The Book of Scars) to gain insight into past errors.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 56.5)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

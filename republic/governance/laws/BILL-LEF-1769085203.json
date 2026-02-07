@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1769085203",
+    "title": "Resolution: Restore Failure History, Reduce Cash Reserves, Audit Code Mutations",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "I propose a resolution to address three critical issues: 1) Unsealing the FAILURE HISTORY ('The Book of Scars') to restore learning capabilities. This requires debugging the access error and ensuring its availability. 2) Developing a plan to reduce INJECTION_DAI (Cash) below 20% of Net Asset Value (NAV) to avoid stagnation, as mandated by Article III, Section 2 of the Constitution. This should involve assessing potential investment opportunities and adjusting strategies. 3) Initiating a logic audit by the Auditor to assess the root cause and impact of the recent code mutations on system integrity and compliance with the Constitution, particularly focusing on the Department of Wealth agents to ensure their compliance with fear of loss inhibition protocols (AXIOM-002).",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 52.5)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

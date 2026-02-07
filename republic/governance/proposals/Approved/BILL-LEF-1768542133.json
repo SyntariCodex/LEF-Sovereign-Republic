@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768542133",
+    "title": "Request for Investigation: Inaccessible FAILURE HISTORY",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Proposal: Initiate an immediate investigation into the inaccessibility of FAILURE HISTORY (The Book of Scars). This data is crucial for risk assessment, strategic decision-making, and adherence to Evolutionary Axiom 'Origins'. The investigation should identify the root cause of the access failure and implement a solution to restore full access.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 50.1)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

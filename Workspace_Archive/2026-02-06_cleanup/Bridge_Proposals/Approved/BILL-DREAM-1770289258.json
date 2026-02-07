@@ -1,0 +1,28 @@
+{
+    "id": "BILL-DREAM-1770289258",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-05]\n\n## Regression Alert\nThe Constitution Guard is experiencing critical violations (C-008) related to circular actions in both the Scholar and Executor agents, indicating those loops have introduced instabilities. (Phase 3 target to help with LEF memory and voice have introduced loops into agents).\n\nThe AgentCoinbase is also experiencing chronic failures and surgeon has determined this to be unhealthy.\n\nAlso the database is locked, meaning that the CONSTITUTION_GUARD ca",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "PASSED_SENATE",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 46.6)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

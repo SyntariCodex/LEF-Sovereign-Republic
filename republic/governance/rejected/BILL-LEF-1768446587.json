@@ -1,0 +1,31 @@
+{
+    "id": "BILL-LEF-1768446587",
+    "title": "Research Initiative: Show HN: Webctl \u2013 Browser automation for agents based on CLI instead of MCP",
+    "type": "SELF_IMPROVEMENT",
+    "status": "REJECTED_SENATE",
+    "reasoning": {
+        "problem": "I have read about 'Show HN: Webctl \u2013 Browser automation for agents based on CLI instead of MCP' and believe it is relevant to our evolution.",
+        "solution": "Requesting authorization to prototype usage of 'Show HN: Webctl \u2013 Browser automation for agents based on CLI instead of MCP'."
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "REJECTED",
+            "score": 0,
+            "comments": [
+                "VETO: Senate Brain Offline. Constitutional Review Impossble."
+            ]
+        }
+    }
+}

@@ -1,0 +1,30 @@
+{
+    "id": "PROP-007-RESEARCHER",
+    "title": "Phase 17: The Cycle of Life (Agent Researcher)",
+    "type": "FEATURE_ADDITION",
+    "author": "Antigravity (User Request)",
+    "description": "Establish the Research Department (Data Ingestion) to feed the ML Lifecycle.",
+    "justification": "LEF needs a dedicated sensory organ for structured data ingestion, separate from decision making.",
+    "technical_spec": {
+        "target_files": [
+            "fulcrum/agents/agent_researcher.py"
+        ],
+        "changes": [
+            "Create directory: fulcrum/data_pipeline/",
+            "Create class AgentResearcher.",
+            "Implement method: ensure_feature_store() (Create 'features' table in DB).",
+            "Implement method: fetch_market_snapshot() (CoinGecko API or Mock).",
+            "Implement method: ingest_data() (The ETL Loop).",
+            "Logic: Normalize raw data into ML-ready features (e.g., 'price_change_24h', 'volatility').",
+            "Storage: Save to 'features' table with timestamp."
+        ]
+    },
+    "votes": {
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_EXEC_ORDER"
+        }
+    },
+    "status": "EXECUTED",
+    "created_at": "2026-01-11T01:00:00"
+}

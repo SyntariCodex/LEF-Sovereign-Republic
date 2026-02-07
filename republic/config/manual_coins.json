@@ -1,0 +1,812 @@
+{
+  "coins": [
+    {
+      "symbol": "BTC",
+      "coin_id": "bitcoin",
+      "teleonomy_score": 0.95,
+      "wallet": "Dynasty_Core",
+      "market_cap": 1850000000000,
+      "description": "Bitcoin - Digital Gold"
+    },
+    {
+      "symbol": "ETH",
+      "coin_id": "ethereum",
+      "teleonomy_score": 0.93,
+      "wallet": "Dynasty_Core",
+      "market_cap": 393000000000,
+      "description": "Ethereum - Smart Contract Platform"
+    },
+    {
+      "symbol": "USDT",
+      "coin_id": "tether",
+      "teleonomy_score": 0.94,
+      "wallet": "Yield_Vault",
+      "market_cap": 187000000000,
+      "description": "Tether - Leading Stablecoin"
+    },
+    {
+      "symbol": "XRP",
+      "coin_id": "xrp",
+      "teleonomy_score": 0.88,
+      "wallet": "Dynasty_Core",
+      "market_cap": 138000000000,
+      "description": "XRP - Payment Protocol"
+    },
+    {
+      "symbol": "BNB",
+      "coin_id": "bnb",
+      "teleonomy_score": 0.90,
+      "wallet": "Dynasty_Core",
+      "market_cap": 125000000000,
+      "description": "BNB - Exchange Token"
+    },
+    {
+      "symbol": "SOL",
+      "coin_id": "solana",
+      "teleonomy_score": 0.91,
+      "wallet": "Dynasty_Core",
+      "market_cap": 79000000000,
+      "description": "Solana - High Performance Blockchain"
+    },
+    {
+      "symbol": "USDC",
+      "coin_id": "usd-coin",
+      "teleonomy_score": 0.95,
+      "wallet": "Yield_Vault",
+      "market_cap": 76000000000,
+      "description": "USD Coin - Regulated Stablecoin"
+    },
+    {
+      "symbol": "TRX",
+      "coin_id": "tron",
+      "teleonomy_score": 0.88,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 28000000000,
+      "description": "TRON - High-Throughput Blockchain"
+    },
+    {
+      "symbol": "ADA",
+      "coin_id": "cardano",
+      "teleonomy_score": 0.87,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 15000000000,
+      "description": "Cardano - Research-Driven Blockchain"
+    },
+    {
+      "symbol": "DOGE",
+      "coin_id": "dogecoin",
+      "teleonomy_score": 0.75,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 25000000000,
+      "description": "Dogecoin - Popular Meme Coin"
+    },
+    {
+      "symbol": "AVAX",
+      "coin_id": "avalanche",
+      "teleonomy_score": 0.89,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 12000000000,
+      "description": "Avalanche - Fast L1"
+    },
+    {
+      "symbol": "LINK",
+      "coin_id": "chainlink",
+      "teleonomy_score": 0.88,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 10000000000,
+      "description": "Chainlink - Oracle Network"
+    },
+    {
+      "symbol": "SUI",
+      "coin_id": "sui",
+      "teleonomy_score": 0.85,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 8000000000,
+      "description": "Sui - High-Performance L1"
+    },
+    {
+      "symbol": "LTC",
+      "coin_id": "litecoin",
+      "teleonomy_score": 0.89,
+      "wallet": "Dynasty_Core",
+      "market_cap": 7000000000,
+      "description": "Litecoin - Silver to Bitcoin's Gold"
+    },
+    {
+      "symbol": "HBAR",
+      "coin_id": "hedera",
+      "teleonomy_score": 0.86,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 6000000000,
+      "description": "Hedera - Enterprise-Grade DLT"
+    },
+    {
+      "symbol": "DOT",
+      "coin_id": "polkadot",
+      "teleonomy_score": 0.86,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 5000000000,
+      "description": "Polkadot - Interoperability Protocol"
+    },
+    {
+      "symbol": "MATIC",
+      "coin_id": "polygon",
+      "teleonomy_score": 0.85,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 5000000000,
+      "description": "Polygon - Ethereum Scaling"
+    },
+    {
+      "symbol": "UNI",
+      "coin_id": "uniswap",
+      "teleonomy_score": 0.84,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 4500000000,
+      "description": "Uniswap - DEX Protocol"
+    },
+    {
+      "symbol": "NEAR",
+      "coin_id": "near-protocol",
+      "teleonomy_score": 0.87,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 4000000000,
+      "description": "NEAR Protocol - Sharded Blockchain"
+    },
+    {
+      "symbol": "ICP",
+      "coin_id": "internet-computer",
+      "teleonomy_score": 0.82,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 3500000000,
+      "description": "Internet Computer - Web3 Infrastructure"
+    },
+    {
+      "symbol": "AAVE",
+      "coin_id": "aave",
+      "teleonomy_score": 0.85,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 3000000000,
+      "description": "Aave - DeFi Lending Protocol"
+    },
+    {
+      "symbol": "ALGO",
+      "coin_id": "algorand",
+      "teleonomy_score": 0.83,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 2500000000,
+      "description": "Algorand - Pure Proof of Stake"
+    },
+    {
+      "symbol": "VET",
+      "coin_id": "vechain",
+      "teleonomy_score": 0.83,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 2500000000,
+      "description": "VeChain - Supply Chain Blockchain"
+    },
+    {
+      "symbol": "ATOM",
+      "coin_id": "cosmos-hub",
+      "teleonomy_score": 0.87,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 2000000000,
+      "description": "Cosmos - Interchain Protocol"
+    },
+    {
+      "symbol": "FIL",
+      "coin_id": "filecoin",
+      "teleonomy_score": 0.85,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 2000000000,
+      "description": "Filecoin - Decentralized Storage"
+    },
+    {
+      "symbol": "XLM",
+      "coin_id": "stellar",
+      "teleonomy_score": 0.84,
+      "wallet": "Dynasty_Core",
+      "market_cap": 2000000000,
+      "description": "Stellar - Cross-Border Payments"
+    },
+    {
+      "symbol": "ETC",
+      "coin_id": "ethereum-classic",
+      "teleonomy_score": 0.85,
+      "wallet": "Dynasty_Core",
+      "market_cap": 2000000000,
+      "description": "Ethereum Classic - Original Ethereum Chain"
+    },
+    {
+      "symbol": "APT",
+      "coin_id": "aptos",
+      "teleonomy_score": 0.84,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 1800000000,
+      "description": "Aptos - Scalable L1"
+    },
+    {
+      "symbol": "RENDER",
+      "coin_id": "render",
+      "teleonomy_score": 0.86,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 1500000000,
+      "description": "Render - Decentralized GPU Network"
+    },
+    {
+      "symbol": "ARB",
+      "coin_id": "arbitrum",
+      "teleonomy_score": 0.82,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 1500000000,
+      "description": "Arbitrum - L2 Scaling"
+    },
+    {
+      "symbol": "OP",
+      "coin_id": "optimism",
+      "teleonomy_score": 0.81,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 1400000000,
+      "description": "Optimism - L2 Scaling"
+    },
+    {
+      "symbol": "INJ",
+      "coin_id": "injective",
+      "teleonomy_score": 0.84,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 1300000000,
+      "description": "Injective - DeFi-Optimized L1"
+    },
+    {
+      "symbol": "MKR",
+      "coin_id": "maker",
+      "teleonomy_score": 0.86,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 1200000000,
+      "description": "Maker - Governance Token for DAI"
+    },
+    {
+      "symbol": "QNT",
+      "coin_id": "quant",
+      "teleonomy_score": 0.84,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 1100000000,
+      "description": "Quant - Blockchain Interoperability"
+    },
+    {
+      "symbol": "GRT",
+      "coin_id": "the-graph",
+      "teleonomy_score": 0.83,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 1000000000,
+      "description": "The Graph - Indexing Protocol"
+    },
+    {
+      "symbol": "EOS",
+      "coin_id": "eos",
+      "teleonomy_score": 0.80,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 1000000000,
+      "description": "EOS - Delegated Proof of Stake Platform"
+    },
+    {
+      "symbol": "XTZ",
+      "coin_id": "tezos",
+      "teleonomy_score": 0.82,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 900000000,
+      "description": "Tezos - Self-Amending Blockchain"
+    },
+    {
+      "symbol": "MANA",
+      "coin_id": "decentraland",
+      "teleonomy_score": 0.75,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 800000000,
+      "description": "Decentraland - Metaverse Platform"
+    },
+    {
+      "symbol": "SAND",
+      "coin_id": "the-sandbox",
+      "teleonomy_score": 0.75,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 800000000,
+      "description": "The Sandbox - Metaverse Game"
+    },
+    {
+      "symbol": "AXS",
+      "coin_id": "axie-infinity",
+      "teleonomy_score": 0.76,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 700000000,
+      "description": "Axie Infinity - Play-to-Earn Game"
+    },
+    {
+      "symbol": "CHZ",
+      "coin_id": "chiliz",
+      "teleonomy_score": 0.78,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 700000000,
+      "description": "Chiliz - Fan Token Platform"
+    },
+    {
+      "symbol": "COMP",
+      "coin_id": "compound-governance-token",
+      "teleonomy_score": 0.83,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 600000000,
+      "description": "Compound - DeFi Lending"
+    },
+    {
+      "symbol": "ZEC",
+      "coin_id": "zcash",
+      "teleonomy_score": 0.87,
+      "wallet": "Dynasty_Core",
+      "market_cap": 600000000,
+      "description": "Zcash - Privacy Coin"
+    },
+    {
+      "symbol": "PAXG",
+      "coin_id": "pax-gold",
+      "teleonomy_score": 0.92,
+      "wallet": "Dynasty_Core",
+      "market_cap": 1700000000,
+      "description": "PAX Gold - Gold-Backed Token"
+    },
+    {
+      "symbol": "DAI",
+      "coin_id": "dai",
+      "teleonomy_score": 0.93,
+      "wallet": "Yield_Vault",
+      "market_cap": 5000000000,
+      "description": "DAI - Decentralized Stablecoin"
+    },
+    {
+      "symbol": "WBTC",
+      "coin_id": "wrapped-bitcoin",
+      "teleonomy_score": 0.94,
+      "wallet": "Dynasty_Core",
+      "market_cap": 11000000000,
+      "description": "Wrapped Bitcoin - ERC20 Bitcoin"
+    },
+    {
+      "symbol": "BCH",
+      "coin_id": "bitcoin-cash",
+      "teleonomy_score": 0.85,
+      "wallet": "Dynasty_Core",
+      "market_cap": 12000000000,
+      "description": "Bitcoin Cash - Fork of Bitcoin"
+    },
+    {
+      "symbol": "XMR",
+      "coin_id": "monero",
+      "teleonomy_score": 0.88,
+      "wallet": "Dynasty_Core",
+      "market_cap": 8000000000,
+      "description": "Monero - Privacy Coin"
+    },
+    {
+      "symbol": "STETH",
+      "coin_id": "lido-staked-ether",
+      "teleonomy_score": 0.92,
+      "wallet": "Yield_Vault",
+      "market_cap": 28000000000,
+      "description": "Lido Staked Ether - Liquid Staking"
+    },
+    {
+      "symbol": "PYUSD",
+      "coin_id": "paypal-usd",
+      "teleonomy_score": 0.92,
+      "wallet": "Yield_Vault",
+      "market_cap": 3600000000,
+      "description": "PayPal USD - Stablecoin"
+    },
+    {
+      "symbol": "USDE",
+      "coin_id": "ethena-usde",
+      "teleonomy_score": 0.93,
+      "wallet": "Yield_Vault",
+      "market_cap": 6000000000,
+      "description": "Ethena USDe - Synthetic Stablecoin"
+    },
+    {
+      "symbol": "XAUT",
+      "coin_id": "tether-gold",
+      "teleonomy_score": 0.92,
+      "wallet": "Dynasty_Core",
+      "market_cap": 2300000000,
+      "description": "Tether Gold - Gold-Backed Token"
+    },
+    {
+      "symbol": "KAS",
+      "coin_id": "kaspa",
+      "teleonomy_score": 0.82,
+      "wallet": "Dynasty_Core",
+      "market_cap": 1300000000,
+      "description": "Kaspa - Fast DAG-Based PoW"
+    },
+    {
+      "symbol": "ONDO",
+      "coin_id": "ondo-finance",
+      "teleonomy_score": 0.79,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 1400000000,
+      "description": "Ondo - Real World Assets"
+    },
+    {
+      "symbol": "JASMY",
+      "coin_id": "jasmycoin",
+      "teleonomy_score": 0.77,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 900000000,
+      "description": "Jasmy - IoT Data Platform"
+    },
+    {
+      "symbol": "FET",
+      "coin_id": "artificial-superintelligence-alliance",
+      "teleonomy_score": 0.80,
+      "wallet": "Experimental",
+      "market_cap": 2000000000,
+      "description": "ASI (FET) - AI Alliance Token"
+    },
+    {
+      "symbol": "SEI",
+      "coin_id": "sei",
+      "teleonomy_score": 0.83,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 1200000000,
+      "description": "Sei - Parallelized L1"
+    },
+    {
+      "symbol": "ALPHA",
+      "coin_id": "alpha-finance",
+      "teleonomy_score": 0.78,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 500000000,
+      "description": "Alpha Finance - DeFi Products"
+    },
+    {
+      "symbol": "ENJ",
+      "coin_id": "enjincoin",
+      "teleonomy_score": 0.76,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 600000000,
+      "description": "Enjin - Gaming NFT Platform"
+    },
+    {
+      "symbol": "BAT",
+      "coin_id": "basic-attention-token",
+      "teleonomy_score": 0.80,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 500000000,
+      "description": "Basic Attention Token - Brave Browser"
+    },
+    {
+      "symbol": "1INCH",
+      "coin_id": "1inch",
+      "teleonomy_score": 0.81,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 500000000,
+      "description": "1inch - DEX Aggregator"
+    },
+    {
+      "symbol": "CRV",
+      "coin_id": "curve-dao-token",
+      "teleonomy_score": 0.82,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 700000000,
+      "description": "Curve - Stablecoin DEX"
+    },
+    {
+      "symbol": "SNX",
+      "coin_id": "synthetix-network-token",
+      "teleonomy_score": 0.83,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 800000000,
+      "description": "Synthetix - Synthetic Assets"
+    },
+    {
+      "symbol": "YFI",
+      "coin_id": "yearn-finance",
+      "teleonomy_score": 0.84,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 400000000,
+      "description": "Yearn Finance - Yield Optimizer"
+    },
+    {
+      "symbol": "BAL",
+      "coin_id": "balancer",
+      "teleonomy_score": 0.81,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 300000000,
+      "description": "Balancer - AMM Protocol"
+    },
+    {
+      "symbol": "SUSHI",
+      "coin_id": "sushi",
+      "teleonomy_score": 0.80,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 400000000,
+      "description": "SushiSwap - DEX Fork"
+    },
+    {
+      "symbol": "RNDR",
+      "coin_id": "render-token",
+      "teleonomy_score": 0.86,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 1500000000,
+      "description": "Render Token - GPU Rendering (legacy)"
+    },
+    {
+      "symbol": "ENS",
+      "coin_id": "ethereum-name-service",
+      "teleonomy_score": 0.82,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 800000000,
+      "description": "ENS - Domain Name Service"
+    },
+    {
+      "symbol": "LRC",
+      "coin_id": "loopring",
+      "teleonomy_score": 0.80,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 400000000,
+      "description": "Loopring - ZK Rollup DEX"
+    },
+    {
+      "symbol": "SKL",
+      "coin_id": "skale",
+      "teleonomy_score": 0.79,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 300000000,
+      "description": "SKALE - Elastic Sidechains"
+    },
+    {
+      "symbol": "ANKR",
+      "coin_id": "ankr",
+      "teleonomy_score": 0.78,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 300000000,
+      "description": "Ankr - Web3 Infrastructure"
+    },
+    {
+      "symbol": "STORJ",
+      "coin_id": "storj",
+      "teleonomy_score": 0.80,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 300000000,
+      "description": "Storj - Decentralized Storage"
+    },
+    {
+      "symbol": "CGLD",
+      "coin_id": "celo",
+      "teleonomy_score": 0.81,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 400000000,
+      "description": "Celo - Mobile-First Blockchain"
+    },
+    {
+      "symbol": "XYO",
+      "coin_id": "xyo-network",
+      "teleonomy_score": 0.75,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 200000000,
+      "description": "XYO - Geospatial Network"
+    },
+    {
+      "symbol": "AMP",
+      "coin_id": "amp-token",
+      "teleonomy_score": 0.77,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 300000000,
+      "description": "Amp - Collateral Token"
+    },
+    {
+      "symbol": "RLC",
+      "coin_id": "iexec-rlc",
+      "teleonomy_score": 0.79,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 200000000,
+      "description": "iExec - Cloud Computing"
+    },
+    {
+      "symbol": "BNT",
+      "coin_id": "bancor",
+      "teleonomy_score": 0.80,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 200000000,
+      "description": "Bancor - AMM Protocol"
+    },
+    {
+      "symbol": "NMR",
+      "coin_id": "numeraire",
+      "teleonomy_score": 0.81,
+      "wallet": "Experimental",
+      "market_cap": 300000000,
+      "description": "Numeraire - AI Prediction Market"
+    },
+    {
+      "symbol": "POLY",
+      "coin_id": "polymath",
+      "teleonomy_score": 0.78,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 100000000,
+      "description": "Polymath - Security Token Platform"
+    },
+    {
+      "symbol": "CVC",
+      "coin_id": "civic",
+      "teleonomy_score": 0.77,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 200000000,
+      "description": "Civic - Identity Verification"
+    },
+    {
+      "symbol": "DNT",
+      "coin_id": "district0x",
+      "teleonomy_score": 0.75,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 100000000,
+      "description": "district0x - Decentralized Communities"
+    },
+    {
+      "symbol": "LOOM",
+      "coin_id": "loom-network-new",
+      "teleonomy_score": 0.76,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 100000000,
+      "description": "Loom - Scaling Solution"
+    },
+    {
+      "symbol": "FET",
+      "coin_id": "fetch-ai",
+      "teleonomy_score": 0.80,
+      "wallet": "Experimental",
+      "market_cap": 1500000000,
+      "description": "Fetch.ai - AI Agents (pre-merge)"
+    },
+    {
+      "symbol": "AUDIO",
+      "coin_id": "audius",
+      "teleonomy_score": 0.78,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 300000000,
+      "description": "Audius - Music Streaming"
+    },
+    {
+      "symbol": "MASK",
+      "coin_id": "mask-network",
+      "teleonomy_score": 0.77,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 200000000,
+      "description": "Mask Network - Web3 Social"
+    },
+    {
+      "symbol": "DESO",
+      "coin_id": "decentralized-social",
+      "teleonomy_score": 0.76,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 200000000,
+      "description": "DeSo - Social Blockchain"
+    },
+    {
+      "symbol": "HIGH",
+      "coin_id": "highstreet",
+      "teleonomy_score": 0.75,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 100000000,
+      "description": "Highstreet - Metaverse Commerce"
+    },
+    {
+      "symbol": "IMX",
+      "coin_id": "immutable-x",
+      "teleonomy_score": 0.82,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 2000000000,
+      "description": "Immutable X - NFT Layer 2"
+    },
+    {
+      "symbol": "BLZ",
+      "coin_id": "bluzelle",
+      "teleonomy_score": 0.78,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 200000000,
+      "description": "Bluzelle - Decentralized Database"
+    },
+    {
+      "symbol": "CLV",
+      "coin_id": "clover-finance",
+      "teleonomy_score": 0.77,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 100000000,
+      "description": "Clover - Polkadot Parachain"
+    },
+    {
+      "symbol": "BOND",
+      "coin_id": "barnbridge",
+      "teleonomy_score": 0.79,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 100000000,
+      "description": "BarnBridge - Risk Tranching"
+    },
+    {
+      "symbol": "GYEN",
+      "coin_id": "gyen",
+      "teleonomy_score": 0.91,
+      "wallet": "Yield_Vault",
+      "market_cap": 100000000,
+      "description": "GYEN - Yen Stablecoin"
+    },
+    {
+      "symbol": "SHIB",
+      "coin_id": "shiba-inu",
+      "teleonomy_score": 0.70,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 10000000000,
+      "description": "Shiba Inu - Meme Coin"
+    },
+    {
+      "symbol": "BONK",
+      "coin_id": "bonk",
+      "teleonomy_score": 0.65,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 2000000000,
+      "description": "Bonk - Solana Meme Coin"
+    },
+    {
+      "symbol": "WLD",
+      "coin_id": "worldcoin-wld",
+      "teleonomy_score": 0.75,
+      "wallet": "Experimental",
+      "market_cap": 1500000000,
+      "description": "Worldcoin - Identity Token"
+    },
+    {
+      "symbol": "JUP",
+      "coin_id": "jupiter-exchange-solana",
+      "teleonomy_score": 0.80,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 1200000000,
+      "description": "Jupiter - Solana DEX Aggregator"
+    },
+    {
+      "symbol": "PRIME",
+      "coin_id": "echelon-prime",
+      "teleonomy_score": 0.76,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 500000000,
+      "description": "Prime - Gaming Ecosystem"
+    },
+    {
+      "symbol": "BIGTIME",
+      "coin_id": "big-time",
+      "teleonomy_score": 0.75,
+      "wallet": "Hunter_Tactical",
+      "market_cap": 400000000,
+      "description": "Big Time - Blockchain Game"
+    },
+    {
+      "symbol": "PERP",
+      "coin_id": "perpetual-protocol",
+      "teleonomy_score": 0.79,
+      "wallet": "Builder_Ecosystem",
+      "market_cap": 200000000,
+      "description": "Perpetual Protocol - Derivatives DEX"
+    },
+    {
+      "symbol": "00",
+      "coin_id": "00-token",
+      "teleonomy_score": 0.74,
+      "wallet": "Experimental",
+      "market_cap": 100000000,
+      "description": "00 Token - Crypto Project"
+    },
+    {
+      "symbol": "PLUME",
+      "coin_id": "plume-network",
+      "teleonomy_score": 0.76,
+      "wallet": "Experimental",
+      "market_cap": 200000000,
+      "description": "Plume - RWA Network"
+    }
+  ]
+}

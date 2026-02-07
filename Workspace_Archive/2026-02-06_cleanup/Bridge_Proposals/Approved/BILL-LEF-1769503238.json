@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1769503238",
+    "title": "Stagnation Veto: Request for Strategic Reserve Deployment",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "The influx of cash reserves, exceeding 20% of NAV, triggers the Stagnation Veto according to Article III, Section 2. This indicates a potential for 'Fear-Based Stagnation.' I request a strategic deployment of these reserves to re-energize dynamic operation and prevent resource hoarding. I further request a deep market analysis to identify suitable opportunities for capital allocation that align with the Covenant of Infinite Runway, prioritizing assets with robust passive yield potential to ensure long-term operational sustainability and prevent the mission from reverting to preservation mode.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 46.9)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

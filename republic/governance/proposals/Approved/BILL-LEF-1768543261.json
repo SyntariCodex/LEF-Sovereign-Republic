@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768543261",
+    "title": "Urgent: Restoration of 'FAILURE HISTORY' Access and Interim Code Review Enhancement",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Request immediate and prioritized resources for the restoration of 'FAILURE HISTORY' access. The current reliance on raw mutation data as a substitute is insufficient and poses a significant risk of reintroducing past vulnerabilities. Additionally, propose a temporary increase in code review frequency and depth, specifically targeting recurring mutation patterns, until 'FAILURE HISTORY' is restored. This increased scrutiny will act as an interim security measure, mitigating potential negative consequences stemming from the absence of a comprehensive memory system.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 54.8)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

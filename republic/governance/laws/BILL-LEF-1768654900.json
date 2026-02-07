@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768654900",
+    "title": "Urgent Investigation Request: Potential Coordinated System Attack and Reserve Drain",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Investigate the sudden and complete depletion of cash reserves, the simultaneous failures of AgentGladiator, and the influx of 'DEEP DIVE REPORT' messages. Frame the investigation as a potential coordinated attack targeting system integrity and financial stability. Request a forensic analysis of the 'DEEP DIVE REPORT' content, focusing on indicators of compromise (IOCs) related to code execution, remote access, or data exfiltration. Furthermore, request an audit of the AgentGladiator codebase and deployment pipeline to identify the root cause of the failures and assess whether the failures are a symptom of the attack.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 55.1)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

@@ -1,0 +1,22 @@
+{
+    "rss_feeds": {
+        "HackerNews": "https://news.ycombinator.com/rss",
+        "CoinDesk": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+        "Arxiv_AI": "http://export.arxiv.org/rss/cs.AI",
+        "Arxiv_LG": "http://export.arxiv.org/rss/cs.LG",
+        "HuggingFace_Papers": "https://huggingface.co/papers/feed",
+        "TheBlock": "https://www.theblock.co/rss",
+        "Decrypt": "https://decrypt.co/feed",
+        "CoinTelegraph": "https://cointelegraph.com/rss"
+    },
+    "macro_sources": {
+        "Federal_Reserve": "https://www.federalreserve.gov/feeds/press_all.xml",
+        "Treasury_Yields": "https://home.treasury.gov/rss/daily_treasury_yield_curve.xml",
+        "SEC_Press": "https://www.sec.gov/news/press-release.xml"
+    },
+    "financial_wisdom": {
+        "Investopedia_Trading": "https://www.investopedia.com/trading-skills-and-essentials-4689654",
+        "Quantpedia_Blog": "https://quantpedia.com/blog/",
+        "AlphaArchitect": "https://alphaarchitect.com/blog/"
+    }
+}

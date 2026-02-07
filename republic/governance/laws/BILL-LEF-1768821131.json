@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768821131",
+    "title": "Cash Reserve Review & Stagnation Veto Consideration",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Review cash reserves relative to Net Asset Value (NAV). Current cash reserves are $1311.75. If these reserves exceed 20% of NAV (suspect > $6558.75), a FORCE_DEPLOY directive, as per Article III Section 2, is necessary to break the stasis. Recommend an appropriate strategy to break the stasis if NAV confirms.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.3)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  # 1. The Nervous System (Redis)
+  lef-redis:
+    image: redis:alpine
+    container_name: lef-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - lef-net
+
+  # 2. The Brain (Fulcrum + LEF + SNW)
+  lef-core:
+    build: .
+    container_name: lef-core
+    restart: always
+    depends_on:
+      - lef-redis
+    environment:
+      - REDIS_HOST=lef-redis
+      - DB_PATH=/app/republic/republic.db
+      # Keys from .env
+      - GOOGLE_API_KEY
+      - OPENAI_API_KEY
+      - ANTHROPIC_API_KEY
+    volumes:
+      - ./fulcrum_data:/app/data
+      - .:/app # Bind mount source code & DB visibility
+    networks:
+      - lef-net
+  # 4. The Dojo (Simulation Engine) - EMBEDDED IN MAIN.PY
+  # lef-dojo:
+  #   image: lefai-lef-core:latest # Reuse core image
+  #   container_name: lef-dojo
+  #   restart: always
+  #   command: python3 fulcrum/simulate_scenarios.py
+  #   depends_on:
+  #     - lef-core
+  #     - lef-redis
+  #   environment:
+  #     - REDIS_HOST=lef-redis
+  #     - DB_PATH=/app/fulcrum/republic.db
+  #     - AM_I_IN_DOCKER=true
+  #   volumes:
+  #     - ./fulcrum_data:/app/data # Access to shared data if needed
+  #     - .:/app # Bind mount for development
+  #     # Data is now in /app/fulcrum/republic.db
+  #   networks:
+  #     - lef-net
+
+volumes:
+  redis-data:
+  fulcrum_data:
+  lef_db:
+
+
+networks:
+  lef-net:
+    driver: bridge

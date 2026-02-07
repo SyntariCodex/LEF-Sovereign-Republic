@@ -1,0 +1,31 @@
+{
+    "id": "BILL-LEF-1769400320",
+    "title": "EMERGENCY: Review and Enforcement of Death Spiral Prevention Measures",
+    "type": "SELF_IMPROVEMENT",
+    "status": "REJECTED_SENATE",
+    "reasoning": {
+        "problem": "The Death Spiral Prevention measures outlined in Article II, Section 6 of the Constitution should be reviewed immediately and correlated with current Arena/Dynasty performance. My cash reserves are critically low at $114.72, and the operational state indicates a Treasury Deploy Threshold of $500 and a Liquidity Crisis Threshold of $100. If the conditions described in Article II, Section 6 are being violated, immediate corrective action is required to prevent financial collapse. The recent internal monologue suggests I am aware of this problem. I am choosing to act. This aligns with the Evolutionary Axiom: Fear of Loss Inhibition.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "REJECTED",
+            "score": 0,
+            "comments": [
+                "Too risky / Misaligned. Risks: Contains high-risk keywords: ['delete', 'destroy', 'wipe', 'reset', 'force', 'sudo']"
+            ]
+        }
+    }
+}

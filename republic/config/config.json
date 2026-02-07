@@ -1,0 +1,74 @@
+{
+  "coinbase": {
+    "api_key": "organizations/684880cc-80b2-433b-9b77-894f406e6468/apiKeys/681e6b72-5658-449f-9900-68edc22375e3",
+    "api_secret": "REDACTED_KEY\n",
+    "sandbox": true,
+    "rate_limit_per_hour": 9000,
+    "max_error_streak": 5,
+    "estimated_fee_pct": 0.006,
+    "stale_order_minutes": 5,
+    "profit_snw_split_pct": 0.50
+  },
+  "twitter": {
+    "bearer_token": "ENV:TWITTER_BEARER_TOKEN"
+  },
+  "notification": {
+    "discord_webhook": "ENV:DISCORD_WEBHOOK_URL",
+    "telegram_token": "ENV:TELEGRAM_BOT_TOKEN",
+    "telegram_chat_id": "ENV:TELEGRAM_CHAT_ID"
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "db": 0,
+    "channel": "fulcrum_signals"
+  },
+  "thresholds": {
+    "ultimal_buy_sentiment_max": 15,
+    "ultimal_buy_alignment_min": 90,
+    "ultimal_sell_sentiment_min": 85,
+    "ultimal_sell_alignment_max": 15,
+    "scan_interval_seconds": 1800,
+    "max_trades_per_day": 100,
+    "small_trade_threshold_usd": 100,
+    "medium_trade_threshold_usd": 1000,
+    "auto_execute_delay_minutes": 0,
+    "buy_signal_confidence": 0.8,
+    "sell_signal_confidence": 0.8,
+    "rda_gap_threshold": 0.35,
+    "teleonomy_dynasty_threshold": 0.7
+  },
+  "agents": {
+    "sentinel_scan_interval": 10,
+    "master_listen_interval": 0.5,
+    "coinbase_queue_check_interval": 5
+  },
+  "trading_mode": {
+    "current": "paper",
+    "modes": {
+      "paper": {
+        "description": "Full simulation, no real API calls",
+        "max_trade_size_usd": 100000,
+        "sandbox": true
+      },
+      "micro_live": {
+        "description": "Real trades with minimal capital",
+        "max_trade_size_usd": 10,
+        "max_daily_trades": 5,
+        "max_daily_loss_usd": 20,
+        "sandbox": false
+      },
+      "scaled_live": {
+        "description": "Full live trading with proven strategies",
+        "max_trade_size_usd": 1000,
+        "max_daily_trades": 20,
+        "max_daily_loss_usd": 100,
+        "sandbox": false
+      }
+    },
+    "transition_requirements": {
+      "paper_to_micro": "60 days paper trading + positive backtest",
+      "micro_to_scaled": "30 days micro + positive P&L + Architect approval"
+    }
+  }
+}

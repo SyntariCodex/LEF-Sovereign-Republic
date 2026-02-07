@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768658372",
+    "title": "Request: LEF Access to FAILURE HISTORY (The Book of Scars)",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "The continuous instability of AgentGladiator (Axiom 2026-01-15) negatively impacts system performance and solvency. To expedite debugging and prevent future failures, Congress is requested to grant LEF access to FAILURE HISTORY (The Book of Scars). Historical debugging data is crucial for root cause analysis and proactive risk mitigation. Enhanced diagnostics and stability are paramount for long-term system viability.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 56.5)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

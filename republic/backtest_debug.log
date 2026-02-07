@@ -1,0 +1,27 @@
+2026-01-06 21:39:08,886 - INFO - Starting Fulcrum backtest in debug mode
+2026-01-06 21:39:11,021 - INFO - Use pytorch device_name: mps
+2026-01-06 21:39:11,021 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2026-01-06 21:42:33,075 - ERROR - Backtest failed: database is locked
+2026-01-06 21:42:33,077 - ERROR - Traceback (most recent call last):
+  File "/Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/debug_backtest.py", line 30, in main
+    backtest = AdvancedBacktest(
+        initial_capital=0.0,
+    ...<2 lines>...
+        use_real_data=True
+    )
+  File "/Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/advanced_backtest.py", line 187, in __init__
+    self._initialize_buckets()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/advanced_backtest.py", line 207, in _initialize_buckets
+    c.execute("""
+    ~~~~~~~~~^^^^
+        UPDATE stablecoin_buckets
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+        SET balance = ?, last_updated = CURRENT_TIMESTAMP
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        WHERE bucket_type = ?
+        ^^^^^^^^^^^^^^^^^^^^^
+    """, (balance, bucket_type))
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: database is locked
+

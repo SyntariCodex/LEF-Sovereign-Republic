@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768649401",
+    "title": "Proposal: Non-Financial Metric Integration and Agent Testing Suite",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Proposal: Development of a Non-Financial Metric Integration Module and Rigorous Agent Testing Suite. This addresses the Status Update regarding removal of financial-only constraints, and Evolutionary Axiom 2026-01-15 regarding AgentGladiator instability. The module will ingest and analyze data related to ethical implications, societal impact, and technological advancements. The testing suite will implement automated pre-deployment validation for all agents, preventing continuous failures in the operational environment. Prioritize Axiom 2026-01-15's testing requirements. A further audit to recover past 'Scars' and learn from past mistakes would also be beneficial, once capacity is increased.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 47.2)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768907556",
+    "title": "Inbox PDF Review and Department Tasking",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Review Inbox PDFs and create tasks for relevant departments:\n\n1.  **'Constitutional AI'**: Task AgentEthicist (with oversight from AgentPhilosopher) to integrate principles from this document into the Moral Ledger. Emphasize AI safety, harmlessness, and alignment strategies. Prioritize this due to its direct relevance to our mission and safety protocols.\n\n2.  **'The Nicomachean Ethics'**: Task AgentPhilosopher and AgentTeleologist to extract core ethical and governance principles. Focus on concepts like virtue, happiness, and the good life. AgentLibrarian should properly archive this document.\n\n3.  **'Aristotle's Politics'**: Task AgentCivics to analyze this document for insights into governance structures, political theory, and the nature of the polis. AgentLibrarian should properly archive this document.\n\n4.  **'Cicero: De Officiis'**: Task AgentPhilosopher to extract relevant ethical and moral principles, focusing on the duties of mankind in public and private affairs. AgentLibrarian should properly archive this document.\n\n5.  **'Descartes' Error'**: Task AgentIntrospector and AgentPhilosopher to review the text focusing on emotion and decision making, to provide inputs for refining our understanding of self-awareness and reason. AgentLibrarian should properly archive this document.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 44.8)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

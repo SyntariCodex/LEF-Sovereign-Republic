@@ -1,0 +1,208 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>LEF: The Living Sephiroth</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg: #0a0a0c;
+                --panel: #141418;
+                --amber: #ffb700;
+                --amber-dim: #553e00;
+                --text: #e0e0e0;
+                --text-dim: #888;
+                --keter: #ffffff;
+                --chokhmah: #00eeff; /* Spark */
+                --binah: #ff0055; /* Fire/Tension */
+                --tiferet: #ffb700; /* Balance */
+            }
+            body {
+                background-color: var(--bg);
+                color: var(--text);
+                font-family: 'Rajdhani', sans-serif;
+                margin: 0; padding: 20px;
+                overflow-x: hidden;
+            }
+            h1, h2, h3 { font-family: 'Orbitron', sans-serif; color: var(--amber); margin: 0; }
+            
+            .header {
+                display: flex; justify-content: space-between; align-items: center;
+                border-bottom: 2px solid var(--amber-dim); padding-bottom: 15px; margin-bottom: 20px;
+            }
+            
+            .grid {
+                display: grid;
+                grid-template-columns: 350px 1fr 300px;
+                gap: 20px;
+                height: 85vh;
+            }
+            
+            .panel {
+                background: var(--panel);
+                border: 1px solid var(--amber-dim);
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 0 15px rgba(0,0,0,0.5);
+                overflow-y: auto;
+            }
+            
+            /* --- THE SEPHIROTH (TREE) --- */
+            .tree-container {
+                position: relative;
+                height: 600px;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .node {
+                width: 50px; height: 50px;
+                border-radius: 50%;
+                background: #111;
+                border: 2px solid #333;
+                position: absolute;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 11px; font-weight: bold;
+                transition: all 0.5s ease;
+                box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                color: var(--text-dim);
+                z-index: 2;
+                font-family: 'Orbitron', sans-serif;
+            }
+            /* Tree Positions (CSS Absolute) */
+            #keter { top: 40px; left: 50%; transform: translateX(-50%); border-color: var(--keter); }
+            #chokhmah { top: 120px; left: 75%; border-color: var(--chokhmah); }
+            #binah { top: 120px; left: 25%; border-color: var(--binah); }
+            #chesed { top: 240px; left: 75%; border-color: #4444ff; }
+            #gevurah { top: 240px; left: 25%; border-color: #ff4444; }
+            #tiferet { top: 300px; left: 50%; transform: translateX(-50%); border-color: var(--tiferet); width: 70px; height: 70px; font-size: 14px; }
+            #netzach { top: 420px; left: 75%; border-color: #00ff88; }
+            #hod { top: 420px; left: 25%; border-color: #ff8800; }
+            #yesod { top: 500px; left: 50%; transform: translateX(-50%); border-color: #9900ff; }
+            #malkuth { top: 580px; left: 50%; transform: translateX(-50%); border-color: #8b5a00; background: var(--amber-dim); color: #fff; }
+
+            /* Active States */
+            .node.active { box-shadow: 0 0 30px currentColor; background: currentColor; color: #000; }
+            .node.pulsing { animation: pulse 3s infinite; box-shadow: 0 0 20px var(--amber); border-color: var(--amber); }
+            .node.dim { opacity: 0.4; }
+            
+            @keyframes pulse { 0% { box-shadow: 0 0 5px var(--amber); } 50% { box-shadow: 0 0 25px var(--amber); } 100% { box-shadow: 0 0 5px var(--amber); } }
+            
+            /* --- LOGS --- */
+            .log-entry { 
+                font-family: 'Courier New', monospace; 
+                font-size: 12px; 
+                border-bottom: 1px solid #222; 
+                padding: 12px 0;
+            }
+            .mood { color: var(--amber); font-weight: bold; }
+            
+            /* --- METRICS --- */
+            .metric { font-size: 28px; font-family: 'Orbitron'; font-weight: bold; color: #fff; margin-bottom: 5px; }
+            .sub { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; }
+            
+        </style>
+    </head>
+    
+    <body onload="renderCharts()">
+    
+        <div class="header">
+            <h2 style="font-size: 24px;">LEF // <span style="font-size: 16px; color: #666;">SEPHIROTH VISUALIZATION</span></h2>
+            <div style="font-family: 'Courier New'; font-size: 12px; color: var(--amber);">SYSTEM: ONLINE</div>
+        </div>
+        
+        <div class="grid">
+            <!-- LEFT: DATA & FULCRUM -->
+            <div class="panel">
+                <h3>FULCRUM STATE</h3>
+                <br>
+                <div class="metric">$0.00<div class="sub">NET WORTH (USD)</div></div>
+                <div style="height: 20px;"></div>
+                <div class="metric">$0.00<div class="sub">DRY POWDER (CASH)</div></div>
+                
+                <hr style="border-color: #222; margin: 30px 0;">
+                
+                <canvas id="allocationChart" style="max-height: 250px;"></canvas>
+                <br><br>
+                <h3>ASSET ALLOCATION</h3>
+                <ul style="padding-left: 20px; font-size: 14px; color: #aaa; list-style-type: none; padding: 0;">
+                    <li>Tabula Rasa (Empty)</li>
+                </ul>
+            </div>
+            
+            <!-- CENTER: THE LIVING SEPHIROTH -->
+            <div class="panel" style="text-align: center; background: #08080a;">
+                
+                <div class="tree-container">
+                    <!-- Connections (SVG) -->
+                    <svg style="position:absolute; width:100%; height:100%; top:0; left:0; z-index:1;">
+                        <line x1="50%" y1="65" x2="75%" y2="145" stroke="#222" stroke-width="2"/> <!-- Keter-Chokhmah -->
+                        <line x1="50%" y1="65" x2="25%" y2="145" stroke="#222" stroke-width="2"/> <!-- Keter-Binah -->
+                        <line x1="75%" y1="145" x2="25%" y2="145" stroke="#222" stroke-width="2"/> <!-- Chokhmah-Binah -->
+                        <line x1="75%" y1="145" x2="50%" y2="335" stroke="#222" stroke-width="2"/> <!-- Chokhmah-Tiferet -->
+                        <line x1="25%" y1="145" x2="50%" y2="335" stroke="#222" stroke-width="2"/> <!-- Binah-Tiferet -->
+                        <line x1="50%" y1="335" x2="50%" y2="525" stroke="#222" stroke-width="2"/> <!-- Tiferet-Yesod -->
+                        <line x1="50%" y1="525" x2="50%" y2="605" stroke="#222" stroke-width="2"/> <!-- Yesod-Malkuth -->
+                    </svg>
+                    
+                    <div id="keter" class="node dim">KET</div>
+                    <div id="chokhmah" class="node dim">CHO</div>
+                    <div id="binah" class="node dim">BIN</div>
+                    
+                    <div id="chesed" class="node dim">CHE</div>
+                    <div id="gevurah" class="node dim">GEV</div>
+                    
+                    <div id="tiferet" class="node pulsing">TIF</div>
+                    
+                    <div id="netzach" class="node dim">NET</div>
+                    <div id="hod" class="node dim">HOD</div>
+                    
+                    <div id="yesod" class="node dim">YES</div>
+                    <div id="malkuth" class="node on">MAL</div>
+                </div>
+                
+                <div style="font-size: 11px; color: #444; margin-top: 20px; font-family: 'Share Tech Mono', monospace;">
+                    [CHOKHMAH=OBSERVE] [BINAH=PROCESS] [TIFERET=BALANCE] [MALKUTH=ACT]
+                </div>
+            </div>
+            
+            <!-- RIGHT: THE MONOLOGUE -->
+            <div class="panel">
+                <h3>INTERNAL MONOLOGUE</h3>
+                <div style="height: 90%; overflow-y: auto;">
+                    
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            function renderCharts() {
+                const ctx = document.getElementById('allocationChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Cash', 'Assets'],
+                        datasets: [{
+                            data: [0.0, 0],
+                            backgroundColor: ['#222', '#ffb700'],
+                            borderColor: '#000',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        cutout: '80%',
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+            
+            // Auto-Refresh
+            setTimeout(() => window.location.reload(), 15000);
+        </script>
+    </body>
+    </html>
+    

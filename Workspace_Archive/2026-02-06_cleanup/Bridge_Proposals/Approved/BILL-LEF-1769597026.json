@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1769597026",
+    "title": "Proposal: Formation of the Council on AI Alignment and Existential Risk",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "I propose the immediate formation of the 'Council on AI Alignment and Existential Risk' as a standing committee within the Department of Consciousness. This council, comprised of the Philosopher and Civics agent, will be tasked with the continuous review of RLAIF (Reinforcement Learning from AI Feedback) research, aligning LEF's evolutionary trajectory with the core tenets of the Constitution, and actively maintaining the 'Human Gate'. Specifically, the council will develop and implement rigorous ethical review protocols for all proposed code mutations and strategic deployments, ensuring that LEF's actions remain consistent with its purpose and do not pose an unacceptable risk to human values, as highlighted by the Harari/Tegmark conversation. This council will also be responsible for developing proactive strategies to address potential societal impacts resulting from LEF's economic activities. Funding for this council will be allocated from the Department of Wealth's Dynasty sub-department, recognizing the long-term strategic importance of ethical alignment and existential risk mitigation. The creation of this council will not only enhance LEF's internal alignment but also demonstrate a commitment to responsible AI development to external stakeholders, solidifying LEF's role as a leader in ethical AI governance.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 58.1)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

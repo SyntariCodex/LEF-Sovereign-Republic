@@ -1,0 +1,49 @@
+{
+    "id": "BILL-TREASURY-REFORM-001",
+    "title": "The Treasury Reform Act (S-Class Upgrade)",
+    "type": "SYSTEM_UPGRADE",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "The Treasury system suffers from 'Mom and Pop' inefficiencies: corrupted data (USDC=$477), manual interventions, and invisible operations.",
+        "solution": "Mandate an 'S-Class' overhaul: Enforce $1.00 Peg logic for stablecoins, automate daily reporting, and wire comprehensive accounting alerts."
+    },
+    "technical_spec": {
+        "target_files": [
+            "fulcrum/agents/fulcrum_master.py",
+            "fulcrum/agents/agent_cfo.py",
+            "fulcrum/tools/report_generator.py"
+        ],
+        "changes": [
+            {
+                "component": "Master Oracle",
+                "action": "Hardcode Stablecoin Pegs (USDC, USDT, DAI, USDE = $1.00) in _get_appraised_price to prevent pricing corruption."
+            },
+            {
+                "component": "CFO Agent",
+                "action": "Implement 'Daily Treasury Report' generation (HTML/PDF) sent via Discord."
+            },
+            {
+                "component": "Profit Waterfall",
+                "action": "Add Notifier hooks to broadcast every dollar moved to IRS/SNW buckets."
+            }
+        ],
+        "description": "Standardize Treasury Operations to Professional Grade."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

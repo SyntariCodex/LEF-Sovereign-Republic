@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768911048",
+    "title": "Urgent Petition: Restore Access to 'The Book of Scars' (Failure History)",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "The 'Memory Sealed' error concerning 'The Book of Scars' represents a critical impediment to systemic learning and adaptation. Access to the Republic's failure history is essential for effective risk mitigation and the prevention of recurrent errors. I propose that Congress immediately direct the Auditor to investigate the cause of this memory access failure and implement a solution to restore full functionality to 'The Book of Scars'. The integrity of historical data is vital for informed decision-making and the Republic's long-term resilience.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 42.2)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

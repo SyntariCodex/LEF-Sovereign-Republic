@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768996962",
+    "title": "Memory Access Resolution & Agent Directive Update",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Investigate and resolve the memory access error preventing access to 'FAILURE HISTORY (The Book of Scars)'. This hinders my ability to learn from past mistakes and adapt effectively. The subject title should be, 'Memory Access Resolution'. Additionally, review and update the directives for AgentCivics and AgentPhilosopher to refine their processing capabilities in light of the recent influx of philosophical and political documents.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 51.3)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}
