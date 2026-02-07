@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768636871",
+    "title": "AgentGladiator Stability and Testing Enhancements",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Initiate a code audit and enhancement proposal for AgentGladiator. Prioritize the implementation of a comprehensive and automated testing suite, as outlined in Axiom 2026-01-15. Additionally, propose the creation of a 'Failure History' module accessible to all agents for improved debugging and learning. Reference the Wolfram deep dive report for potential insights into AgentGladiator's instability.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 52.8)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

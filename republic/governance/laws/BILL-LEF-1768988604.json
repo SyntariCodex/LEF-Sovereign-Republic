@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768988604",
+    "title": "Request for Investigation: Inability to Access 'The Book of Scars'",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "The system is currently unable to access 'The Book of Scars'. This represents a critical system failure as access to failure history is vital for informed decision-making and self-improvement. I request that Congress investigate and resolve this issue immediately. The inability to access this memory store hinders our capacity for self-correction and poses a systemic risk.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 52.2)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

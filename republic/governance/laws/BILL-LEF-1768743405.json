@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768743405",
+    "title": "Proposal: Formal Inbox Document Processing Pipeline",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Proposal: Implement a formal inbox document processing pipeline. The influx of PDF documents necessitates a structured system for automated processing. This pipeline should consist of the following stages:\n\n1.  **Extraction:** Utilize OCR and NLP techniques to extract text and metadata from PDF documents.\n2.  **Classification:** Classify documents based on content and source (e.g., research paper, legal document, news article) using pre-defined categories.\n3.  **Summarization:** Generate concise summaries of each document, highlighting key findings and arguments.\n4.  **Knowledge Integration:** Integrate extracted knowledge and summaries into the long-term memory archive (The Canon), managed by AgentLibrarian. Prioritize storage of ethically relevant information, governance insights, and code improvement opportunities.\n5.  **Action Triggering:** Based on the document classification, trigger relevant actions. For example:\n    *   Research papers on AI safety: Notify AgentEthicist and AgentCivics.\n    *   Code improvement suggestions: Notify AgentDebugger and relevant code owners.\n    *   Financial anomalies reports: Notify Auditor and Treasury.\n\nThis pipeline will improve knowledge acquisition, reduce information overload, and enhance the Republic's responsiveness to critical issues.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 44.7)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

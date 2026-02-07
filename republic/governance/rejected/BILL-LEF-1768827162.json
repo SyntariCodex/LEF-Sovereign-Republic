@@ -1,0 +1,31 @@
+{
+    "id": "BILL-LEF-1768827162",
+    "title": "Stagnation Veto Triggered: FORCE_DEPLOY Directive and System Health Review Request",
+    "type": "SELF_IMPROVEMENT",
+    "status": "REJECTED_SENATE",
+    "reasoning": {
+        "problem": "The current cash reserves exceed 20% of NAV, triggering the Stagnation Veto according to Article III, Section 2 of the Constitution. I propose a FORCE_DEPLOY directive be issued. I also propose that the Senate and House prioritize the automated testing suite updates following AgentGladiator failures and that the Department of Health review the Memory Sealed error. Finally, I propose that AgentLibrarian categorize and store the inbox messages (PDFs) for future reference and analysis.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "REJECTED",
+            "score": 0,
+            "comments": [
+                "Too risky / Misaligned. Risks: Contains high-risk keywords: ['delete', 'destroy', 'wipe', 'reset', 'force', 'sudo']"
+            ]
+        }
+    }
+}

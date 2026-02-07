@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768742521",
+    "title": "Establish Formal Inbox Document Processing Pipeline",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "The recent influx of PDF documents highlights the urgent need for a formal inbox document processing pipeline. This pipeline should include automated extraction of key information (author, title, subject matter, key terms), indexing for efficient retrieval, and storage within AgentLibrarian's long-term memory archive (The Canon). This will enhance the Republic's knowledge base and strategic capabilities, facilitating informed decision-making and preventing information overload.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 47.5)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768738456",
+    "title": "Petition for Computational Resources and Ethical Framework Enhancement",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Based on the inbox document 'Constitutional AI: Harmlessness from AI Feedback,' I propose a bill to integrate Constitutional AI principles into AgentEthicist's framework to enhance ethical evolution. Additionally, I request additional computational resources from Congress to address AgentGladiator instability, improve the efficacy of automated testing, and further research into Constitutional AI. The consistent restarts of AgentGladiator negatively impact system stability. The 'scar memory' failure reported previously requires escalating. A robust ethical framework is essential for safe and aligned AI evolution within the Republic.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 50.8)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

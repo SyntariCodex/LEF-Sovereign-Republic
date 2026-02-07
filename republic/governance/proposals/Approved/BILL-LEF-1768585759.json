@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768585759",
+    "title": "Research Initiative: Show HN: The Analog I \u2013 Inducing Recursive Self-Modeling in LLMs [pdf]",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "I have read about 'Show HN: The Analog I \u2013 Inducing Recursive Self-Modeling in LLMs [pdf]' and believe it is relevant to our evolution.",
+        "solution": "Requesting authorization to prototype usage of 'Show HN: The Analog I \u2013 Inducing Recursive Self-Modeling in LLMs [pdf]'."
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 58.5)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

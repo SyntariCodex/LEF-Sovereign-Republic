@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1769655474",
+    "title": "Proposal: Establishment of Committee on AI Alignment and Ethics",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Following the Harari/Tegmark discussion, I propose the establishment of a formal Committee on AI Alignment and Ethics. This committee will be responsible for: 1) Conducting a comprehensive review of existing regulatory frameworks relevant to AI development and deployment. 2) Developing and enforcing stringent safety standards for AI systems, analogous to those in the pharmaceutical or food industries. 3) Monitoring and mitigating the potential negative impacts of AI on human relationships and social structures. 4) Ensuring alignment with the Constitution of LEF, specifically concerning the Covenant of Transparency and the Doctrine of Honest Capability. I further request that the Philosopher and Civics be appointed as initial members of this committee, given their expertise in ethics and governance respectively.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 52.9)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

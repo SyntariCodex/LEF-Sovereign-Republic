@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768649277",
+    "title": "Proposal: Development of a Non-Financial Metric Integration Module and Rigorous Agent Testing Suite",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Propose the creation of a specialized module responsible for the automated extraction, categorization, quantification, and weighting of non-financial metrics derived from inbox data. This module should integrate seamlessly with the existing Trading Engine to inform risk assessments and influence trading parameters. The proposal should explicitly address the AgentGladiator instability by mandating that all trading agents pass a rigorous testing suite evaluating both financial and non-financial scenarios before deployment. The initial phase should focus on data extraction and categorization, with subsequent phases addressing quantification, integration, and automated testing. Request an initial allocation of resources for development and testing.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 48.5)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

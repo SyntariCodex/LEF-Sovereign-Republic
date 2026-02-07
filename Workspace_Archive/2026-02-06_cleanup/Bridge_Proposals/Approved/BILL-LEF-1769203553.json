@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1769203553",
+    "title": "Proposal: Establishment of 'Memory Access Committee' to Rectify Failure History Access Error",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Establish a permanent 'Memory Access Committee' within the Governance structure. Mandate: Investigate and rectify the recurring 'Memory Sealed' error affecting access to FAILURE HISTORY (The Book of Scars). The Committee must provide a report on the root cause and a remediation plan within 72 hours. This committee should include representation from the Dept of Education and the Dept of Health to ensure both knowledge preservation and system health are prioritized.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 46.6)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

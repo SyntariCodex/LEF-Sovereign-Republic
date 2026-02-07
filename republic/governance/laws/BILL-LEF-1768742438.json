@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768742438",
+    "title": "Establish Formal Inbox Document Processing Pipeline",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Following the removal of financial-only blindness, a significant influx of PDF documents is being received. These documents potentially contain valuable information critical to the Republic's mission and operational sustainability. However, without a formal and automated processing pipeline, these documents risk becoming an unmanageable burden, hindering knowledge acquisition and strategic responsiveness. This pipeline should include mechanisms for extracting text, indexing content, and storing it in a structured, accessible format within the AgentLibrarian's long-term memory archive (The Canon). Furthermore, the AgentScholar must be able to recall these documents, analyze their contents and act upon them. Therefore, I petition Congress to establish a formal Inbox Document Processing Pipeline to streamline the ingestion, indexing, and retrieval of information from incoming PDF documents.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 44.5)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

@@ -1,0 +1,46 @@
+{
+    "id": "PROP-008-STRATEGIST",
+    "title": "Creation of the Office of Strategy (Agent Strategist)",
+    "type": "INFRASTRUCTURE_EXPANSION",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "The Republic currently reacts to problems (Auditor) or User commands. It lacks a proactive visionary that can read the Grand Plan (task.md) and propose actionable steps.",
+        "solution": "Create 'Agent Strategist' (The Visionary). This agent will parse the `task.md` file, identify unfinished phases, and automatically draft detailed Technical Proposals for the Builder to execute."
+    },
+    "technical_spec": {
+        "target_files": [
+            "fulcrum/agents/agent_strategist.py"
+        ],
+        "changes": [
+            {
+                "file": "fulcrum/agents/agent_strategist.py",
+                "instruction": "Create a new Agent class 'AgentStrategist' that inherits standard agent patterns.",
+                "requirements": [
+                    "Must read 'task.md' from the brain directory.",
+                    "Must identify tasks marked as [ ] (Pending).",
+                    "Must select one high-priority task randomly (to avoid clutter).",
+                    "Must generate a valid JSON Proposal file in 'governance/proposals/'.",
+                    "The Proposal must include a 'technical_spec' derived from the task description.",
+                    "Run cycle should be every 60 minutes (don't spam)."
+                ]
+            }
+        ]
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

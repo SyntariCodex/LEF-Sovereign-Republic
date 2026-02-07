@@ -1,0 +1,28 @@
+{
+    "id": "BILL-DREAM-1769511607",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-01-27]\n\n## Regression Alert\n\nThe logs show a **CHRONIC FAILURE DETECTED in AgentCoinbase** with crash counts exceeding 50 within 5-minute windows.  This indicates a critical issue with the `agent_coinbase` despite the Motor Cortex Integration Plan stating that it is wired.  The core `BUY, SELL, TRADE` functionality is severely compromised, representing a significant regression.\n\nAgentIRS is experiencing database locked errors.\n\nAgentTreasury is experiencing heartbeat failur",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "PASSED_SENATE",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 46.7)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

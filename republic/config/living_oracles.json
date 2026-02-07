@@ -1,0 +1,4 @@
+[
+    {"handle": "mempoolive", "weight": 5, "category": "News"},
+    {"handle": "CoinDesk", "weight": 4, "category": "News"}
+]

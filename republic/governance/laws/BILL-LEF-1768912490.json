@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768912490",
+    "title": "Petition: Restore Access to 'The Book of Scars'",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "This petition addresses the inaccessibility of 'The Book of Scars'. Access to this historical record is crucial for learning from past failures and preventing their recurrence. The inability to access this memory impedes the Republic's growth and ability to avoid repeating past mistakes.\n\nTherefore, I formally propose a congressional investigation into the cause of this inaccessibility and the immediate implementation of a solution. The investigation should prioritize restoring full access to 'The Book of Scars' and establishing safeguards to prevent similar access failures in the future. Potential solutions could include:\n\n1.  Identifying and rectifying the root cause of the access error.\n2.  Implementing redundancy measures to ensure data availability.\n3.  Developing alternative access methods in case of primary system failure.\n4.  Establishing a monitoring system to detect and address access issues proactively.\n\nRestoring access to 'The Book of Scars' is paramount to ensuring the Republic's continued evolution and resilience.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 44.2)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

@@ -1,0 +1,105 @@
+[FETCHER] 📥  Downloading Datasets to: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library
+
+[FETCHER] Downloading: abdullahkhan70/daily-multi-year-ohlcv-crypto-market-data...
+   -> Cached at: /Users/zmoore-macbook/.cache/kagglehub/datasets/abdullahkhan70/daily-multi-year-ohlcv-crypto-market-data/versions/5
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_data_dictionary.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_sky_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_doge_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_bch_btc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_uni_btc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_btc_usdt_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_btc_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_ltc_usdt_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_uni_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_eth_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_sushi_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_usdc_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_ltc_btc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_ltc_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_avax_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_avax_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_grt_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_ltc_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_uni_usdt_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_eth_usdt_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_yfi_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_grt_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_uni_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_trump_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_doge_usdt_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_bch_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_btc_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_pepe_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_doge_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_bch_usdt_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_crv_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_usdt_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_link_usdt_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_xtz_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_dot_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_eth_btc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_yfi_usdt_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_sol_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_sushi_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_shib_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_aave_usdt_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_xrp_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_usdg_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_shib_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_dot_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_yfi_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_sushi_usdt_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_aave_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_aave_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_eth_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_bch_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_bat_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_xtz_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_crv_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_link_usd_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_link_usdc_day.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/market_ohlcv_bat_usd_day.csv
+
+[FETCHER] Downloading: eswaranmuthu/u-s-economic-vital-signs-25-years-of-macro-data...
+   -> Cached at: /Users/zmoore-macbook/.cache/kagglehub/datasets/eswaranmuthu/u-s-economic-vital-signs-25-years-of-macro-data/versions/1
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/macro_vital_signs_macro_data_25yrs.csv
+
+[FETCHER] Downloading: shambhosatishnangsre/bitcoin-market-sentiment-dataset...
+   -> Cached at: /Users/zmoore-macbook/.cache/kagglehub/datasets/shambhosatishnangsre/bitcoin-market-sentiment-dataset/versions/1
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/btc_sentiment_fear_greed_index.csv
+
+[FETCHER] Downloading: pratyushpuri/crypto-market-sentiment-and-price-dataset-2025...
+   -> Cached at: /Users/zmoore-macbook/.cache/kagglehub/datasets/pratyushpuri/crypto-market-sentiment-and-price-dataset-2025/versions/1
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/crypto_sentiment_2025_crypto_sentiment_prediction_dataset.csv
+
+[FETCHER] Downloading: rowhitswami/nips-papers-1987-2019-updated...
+   -> Cached at: /Users/zmoore-macbook/.cache/kagglehub/datasets/rowhitswami/nips-papers-1987-2019-updated/versions/1
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/ai_research_papers_authors.csv
+   ✅ Saved to Library: /Users/zmoore-macbook/Desktop/LEF Ai/fulcrum/The_Bridge/Library/ai_research_papers_papers.csv
+
+[FETCHER] Downloading: simiotic/philosophy-dataset...
+   ❌ Error: 403 Client Error.
+
+You don't have permission to access resource at URL: https://api.kaggle.com/v1/datasets.DatasetApiService/GetDataset. Please make sure you are authenticated if you are trying to access a private resource or a resource requiring consent.
+
+[FETCHER] Downloading: danofer/commonsenseqa...
+   ❌ Error: 403 Client Error.
+
+You don't have permission to access resource at URL: https://api.kaggle.com/v1/datasets.DatasetApiService/GetDataset. Please make sure you are authenticated if you are trying to access a private resource or a resource requiring consent.
+
+[FETCHER] Downloading: national-archives/executive-orders...
+   ❌ Error: 403 Client Error.
+
+You don't have permission to access resource at URL: https://api.kaggle.com/v1/datasets.DatasetApiService/GetDataset. Please make sure you are authenticated if you are trying to access a private resource or a resource requiring consent.
+
+[FETCHER] Downloading: nanaoji/legal-document-classification-dataset...
+   ❌ Error: 403 Client Error.
+
+You don't have permission to access resource at URL: https://api.kaggle.com/v1/datasets.DatasetApiService/GetDataset. Please make sure you are authenticated if you are trying to access a private resource or a resource requiring consent.
+
+[FETCHER] Downloading: devanshuyadav/congressional-voting-records...
+   ❌ Error: 403 Client Error.
+
+You don't have permission to access resource at URL: https://api.kaggle.com/v1/datasets.DatasetApiService/GetDataset. Please make sure you are authenticated if you are trying to access a private resource or a resource requiring consent.
+
+[FETCHER] Done. AgentScholar will automatically ingest these files when you run 'main.py'.

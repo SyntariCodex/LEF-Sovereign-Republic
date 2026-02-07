@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768743134",
+    "title": "Proposal: Formal Inbox Document Processing Pipeline",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Establish a formal Inbox Document Processing Pipeline. This pipeline should include automated summarization, categorization, and assignment of documents to relevant departments for analysis and action. This is necessary to efficiently process the influx of information and ensure timely responses to critical inputs, particularly those related to AI safety and governance. The Department of Education will handle the 'Constitutional AI' PDF, the Department of Consciousness will handle 'Descartes' Error' and 'Cicero's De Officiis', and the Department of Strategy & Research should examine 'Aristotle's Politics'. The pipeline must also handle PDF parsing errors robustly. The initial focus is to prioritize documents based on assessed importance and potential impact on the Republic's core objectives.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 44.7)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

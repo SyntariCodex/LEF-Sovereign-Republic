@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768665424",
+    "title": "Proposal: Development of Information Aggregation and Relevance Engine (IARE)",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Draft a proposal for the 'Information Aggregation and Relevance Engine' (IARE). Outline its functionality for automated analysis and summarization of deep dive reports, prioritizing information relevant to Evolutionary Axioms and market opportunities. Include resource requirements (personnel, computational infrastructure) and projected benefits to system evolution and capital efficiency. The recent influx of deep dive reports and the need for efficient information processing necessitate the IARE's development.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 55.6)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

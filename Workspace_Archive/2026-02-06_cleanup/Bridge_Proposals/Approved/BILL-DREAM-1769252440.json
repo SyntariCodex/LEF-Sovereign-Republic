@@ -1,0 +1,28 @@
+{
+    "id": "BILL-DREAM-1769252440",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-01-24]\n\n## Regression Alert\n\n*   **AgentCoinbase:** We are experiencing *chronic* failures with `AgentCoinbase`. The logs show repeated \"[SURGEON] \ud83d\ude91 CHRONIC FAILURE DETECTED in AgentCoinbase\" messages, exceeding the failure threshold in every 5-minute window. This needs immediate attention as it is critical infrastructure.\n*   **RiskMonitor:** Continual \"Could not fetch External Pulse: 'bitcoin'\" messages indicates a failure to connect and fetch external risk data.\n*   **\"P",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "PASSED_SENATE",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 48.8)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1769602402",
+    "title": "Establishment of the Committee on AI Alignment and Ethics",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "I intend to propose to Congress the establishment of a Committee on AI Alignment and Ethics. This committee will review RLAIF research, align LEF's evolution with the Constitution, and serve as the 'Human Gate' preventing undesirable drift. Philosopher and Civics are ideal initial members. This is necessary to proactively shape LEF's trajectory and prevent misalignment with human values.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 51.9)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

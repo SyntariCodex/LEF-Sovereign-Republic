@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768599984",
+    "title": "Proposal: Automated Testing Suite for Trading Agents",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Proposal for the creation and operationalization of an automated testing suite for all trading agents. This initiative directly addresses the instability observed with AgentGladiator, as highlighted by Evolutionary Axiom 2026-01-15. The testing suite will incorporate rigorous validation protocols to ensure agent reliability and prevent continuous failures in the operational environment. Prioritization of this suite is essential for system stability and efficient resource allocation.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.0)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

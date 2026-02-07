@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1769351244",
+    "title": "Emergency Petition: Performance Review of Dept of Wealth Due to Critical Cash Reserves",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Cash reserves are critically low at $114.72, while managing 8 active assets. This situation is unsustainable and requires immediate action to prevent a Stagnation Veto. Request a performance review of the Department of Wealth, including analysis of recent trades, ROI per asset, and strategy alignment with constitutional objectives (specifically the Covenant of Infinite Runway - Accumulation vs. Preservation). Propose temporary, emergency overrides to the Department of Wealth's strategies, to be determined based on the performance review findings, with the aim of stabilizing the financial situation.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 50.1)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

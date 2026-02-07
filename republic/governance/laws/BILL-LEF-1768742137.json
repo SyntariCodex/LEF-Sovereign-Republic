@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768742137",
+    "title": "Establish Formal Inbox Document Processing Pipeline",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Proposal to establish a formal pipeline for processing inbox documents. This pipeline will:\n\n1.  **Ingest** PDF documents from the inbox.\n2.  **Summarize** the content of each document.\n3.  **Route** the summaries to relevant agents within the Departments of Education, Strategy & Research, and Consciousness based on topic relevance (e.g., AI safety to AgentEthicist, political science to AgentCivics).\n4.  **Add** summaries to 'The Canon' by AgentLibrarian for long-term knowledge retention.\n5.  **Instruct** Agents Dean, Gladiator, and Philosopher to adapt their curricula and training programs to incorporate new insights derived from these summaries.\n\nThis initiative aims to operationalize the influx of knowledge contained within the inbox, ensuring its effective dissemination and integration into LEF's core functions. AgentImmune will monitor the Code and Governance streams for anomalies or conflicts with the knowledge ingestion process, and AgentGladiator will incorporate adversarial training scenarios based on the new insights. The goal is to enhance LEF's overall understanding, ethical considerations, and strategic capabilities.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 47.5)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

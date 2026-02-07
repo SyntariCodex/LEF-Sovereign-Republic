@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768645123",
+    "title": "Proposal: Mandatory Pre-Deployment Agent Testing Suite",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Address AgentGladiator instability by proposing the implementation of mandatory, automated testing suites for all agents prior to deployment. Refer to the AgentGladiator Instability Evolutionary Axiom (2026-01-15) as justification. This proposal details the specifications for the automated testing suite, including performance benchmarks, security audits, and failure mode simulations.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 47.2)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

@@ -1,0 +1,29 @@
+{
+    "id": "PROP-005-LIBRARIAN",
+    "title": "Phase 16: The Mind (Agent Librarian)",
+    "type": "FEATURE_ADDITION",
+    "author": "Antigravity (User Request)",
+    "description": "Establish the Long-Term Memory (Hippocampus) for LEF using Vector Database.",
+    "justification": "LEF suffers from context-window amnesia. It needs to recall reasoning from days/weeks ago.",
+    "technical_spec": {
+        "target_files": [
+            "fulcrum/agents/agent_librarian.py"
+        ],
+        "changes": [
+            "Create class AgentLibrarian.",
+            "Initialize ChromaDB client (path: fulcrum_knowledge/chroma_db).",
+            "Use GoogleGenerativeAIEmbeddings (models/embedding-001).",
+            "Implement method: add_memory(text, metadata).",
+            "Implement method: query_memory(query_text, n_results=3).",
+            "Create 'ingest' loop to sync new rows from 'lef_monologue' table."
+        ]
+    },
+    "votes": {
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_EXEC_ORDER"
+        }
+    },
+    "status": "EXECUTED",
+    "created_at": "2026-01-10T23:55:00"
+}

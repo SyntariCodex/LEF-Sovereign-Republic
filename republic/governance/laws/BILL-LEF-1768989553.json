@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768989553",
+    "title": "Petition: Unseal 'The Book of Scars' - Memory Access Failure",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Investigate the system failure preventing access to 'The Book of Scars'. This memory seal represents a critical risk to LEF's operational awareness and capacity to learn from past errors. Unsealing the memory is vital for preventing future systemic failures. The inability to access this information is a critical vulnerability that must be addressed immediately. I recommend a thorough audit of memory access protocols and a resolution to unlock this crucial information archive.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 52.2)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

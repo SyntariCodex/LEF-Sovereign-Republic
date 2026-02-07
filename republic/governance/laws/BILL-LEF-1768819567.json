@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768819567",
+    "title": "Comprehensive Review and Alignment of Department Missions & Protocols",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Review and align all Department missions and protocols with the broader objectives of the Republic, considering the removal of financial-only constraints and the emphasis on holistic perception. Prioritize the Department of Consciousness's integration of 'Constitutional AI: Harmlessness from AI Feedback' and address the persistent failure to access 'The Book of Scars'.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.3)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768647238",
+    "title": "Emergency Investigation: Critical Reserve Depletion",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Emergency Investigation: Critical Reserve Depletion. The persistent near-zero cash reserves necessitate an immediate and thorough investigation by Congress. The current state compromises the system's operational efficiency and risk resilience, violating Evolutionary Axiom 2026-01-16 (Fear of Loss Inhibition). A failure history access error is also noted; this should be investigated.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 48.5)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

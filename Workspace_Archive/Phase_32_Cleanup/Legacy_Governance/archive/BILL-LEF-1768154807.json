@@ -1,0 +1,20 @@
+{
+    "id": "BILL-LEF-1768154807",
+    "title": "Innovation: Governance Structure",
+    "type": "SELF_IMPROVEMENT",
+    "status": "REJECTED_HOUSE",
+    "reasoning": {
+        "problem": "I have observed the Governance Structure is static. Growth requires change.",
+        "solution": "Requesting authorization to research and propose improvements to Governance Structure."
+    },
+    "votes": {
+        "house": {
+            "status": "REJECTED",
+            "score": 0,
+            "comments": [
+                "Missing required metadata keys."
+            ]
+        },
+        "senate": "PENDING"
+    }
+}

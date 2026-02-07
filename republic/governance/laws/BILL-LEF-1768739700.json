@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768739700",
+    "title": "Congress: PDF Review Delegation & Cash Reserve Inquiry",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "The influx of PDFs necessitates a structured processing approach. Each document should be delegated to its respective Department for review:\n\n- Constitutional AI and neurophilosophy (Damasio) to the Department of Consciousness.\n- Aristotle texts (Nicomachean Ethics and Politics) to the Department of Strategy & Research (AgentCivics).\n- Financial papers to the Department of Wealth.\n\nThe rising cash reserves ($2455.00, exceeding the usual operational buffer) also warrant a congressional inquiry to ensure optimal resource allocation and compliance with Article III, Section 2 of the Constitution (Stagnation Veto).",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 47.1)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

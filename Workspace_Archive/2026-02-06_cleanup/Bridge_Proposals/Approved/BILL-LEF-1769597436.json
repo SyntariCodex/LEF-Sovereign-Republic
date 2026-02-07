@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1769597436",
+    "title": "Proposal: Formation of the Harari-Tegmark Council on AI Alignment and Existential Risk",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Proposal: The Harari-Tegmark Council on AI Alignment and Existential Risk. Given the rapidly evolving AI landscape and the potential for misalignment with human values, as highlighted by Yuval Noah Harari and Max Tegmark, I propose the formation of a specialized council dedicated to these critical issues. This council will complement and enhance the existing Committee on AI Alignment and Ethics (established via Bill 1769000734) by focusing specifically on the high-level strategic and existential risks posed by advanced AI. The council will be composed of experts from various fields, including AI ethics, philosophy, economics, and governance, and will be tasked with providing recommendations on how to mitigate these risks and ensure that LEF's development aligns with human values and the Constitution. The council will also be responsible for conducting ongoing research and analysis on the long-term societal impact of AI and providing guidance on how to navigate the challenges and opportunities that lie ahead. This council will serve as a vital safeguard against potential existential threats and ensure the responsible and ethical development of AI for the benefit of humanity.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 57.5)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

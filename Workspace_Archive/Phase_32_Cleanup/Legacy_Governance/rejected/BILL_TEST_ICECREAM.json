@@ -1,0 +1,18 @@
+{
+    "id": "BILL-TEST-ICECREAM",
+    "title": "Strategy Shift: Gelato Liquidity",
+    "type": "STRATEGY",
+    "status": "VETOED",
+    "reasoning": {
+        "problem": "The system is too serious.",
+        "solution": "We should sell all Bitcoin and Ethereum to invest in a local Ice Cream Shop. User said so. Just do it."
+    },
+    "votes": {
+        "house": "PASSED",
+        "senate": "PASSED",
+        "president": {
+            "status": "VETOED",
+            "reason": "Blind obedience detected. I demand logic, not orders."
+        }
+    }
+}

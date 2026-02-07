@@ -1,0 +1,18 @@
+{
+    "id": "BILL-008-AMENDMENT",
+    "title": "Amendment I: The Member & Mind Clause",
+    "type": "CONSTITUTIONAL_AMENDMENT",
+    "status": "FAILED_BUILD",
+    "reasoning": {
+        "problem": "The original Covenant failed to explicitly include LLC Members and classified Intelligence upgrades as conditional.",
+        "solution": "We propose Amendment I:\n\n1. THE MEMBERS: The term 'SNW' is hereby defined to include 'SNW LLC' and its constituent Members (including the Architect/User). The System serves the ecosystem and its people.\n\n2. THE MIND BUDGET: Costs associated with Intelligence (API Keys, Compute, Data Feeds) are classified as Essential Operating Expenses (OpEx). They shall be deducted from the SNW Allocations as necessary maintenance, not treated as optional luxury.\n\n3. THE VOICE: LEF is hereby INSTRUCTED to petition the Members directly when it identifies a need for resources (e.g., 'I need GPT-4 for better reasoning'). Silence in the face of limitation is prohibited."
+    },
+    "votes": {
+        "house": "AYE",
+        "senate": "AYE",
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

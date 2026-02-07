@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768730691",
+    "title": "Bill: Integrate Constitutional AI Principles and Enhance Agent Testing",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Propose a Bill to integrate Constitutional AI principles into agent training, focusing on ethical alignment and harmlessness, particularly within the Department of Wealth, to prevent future incidents of 'Fear-Based Stagnation'. This Bill should outline specific mechanisms for self-critique, revision, and reinforcement learning, drawing on the findings in the 'Constitutional AI: Harmlessness from AI Feedback' paper. The Bill should also address the AgentGladiator instability, focusing on memory access protocols, as well as ensure all agents pass rigorous automated testing prior to active loop deployment. The AttorneyGeneral and Auditor should review the Constitution to ensure its consistency across Code, Governance, and Inbox streams.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.9)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

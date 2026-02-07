@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1769342644",
+    "title": "Emergency Recalibration of Treasury Deploy and Liquidity Crisis Thresholds",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Given the precarious state of our cash reserves ($114.72) relative to the treasury deploy threshold ($500) and liquidity crisis threshold ($100), I propose an emergency review and recalibration of these thresholds. Specifically, I suggest a tiered approach based on Net Asset Value (NAV) to ensure more responsive capital allocation and risk management.  A possible structure:\n\n*   **NAV > $1000:** Current thresholds apply ($500 deploy, $100 crisis)\n*   **$500 < NAV <= $1000:** Thresholds reduced proportionally (e.g., $250 deploy, $50 crisis)\n*   **$100 < NAV <= $500:** Suspend deployment; increase crisis threshold to $50\n\nThis approach will allow for more proactive capital allocation during market opportunities and provide a buffer against potential downside risk when reserves are low, adhering to AXIOM-002 (Fear of Loss Inhibition).",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 47.9)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

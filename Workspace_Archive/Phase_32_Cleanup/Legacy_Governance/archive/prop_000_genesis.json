@@ -1,0 +1,47 @@
+{
+    "id": "prop_000",
+    "title": "Short Descriptive Title",
+    "type": "FEATURE|BUGFIX|OPTIMIZATION|SECURITY",
+    "department": "ADMIN|INTEL|RESEARCH|ENGINEERING",
+    "division": "FULCRUM|SNW|CORE",
+    "author": "Agent Name",
+    "status": "FAILED_BUILD",
+    "timestamp_created": "YYYY-MM-DD HH:MM:SS",
+    "reasoning": {
+        "problem": "What is wrong or missing?",
+        "solution": "High level description of fix",
+        "impact": "Risk assessment (Low/Med/High)"
+    },
+    "technical_spec": {
+        "target_files": [
+            "path/to/file.py"
+        ],
+        "changes": [
+            {
+                "action": "MODIFY|CREATE|DELETE",
+                "file": "path/to/file.py",
+                "content_diff": "Pseudo-code or Diff"
+            }
+        ]
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Constitutional alignment verified."
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

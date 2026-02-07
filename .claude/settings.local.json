@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip3 install:*)",
+      "Bash(sqlite3:*)",
+      "Bash(grep:*)",
+      "Bash(python3 -c \"\nfrom system.claude_memory_writer import compile_session_update, merge_into_claude_memory, update_claude_memory\nprint\\(''Import OK''\\)\n\n# Run a test update\nresult = update_claude_memory\\(\\)\nprint\\(f''Update result: {result}''\\)\n\")",
+      "Bash(python3:*)",
+      "Bash(cd:*)",
+      "Bash(find:*)",
+      "Bash(python -m py_compile:*)",
+      "Bash(pg_isready:*)",
+      "Bash(brew list:*)",
+      "Bash(brew services start:*)",
+      "Bash(export PATH=\"/opt/homebrew/opt/postgresql@16/bin:$PATH\")",
+      "Bash(psql:*)",
+      "Bash(python:*)",
+      "Bash(brew services:*)",
+      "Bash(/opt/homebrew/bin/psql:*)",
+      "Bash(brew --prefix:*)",
+      "Bash(/opt/homebrew/opt/postgresql@16/bin/psql:*)",
+      "Bash(POSTGRES_USER=republic_user POSTGRES_DB=republic POSTGRES_PASSWORD=\"\" python3:*)",
+      "Bash(__NEW_LINE_1c77b5c457f97079__ echo \"\")",
+      "Bash(__NEW_LINE_a92c5f69b2e6dadb__ echo \"\")",
+      "Bash(__NEW_LINE_31816d935c128576__ echo \"\")",
+      "Bash(POSTGRES_HOST=localhost POSTGRES_PORT=5432 POSTGRES_DB=republic POSTGRES_USER=republic_user POSTGRES_PASSWORD=mi-cfBzhLEuyDUT85FRRef5-cdMnDEMP python3:*)",
+      "Bash(DATABASE_BACKEND=sqlite python3:*)",
+      "Bash(DATABASE_BACKEND=postgresql POSTGRES_HOST=localhost POSTGRES_PORT=5432 POSTGRES_DB=republic POSTGRES_USER=republic_user POSTGRES_PASSWORD=mi-cfBzhLEuyDUT85FRRef5-cdMnDEMP python3:*)",
+      "Bash(for f in departments/Dept_Foreign/agent_moltbook.py departments/Dept_Education/agent_scholar.py departments/Dept_Wealth/Dynasty/agent_steward.py departments/Dept_Wealth/agent_portfolio_mgr.py departments/Dept_Strategy/agent_architect.py system/state_hasher.py system/circuit_breaker.py departments/Dept_Health/biological_systems.py departments/Dept_Health/agent_surgeon_general.py departments/Dept_Memory/conversation_memory.py training/seed_wealth.py _services/service_sabbath.py main.py departments/The_Cabinet/agent_router.py departments/The_Cabinet/agent_lef.py departments/shared/db_utils.py)",
+      "Bash(do)",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(for file in departments/The_Cabinet/agent_router.py departments/The_Cabinet/agent_lef.py departments/shared/db_utils.py departments/Dept_Memory/conversation_memory.py departments/The_Cabinet/agent_treasury.py departments/Dept_Wealth/agent_portfolio_mgr.py)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(PGPASSWORD='mi-cfBzhLEuyDUT85FRRef5-cdMnDEMP' psql:*)",
+      "Bash(PGPASSWORD='mi-cfBzhLEuyDUT85FRRef5-cdMnDEMP' psql -h localhost -U republic_user -d republic -c \"SELECT count\\(*\\) FROM information_schema.tables WHERE table_schema=''public'';\")",
+      "Bash(redis-cli ping:*)",
+      "Bash(gtimeout 45 python3 main.py)",
+      "Bash(redis-cli:*)"
+    ]
+  }
+}

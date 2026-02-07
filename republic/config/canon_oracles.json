@@ -1,0 +1,8 @@
+[
+    {"handle": "VitalikButerin", "weight": 10, "category": "Core Dev"},
+    {"handle": "balajis", "weight": 9, "category": "Core Dev"},
+    {"handle": "nicksimson", "weight": 8, "category": "Analyst"},
+    {"handle": "BlackRock", "weight": 10, "category": "TradFi"},
+    {"handle": "coinbase", "weight": 5, "category": "Exchange"},
+    {"handle": "MicroStrategy", "weight": 7, "category": "Treasury"}
+]

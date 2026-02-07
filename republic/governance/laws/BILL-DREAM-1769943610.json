@@ -1,0 +1,32 @@
+{
+    "id": "BILL-DREAM-1769943610",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-01]\n\n## Regression Alert\n\nSeveral critical systems are experiencing significant issues, indicating task failures and system instability:\n\n*   **Database Overload:** Repeated \"Pool exhausted, creating overflow connection\" warnings indicate the database connection pool is insufficient. Agents like `AgentIRS`, `AgentTreasury`, and `CONSTITUTION_GUARD` are experiencing \"database is locked\" errors, leading to heartbeat failures, loop errors, and inability to log violations. T",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "SIGNED",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 48.6)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

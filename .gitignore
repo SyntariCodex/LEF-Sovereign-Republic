@@ -1,0 +1,54 @@
+# === SECRETS ===
+.env
+republic/.env
+*.key
+*.pem
+External Observer Reports/HACKATHON_CREDENTIALS.md
+
+# === LARGE DATA FILES ===
+*.csv
+*.json.bak
+*.tar.gz
+*.zip
+
+# === DATABASES ===
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.db.bak
+*.db-backup
+republic/republic_sqlite_backup.db
+
+# === LARGE DATA DIRECTORIES ===
+republic/library/
+republic/arena/
+republic/models/
+republic/venv/
+republic_archives/
+LEF Ai Projects/
+backups/
+logs/
+
+# === LARGE FILES ===
+republic/republic.log
+republic/proposals/
+
+# === PYTHON ===
+__pycache__/
+*.pyc
+*.pyo
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === TEMP SCRIPTS ===
+register_hackathon.sh
+verify_claim.sh
+push_to_github.sh
+push_code_only.sh
+Hackathon.txt
+
+# === NODE ===
+node_modules/

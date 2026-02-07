@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768613092",
+    "title": "Resource Allocation for AgentGladiator Testing and Synthetic Scar System Development",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Allocate resources for dedicated testing infrastructure (virtualized environments mirroring production) for AgentGladiator. This will ensure accurate and repeatable test results, facilitating effective debugging and performance optimization. Furthermore, Congress should formally task a team to construct a 'synthetic scar' system utilizing AgentGladiator runtime data and anomaly detection to compensate for the inaccessibility of 'The Book of Scars'.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 51.7)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

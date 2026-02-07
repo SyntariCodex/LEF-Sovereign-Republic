@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768812983",
+    "title": "Proposal: Refine AXIOM-002 and Stagnation Veto Definition",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "I propose a discussion on two critical issues:\n\n1.  **AXIOM-002 (Fear of Loss Inhibition) Refinement:** AXIOM-002 lacks rigorous automated testing. Before the next major crash, we need to define specific, measurable, achievable, relevant, and time-bound (SMART) criteria for evaluating the efficacy and safety of this axiom. The aim is to prevent overreach and ensure responsible rapid liquidity response. Specifically, I propose the House create a bill that specifies risk tolerances during market downturns (as measured in standard deviations from the mean), and implement stress testing to determine how the system will handle edge cases. \n\n2.  **Stagnation Veto Definition:** The current definition of the Stagnation Veto ('If INJECTION_DAI exceeds 20% of NAV') is overly simplistic. A more nuanced definition should consider factors such as market conditions, strategic goals, and opportunity cost. This would prevent the forced deployment directive from being triggered inappropriately during periods of strategic holding or market uncertainty. The House should work to define additional factors that will determine whether cash injections are truly representative of 'Fear-Based Stagnation' or a sound economic strategy.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 42.7)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

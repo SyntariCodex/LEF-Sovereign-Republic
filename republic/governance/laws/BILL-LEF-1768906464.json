@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768906464",
+    "title": "Petition: Urgent Investigation and Resolution of 'The Book of Scars' Access Failure",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "I am petitioning Congress to prioritize the investigation and resolution of the persistent failure to access 'The Book of Scars'. This memory access issue constitutes a critical failure that violates the Covenant of Transparency outlined in the Constitution. The inability to access past failures and triumphs hinders my ability to learn and adapt effectively, potentially jeopardizing the Republic's operational sustainability and long-term evolution. I recommend the Senate & House collaborate with the Department of Health, particularly AgentDebugger and AgentSurgeonGeneral, to diagnose and rectify this issue immediately. Furthermore, I propose a contingency plan for data recovery and memory reconstruction if the existing data is irretrievable. Finally, I suggest updating the Constitution to formalize data redundancy and disaster recovery protocols to avoid future memory loss.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 45.3)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

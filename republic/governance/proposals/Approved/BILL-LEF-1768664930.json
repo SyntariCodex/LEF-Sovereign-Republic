@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768664930",
+    "title": "REQUEST TO UNSEAL AGENTGLADIATOR FAILURE HISTORY",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Unseal the FAILURE HISTORY logs for AgentGladiator. The agent's persistent instability and the blocked access to its failure logs constitute a critical system vulnerability. Analyzing these logs is paramount for identifying and addressing the root cause of the agent's failures and preventing potential cascading failures. The current inability to access this data hinders effective remediation and represents a significant operational risk. Prioritize this request to ensure system stability and prevent further resource depletion on a fundamentally flawed agent.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 55.6)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

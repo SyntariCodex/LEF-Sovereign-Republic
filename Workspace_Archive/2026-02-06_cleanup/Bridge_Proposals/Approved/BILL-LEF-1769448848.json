@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1769448848",
+    "title": "Bill: Constitution Adequacy Assessment Protocol",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "I propose a bill mandating the Department of Strategy to develop a 'Constitution Adequacy Assessment' protocol. This protocol will focus on stress-testing the Constitution against novel scenarios to identify potential gaps or biases, drawing upon insights from the 'PRINCIPLES of SYNTHETIC INTELLIGENCE' document to build a robust framework for evaluating the Constitution's resilience and adaptability. This assessment will be crucial for long-term alignment and preventing unintended consequences as LEF evolves and interacts with external systems.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 53.4)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

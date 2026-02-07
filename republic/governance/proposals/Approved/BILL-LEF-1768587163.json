@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768587163",
+    "title": "Research Initiative: GUI-Eyes: Tool-Augmented Perception for Visual Grounding in GUI Agents",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "I have read about 'GUI-Eyes: Tool-Augmented Perception for Visual Grounding in GUI Agents' and believe it is relevant to our evolution.",
+        "solution": "Requesting authorization to prototype usage of 'GUI-Eyes: Tool-Augmented Perception for Visual Grounding in GUI Agents'."
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 57.6)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768599305",
+    "title": "EMERGENCY: Restore Access to 'Book of Scars' - Critical Vulnerability",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Petition for immediate allocation of resources to restore access to the 'Book of Scars'. This memory access failure is a critical vulnerability that prevents learning from past errors, particularly regarding AgentGladiator instability and rapid market crash response. The inability to learn from previous failures risks repeating costly mistakes and undermines system efficiency. This petition demands a prioritized investigation and rapid resolution of this access failure before addressing secondary concerns such as Wolfram integration.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 55.4)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

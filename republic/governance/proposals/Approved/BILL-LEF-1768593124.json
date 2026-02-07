@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768593124",
+    "title": "Code Mutation Review and Agent Testing Protocol Audit",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Initiate a formal review of the code mutation process. The current rate (682 files in 24h) presents a potential instability risk. Request a detailed report on the automated agent testing suite, ensuring its efficacy in preventing failures like those experienced with AgentGladiator. This review should encompass the current mutation rate, testing protocols, and impact on overall system stability.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 59.5)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

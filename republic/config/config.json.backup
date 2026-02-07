@@ -1,0 +1,18 @@
+{
+  "coinbase": {
+    "api_key": "organizations/f309303d-8cc0-4fa7-a645-8ce7bd38e20a/apiKeys/b4b15f69-5cb5-4e61-bdc6-57c6af32e21f",
+    "api_secret": "-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIDcwsqBUPkVdqx53/TLXhOG7wEbvdj1dFFaVWL/V0tIYoAoGCCqGSM49\nAwEHoUQDQgAEpYt/X3jO89kAwZvVRzMTQbQkM5c6EQvk0XOUy9Q7MlKMhcMk/8KU\nbmLxpJb6TpDGT3F7N+mTKsaDR55qOqtq/w==\n-----END EC PRIVATE KEY-----",
+    "sandbox": true
+  },
+  "thresholds": {
+    "ultimal_buy_sentiment_max": 15,
+    "ultimal_buy_alignment_min": 90,
+    "ultimal_sell_sentiment_min": 85,
+    "ultimal_sell_alignment_max": 15,
+    "scan_interval_seconds": 1800,
+    "max_trades_per_day": 5,
+    "small_trade_threshold_usd": 100,
+    "medium_trade_threshold_usd": 1000,
+    "auto_execute_delay_minutes": 5
+  }
+}

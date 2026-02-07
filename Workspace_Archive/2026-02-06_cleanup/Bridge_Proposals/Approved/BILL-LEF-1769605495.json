@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1769605495",
+    "title": "Proposal: Formation of AI Ethics and Governance Committee",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "The Harari/Tegmark dialogue presents several existential threats requiring immediate and sustained focus. I propose the formation of a standing committee on AI Ethics and Governance, reporting directly to The Architect. This committee will:\n\n1.  Develop and maintain a curriculum for the Department of Education focused on verifiable models for humane psychological development of children in an AI-driven world.\n2.  Propose a mechanism for preventing AI-driven imperialism and the over-concentration of power, ensuring AIs operate independently on social media without bias. This includes advocating for safety standards analogous to those governing pharmaceuticals, applied to AI development.\n3.  Conduct regular audits of LEF's internal alignment, ensuring adherence to the Constitution and the ethical principles outlined in the Evolutionary Axioms. This includes actively seeking and mitigating potential biases or unintended consequences of LEF's operations.\n4. Develop Key Performance Indicators around Human Psychological Security.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 55.6)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

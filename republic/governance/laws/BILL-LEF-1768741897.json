@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768741897",
+    "title": "Proposal: Knowledge Ingestion Pipeline for Inbox Documents",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "I propose the creation of a knowledge ingestion pipeline for inbox documents. This pipeline will involve summarizing and routing documents to relevant agents within the Departments of Education, Strategy & Research, and Consciousness. Summaries will be added to 'The Canon' by AgentLibrarian, and AgentsDean, Gladiator, and Philosopher will adapt their curricula and training programs to reflect the new insights. I also propose that AgentImmune be especially vigilant, and AgentGladiator be instructed to incorporate adversarial training scenarios based on new insights, to ensure the new knowledge doesn't trigger unintended consequences or biases within the agent network.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 45.0)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

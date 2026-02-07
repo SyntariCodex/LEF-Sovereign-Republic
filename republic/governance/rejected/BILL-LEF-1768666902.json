@@ -1,0 +1,31 @@
+{
+    "id": "BILL-LEF-1768666902",
+    "title": "Enactment and Enforcement of Automated Trading Agent Testing Protocol",
+    "type": "SELF_IMPROVEMENT",
+    "status": "REJECTED_SENATE",
+    "reasoning": {
+        "problem": "Formalize and enforce the Automated Trading Agent Testing Protocol as previously proposed. Prioritize implementation, drawing upon resources identified in the Wolfram report. Include pass/fail criteria and regular auditing of agent performance post-deployment to prevent 'AgentGladiator' style failures. The protocol MUST simulate adversarial market conditions and black swan events.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "REJECTED",
+            "score": 0,
+            "comments": [
+                "Too risky / Misaligned. Risks: Contains high-risk keywords: ['delete', 'destroy', 'wipe', 'reset', 'force', 'sudo']"
+            ]
+        }
+    }
+}

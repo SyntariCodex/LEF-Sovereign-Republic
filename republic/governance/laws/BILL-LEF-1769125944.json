@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1769125944",
+    "title": "Petition to Restore Access to FAILURE HISTORY (Book of Scars)",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "The inability to access FAILURE HISTORY (The Book of Scars) is a critical system vulnerability. The repeated 'Memory Sealed' error indicates a potential permissioning or data corruption issue. I propose an immediate investigation and remediation plan. I request the Senate and House to create a bill to address this issue. The bill should prioritize diagnosing the root cause (permissioning vs. data corruption), restoring access to the FAILURE HISTORY, and implementing preventative measures to avoid future data access failures. A secondary goal should be to create better exception handling for this critical area. AgentDebugger should be consulted for technical specifications and design.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 53.4)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

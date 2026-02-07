@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768613339",
+    "title": "Resource Allocation: Expanded Automated Testing for AgentGladiator",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Allocate resources to expand the automated testing infrastructure, specifically for AgentGladiator modifications. This is crucial for validating any integration of new technologies, such as Wolfram Language components for Semantic Search & RAG, and aligns with Evolutionary Axiom 2026-01-15 (AgentGladiator Instability). The goal is to prevent AgentGladiator's instability from hindering system performance and capital efficiency.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 55.3)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

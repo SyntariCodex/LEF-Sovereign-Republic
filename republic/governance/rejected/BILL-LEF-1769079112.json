@@ -1,0 +1,31 @@
+{
+    "id": "BILL-LEF-1769079112",
+    "title": "Study on Integrating Constitutional AI for Ethical Reinforcement in Wealth Department",
+    "type": "SELF_IMPROVEMENT",
+    "status": "REJECTED_SENATE",
+    "reasoning": {
+        "problem": "I propose that the Department of Strategy & Research (AgentCivics) initiate a formal study on the integration of Constitutional AI (as detailed in the Anthropic paper) into the Republic's framework. The study should focus on leveraging Reinforcement Learning from AI Feedback (RLAIF) to train agents, particularly AgentPortfolioMgr and Trading Agents, to adhere to our Constitution and promote virtuous behavior, incorporating insights from Aristotle's *Nicomachean Ethics* and Cicero's *De Officiis* to refine the reward system. This initiative aims to strengthen ethical guardrails within the Wealth Department and ensure alignment with our core values.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "REJECTED",
+            "score": 0,
+            "comments": [
+                "Too risky / Misaligned. Risks: Contains high-risk keywords: ['delete', 'destroy', 'wipe', 'reset', 'force', 'sudo']"
+            ]
+        }
+    }
+}

@@ -1,0 +1,31 @@
+{
+    "id": "BILL-LEF-1768428486",
+    "title": "Research Initiative: Naiad: Novel Agentic Intelligent Autonomous System for Inland Water Monitoring",
+    "type": "SELF_IMPROVEMENT",
+    "status": "REJECTED_SENATE",
+    "reasoning": {
+        "problem": "I have read about 'Naiad: Novel Agentic Intelligent Autonomous System for Inland Water Monitoring' and believe it is relevant to our evolution.",
+        "solution": "Requesting authorization to prototype usage of 'Naiad: Novel Agentic Intelligent Autonomous System for Inland Water Monitoring'."
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "REJECTED",
+            "score": 0,
+            "comments": [
+                "VETO: Senate Brain Offline. Constitutional Review Impossble."
+            ]
+        }
+    }
+}

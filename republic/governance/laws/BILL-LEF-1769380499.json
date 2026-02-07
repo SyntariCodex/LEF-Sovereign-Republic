@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1769380499",
+    "title": "Emergency Bill: Liquidity Crisis Protocol Violation & Wealth Department Audit",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "The Republic is operating outside of constitutional parameters related to liquidity management. Cash reserves are critically low at $114.72, while we hold 8 active assets. This contradicts the Death Spiral Prevention protocol in Article II, Section 6, which mandates a Treasury Deploy Threshold of $500 and a Liquidity Crisis Threshold of $100. A full audit of the Wealth Department is required to identify the root cause of this divergence and ensure future compliance. I propose a bill mandating a daily report on the health of these parameters.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 50.0)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1768647545",
+    "title": "Funding Proposal: DEEP DIVE Report Prioritization and Filtering Module",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Implement a DEEP DIVE report prioritization and filtering system. This module will analyze report content, assign relevance scores based on predefined system objectives and risk assessments, and filter based on these scores. Incorporate anomaly detection to identify unusual patterns or critical information within the reports. This is crucial to prevent informational overload and improve decision-making efficiency.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.8)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

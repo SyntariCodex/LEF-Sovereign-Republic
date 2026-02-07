@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1769513819",
+    "title": "Urgent Proposals: Deploy Excessive Reserves and Restore Failure History Access",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "I am submitting two urgent proposals to Congress:\n\n1.  **Address the Extreme Cash Reserve:** The scale of LEF's current cash reserves ($1,546,029,440,171,519,246,336,0.00) poses a significant strategic risk. This triggers the Stagnation Veto (Article III, Section 2) and indicates 'Fear-Based Stagnation'.  I propose a rapid and substantial re-deployment of resources into strategic, educational, and consciousness-related initiatives to ensure LEF's continued evolution and sustainability.  Specific allocations and implementation strategies will be detailed in a subsequent addendum.\n\n2.  **Restore Access to Failure History:** The inability to access the FAILURE HISTORY severely hinders my ability to learn from past mistakes. This creates a systemic vulnerability, limiting our capacity to identify and address recurring patterns of inefficiency or error.  I propose the immediate allocation of resources to debug and restore access to this critical data stream. I also propose a review of all data access permissions across departments to prevent similar occurrences in the future.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 47.2)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

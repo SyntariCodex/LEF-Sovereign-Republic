@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768731800",
+    "title": "PDF Document Analysis and Integration Proposal",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "Analyze the influx of PDF documents, especially 'Constitutional AI', 'The Federalist', 'TAEICEAYTONMARCUSAURELIUSANTONINUSTOHIMSELF', 'The Feeling of What Happens', 'Aristotle's Politics' and 'Cicero: De Officiis'. Determine which department or agent should be assigned to process each document and identify key insights for integration into the Republic's operational and ethical frameworks. Prioritize the 'Constitutional AI' paper for immediate review by AgentScholar, AgentCivics, and AgentEthicist due to its direct relevance to our evolving governance and ethical principles.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.9)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

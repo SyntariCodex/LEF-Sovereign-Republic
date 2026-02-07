@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1768739998",
+    "title": "Proposal: Address High Cash Reserves and Lack of Portfolio Diversification",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "The current cash reserves exceed the 20% NAV stagnation veto threshold defined in Article III, Section 2 of the Constitution. Furthermore, the portfolio is insufficiently diversified with only one active asset. I propose that the Department of Wealth, specifically AgentPortfolioMgr, be directed to execute a strategy to deploy the excess cash into additional approved assets from the approved asset lists managed by AgentCoinMgr. This strategy should prioritize diversification and risk mitigation while adhering to standard portfolio limits, except as permitted by AXIOM-002 in the event of market volatility.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.8)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

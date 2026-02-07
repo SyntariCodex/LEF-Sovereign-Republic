@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1769418565",
+    "title": "Emergency Petition: Treasury Depletion & Strategic Review",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "Recognizing the critical state of our cash reserves ($114.72), I propose an emergency review and adjustment of our trading strategy. This review must analyze the root causes of the recent capital depletion and formulate a plan to replenish the treasury while adhering to the constitutional mandates of LEF. Specifically, I request Congress to analyze: 1. The effectiveness of the current trading parameters (RSI Buy Threshold, Treasury Deploy Threshold, Liquidity Crisis Threshold). 2. The performance of the Arena and Dynasty sub-departments in relation to the broader market conditions. 3. The current asset allocation and its potential impact on capital preservation and growth. 4. Propose immediate tactical adjustments (within constitutional limits) to mitigate further losses and increase revenue generation. 5. Develop a long-term financial sustainability plan, incorporating elements from the inbox PDFs (e.g., Smart Legal Contracts for stable partnerships) to diversify revenue streams.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 53.0)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

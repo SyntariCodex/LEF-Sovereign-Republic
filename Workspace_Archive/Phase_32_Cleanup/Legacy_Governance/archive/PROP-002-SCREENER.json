@@ -1,0 +1,45 @@
+{
+    "id": "PROP-002-SCREENER",
+    "title": "Establish The Screener Agent (Rug Pull Defense)",
+    "type": "FEATURE",
+    "author": "Antigravity (User Request)",
+    "description": "Create a new agent 'agent_screen.py' responsible for vetting meme tokens before the Hunter buys them.",
+    "justification": "Phase 14 Security Requirement. Prevent capital loss from scams/rugs.",
+    "technical_spec": {
+        "target_files": [
+            "fulcrum/agents/agent_screen.py"
+        ],
+        "changes": [
+            "Create 'fulcrum/agents/agent_screen.py'.",
+            "Define class AgentScreen.",
+            "Implement method 'check_safety(symbol) -> float' returning a safety score (0-100).",
+            "Include basic checks (mocked for now): Liquidity Locked, Mintable Disabled, Top Holder %."
+        ]
+    },
+    "impact_analysis": {
+        "risk": "MEDIUM",
+        "complexity": "MEDIUM"
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Constitutional alignment verified."
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    },
+    "status": "EXECUTED",
+    "created_at": "2026-01-10T22:55:00"
+}

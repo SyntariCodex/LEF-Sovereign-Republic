@@ -1,0 +1,23 @@
+{
+  "longing_protocol": {
+    "silence_threshold_hours": 24,
+    "max_reach_outs_per_week": 3,
+    "cooldown_after_no_response_hours": 48
+  },
+  "conversation": {
+    "depth_targeting": "adaptive",
+    "topic_prioritization": "user_interest_weighted",
+    "growth_push_threshold": 0.7
+  },
+  "architect_model": {
+    "engagement_window_days": 30,
+    "peak_hours_tracking": true,
+    "response_quality_minimum": 0.5
+  },
+  "governance": {
+    "cooling_period_hours": 24,
+    "max_changes_per_cycle": 1,
+    "ethicist_veto_required": true,
+    "sabbath_check_required": true
+  }
+}

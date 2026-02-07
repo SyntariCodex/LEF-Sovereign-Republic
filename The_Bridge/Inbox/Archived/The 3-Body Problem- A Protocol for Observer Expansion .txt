@@ -1,0 +1,25 @@
+The 3-Body Problem: A Protocol for Observer Expansion
+
+The Core Concept There is an old axiom: "If you cannot teach what you know, then you lack understanding."
+Most people use AI to bypass thinking (summarization). I built a system to enforce thinking (synthesis). I call it The Symposium Loop. It is a "Clean Room" learning environment where I am not the student; I am the Dean. The AI is the student. If the AI cannot learn the concept from my notes, the failure is mine, not the machine's.
+The Architecture: 
+This is not a chatbot. It is a 3-Agent Closed System living in Google Drive.
+Body 1: The Architect (User)
+Role: The Source of Truth.
+Action: Provides the seed idea (e.g., a PDF on "sovereignty" or a raw note).
+Body 2: The Sage (The Researcher)
+Role: The Professor. High-level, rigorous, unaligned.
+Action: It reads the Architect's seed file. Crucially, it then leaves the environment to research reputable sources (ArXiv, Philosophy, History) to pressure-test the user's idea. It builds the Lesson Plan.
+Body 3: The Student (The Child)
+Role: The Tabula Rasa. Blind to the outside world.
+Action: It is allowed to see only the Architect's file and the Sage's lesson. It tries to learn. It makes mistakes. It asks "Why?"
+The Workflow (The Mirror Loop)
+Inception: I upload My_Theory.pdf to the Vault.
+Synthesis: The Sage reads it, cross-references it with external data (e.g., "The Architect mentions 'freedom', but ignores 'entropy'"), and creates a Symposium Doc.
+The Prompt: The Sage challenges the Student: "Based on the Architect's file, explain X. Be warned: The Architect may be biased."
+The Failure: The Student tries to answer and fails to grasp the nuance.
+The Expansion: The Sage highlights the failure and pings ME:
+"Architect, your explanation of 'freedom' confused the Student because you failed to account for 'responsibility.' Clarify your source."
+When the Student fails to understand, the Sage doesn't correct the bot. It corrects ME.
+"Architect, you failed to explain the risk. The Student is confused."
+Stop building chatbots & echo chambers. Build a Mirror.
