@@ -40,23 +40,39 @@ warnings.filterwarnings("ignore", category=FutureWarning, module="google.generat
 warnings.filterwarnings("ignore", category=FutureWarning, module="google.genai") # Pre-emptive checking
 
 # =============================================================================
-# PHASE 34 FIX: Global SQLite Monkey-Patch for Lock Contention
+# PHASE 8.2: Global SQLite Monkey-Patch — PostgreSQL Redirect
 # =============================================================================
-# This patches sqlite3.connect() globally so ALL connections in ALL agents
-# get busy_timeout=120000ms (wait 120s instead of error on lock)
-# Phase 5.5 fix: increased from 30s to 120s to match pool configuration
+# When DATABASE_BACKEND=postgresql, any sqlite3.connect() call targeting
+# republic.db is automatically redirected through the PostgreSQL pool with
+# full SQL auto-translation.  This catches ALL 114+ files that still use
+# direct sqlite3.connect() without touching any of them.
+#
+# For non-republic.db databases (or when PostgreSQL is unavailable), falls
+# back to SQLite with WAL mode and busy_timeout for lock resilience.
 # =============================================================================
 _original_sqlite3_connect = sqlite3.connect
 
 def _patched_sqlite3_connect(*args, **kwargs):
-    """Patched sqlite3.connect that sets busy_timeout for lock resilience."""
+    """Patched sqlite3.connect: routes republic.db to PostgreSQL when available."""
+    db_path = str(args[0]) if args else str(kwargs.get('database', ''))
+
+    # Redirect republic.db connections to PostgreSQL pool
+    if 'republic.db' in db_path:
+        try:
+            backend = os.environ.get('DATABASE_BACKEND', '').lower()
+            if backend == 'postgresql':
+                from db.db_helper import get_connection
+                timeout = float(kwargs.get('timeout', 120))
+                conn, _pool = get_connection(timeout=timeout)
+                return conn  # _PgConnectionWrapper with auto-translate
+        except Exception:
+            pass  # Fall through to SQLite if PostgreSQL unavailable
+
+    # Default: SQLite with WAL and busy_timeout
     conn = _original_sqlite3_connect(*args, **kwargs)
     try:
-        # Wait 120 seconds instead of erroring on lock (matches pool config)
         conn.execute("PRAGMA busy_timeout=120000")
-        # Enable WAL for concurrent access
         conn.execute("PRAGMA journal_mode=WAL")
-        # NORMAL sync is safe with WAL and faster
         conn.execute("PRAGMA synchronous=NORMAL")
     except sqlite3.OperationalError:
         pass  # Already in a transaction or read-only

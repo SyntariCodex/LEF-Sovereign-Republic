@@ -89,13 +89,16 @@ def translate_sql(sql: str) -> str:
         flags=re.IGNORECASE
     )
 
-    # INSERT OR IGNORE → INSERT ... ON CONFLICT DO NOTHING
+    # INSERT OR IGNORE → INSERT INTO ... ON CONFLICT DO NOTHING
+    _had_or_ignore = bool(re.search(r'INSERT\s+OR\s+IGNORE\s+INTO', result, flags=re.IGNORECASE))
     result = re.sub(
         r'INSERT\s+OR\s+IGNORE\s+INTO',
         'INSERT INTO',
         result,
         flags=re.IGNORECASE
     )
+    if _had_or_ignore and 'ON CONFLICT' not in result.upper():
+        result = result.rstrip().rstrip(';') + ' ON CONFLICT DO NOTHING'
 
     # IFNULL → COALESCE
     result = re.sub(r'\bIFNULL\b', 'COALESCE', result, flags=re.IGNORECASE)
@@ -127,6 +130,23 @@ def translate_sql(sql: str) -> str:
         result,
         flags=re.IGNORECASE
     )
+
+    # SQLite scalar MIN(a, b) → PostgreSQL LEAST(a, b)
+    # SQLite scalar MAX(a, b) → PostgreSQL GREATEST(a, b)
+    # Process inside-out for nested cases like MAX(0.1, MIN(0.99, x))
+    _prev = None
+    while _prev != result:
+        _prev = result
+        result = re.sub(
+            r'\bMIN\s*\(([^(),]+),\s*((?:[^()]|\([^()]*\))+)\)',
+            r'LEAST(\1, \2)',
+            result, count=1, flags=re.IGNORECASE
+        )
+        result = re.sub(
+            r'\bMAX\s*\(([^(),]+),\s*((?:[^()]|\([^()]*\))+)\)',
+            r'GREATEST(\1, \2)',
+            result, count=1, flags=re.IGNORECASE
+        )
 
     # AUTOINCREMENT → strip (PostgreSQL uses SERIAL)
     result = re.sub(r'\bAUTOINCREMENT\b', '', result, flags=re.IGNORECASE)
@@ -343,6 +363,11 @@ class _PgCursorWrapper:
     def __init__(self, cursor):
         self._cursor = cursor
 
+    @property
+    def connection(self):
+        """Expose parent connection (sqlite3 cursor compat)."""
+        return self._cursor.connection
+
     def _coerce_row(self, row):
         """Convert Decimal values to float and wrap as DualAccessRow."""
         from decimal import Decimal
@@ -379,11 +404,15 @@ class _PgCursorWrapper:
 
     # Column names known to be TIMESTAMP in PostgreSQL schema
     _TIMESTAMP_COLUMNS = (
+        'timestamp',
         'last_active', 'last_heartbeat', 'last_updated',
         'created_at', 'executed_at', 'opened_at', 'closed_at',
         'migrated_at', 'ingested_at', 'resolved_at', 'consumed_at',
         'posted_at', 'responded_at', 'last_seen', 'last_validated',
         'last_applied', 'last_used', 'completed_at', 'target_date',
+        'added_at', 'allocated_at', 'approved_at', 'assigned_at',
+        'ended_at', 'first_seen', 'github_last_commit', 'observed_at',
+        'started_at', 'updated_at',
     )
 
     def execute(self, sql, params=None):
@@ -418,6 +447,11 @@ class _PgCursorWrapper:
         translated = translate_sql(sql)
         if not translated:
             return self._cursor
+        # Coerce epoch timestamps in batch params too
+        if params_list:
+            sql_lower = translated.lower()
+            if any(col in sql_lower for col in self._TIMESTAMP_COLUMNS):
+                params_list = [self._coerce_epoch_params(p) for p in params_list]
         return self._cursor.executemany(translated, params_list)
 
     def fetchone(self):
@@ -467,6 +501,7 @@ class _PgConnectionWrapper:
     def __init__(self, conn, pool=None):
         self._conn = conn
         self._pool = pool  # Reference to pool for proper release on close()
+        self._closed = False  # Guard against double-close
         self.row_factory = None  # SQLite compatibility
 
     def cursor(self):
@@ -490,6 +525,9 @@ class _PgConnectionWrapper:
 
     def close(self):
         """Close or return to pool. If pool-managed, return instead of closing."""
+        if self._closed:
+            return
+        self._closed = True
         if self._pool:
             try:
                 self._pool.release(self)
@@ -516,8 +554,17 @@ class _PgConnectionWrapper:
     def __enter__(self):
         return self
 
-    def __exit__(self, *args):
-        return self._conn.__exit__(*args)
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Commit/rollback and return connection to pool."""
+        try:
+            if exc_type:
+                self._conn.rollback()
+            else:
+                self._conn.commit()
+        except Exception:
+            pass
+        self.close()
+        return False
 
 
 def release_connection(conn, pool):

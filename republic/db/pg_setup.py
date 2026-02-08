@@ -278,7 +278,7 @@ def init_pg(conn_params=None):
         cur.execute("""
             CREATE TABLE IF NOT EXISTS realized_pnl (
                 id SERIAL PRIMARY KEY,
-                trade_id TEXT,
+                trade_id INTEGER,
                 asset TEXT,
                 profit_amount NUMERIC(18,8),
                 roi_pct DOUBLE PRECISION,
@@ -1040,7 +1040,18 @@ def init_pg(conn_params=None):
             )
         """)
 
-        print("✓ All 75 tables created successfully")
+        # Table 76: operational_costs
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS operational_costs (
+                id SERIAL PRIMARY KEY,
+                cost_type TEXT,
+                cost_usd REAL,
+                description TEXT,
+                timestamp TIMESTAMP DEFAULT NOW()
+            )
+        """)
+
+        print("✓ All 76 tables created successfully")
 
         # Create all indexes
         print("Creating indexes...")
