@@ -47,9 +47,9 @@ class AgentSurgeonGeneral:
                 
                 # 1. Scan for recent crashes (Last 5 mins)
                 c.execute("""
-                    SELECT source, message, count(*) 
-                    FROM agent_logs 
-                    WHERE level IN ('ERROR', 'CRITICAL') 
+                    SELECT source, MAX(message), count(*)
+                    FROM agent_logs
+                    WHERE level IN ('ERROR', 'CRITICAL')
                     AND timestamp > datetime('now', '-5 minutes')
                     GROUP BY source
                 """)
