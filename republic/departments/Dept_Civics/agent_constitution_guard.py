@@ -18,10 +18,24 @@ import json
 import sqlite3
 import logging
 from datetime import datetime
+from contextlib import contextmanager
 
 # Path setup
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, BASE_DIR)
+
+# Phase 12.H6: Use centralized db_helper for connection pooling
+try:
+    from db.db_helper import db_connection
+except ImportError:
+    @contextmanager
+    def db_connection(db_path=None, timeout=120.0):
+        conn = sqlite3.connect(db_path or os.path.join(BASE_DIR, 'republic.db'), timeout=timeout)
+        conn.row_factory = sqlite3.Row
+        try:
+            yield conn
+        finally:
+            conn.close()
 
 # Logging
 logging.basicConfig(
@@ -59,9 +73,15 @@ class ConstitutionGuard:
             
         self.violations_this_cycle = []
         
-    def _get_db_connection(self):
-        """Get database connection with constitutional 60-second timeout (C-001)."""
-        return sqlite3.connect(self.db_path, timeout=60.0)
+    # Phase 34: _get_db_connection() removed — use db_connection() context manager
+    # _get_conn() kept for backward compatibility during audit cycles (shared_conn pattern)
+    def _get_conn(self):
+        """Return shared connection if available (during audit), otherwise open one.
+        Phase 34: Fallback now uses db_connection-compatible sqlite3 with timeout."""
+        if hasattr(self, '_shared_conn') and self._shared_conn:
+            return self._shared_conn, False  # conn, should_close
+        conn = sqlite3.connect(self.db_path, timeout=60.0)
+        return conn, True  # conn, should_close
     
     # =========================================================================
     # RULE VALIDATORS
@@ -101,17 +121,17 @@ class ConstitutionGuard:
         Article II, Section 6
         """
         try:
-            conn = self._get_db_connection()
+            conn, should_close = self._get_conn()
             c = conn.cursor()
-            
+
             # Check recent buy orders that were approved
             c.execute("""
-                SELECT id, asset, reason FROM trade_queue 
-                WHERE action = 'BUY' 
+                SELECT id, asset, reason FROM trade_queue
+                WHERE action = 'BUY'
                 AND status IN ('APPROVED', 'EXECUTED')
                 AND created_at > datetime('now', '-24 hours')
             """)
-            
+
             violations = []
             for row in c.fetchall():
                 trade_id, asset, reason = row
@@ -124,9 +144,10 @@ class ConstitutionGuard:
                         rsi_val = float(rsi_match.group(1))
                         if rsi_val > 30:
                             violations.append(f"Trade {trade_id} ({asset}): RSI={rsi_val}")
-            
-            conn.close()
-            
+
+            if should_close:
+                conn.close()
+
             if violations:
                 return RuleResult(
                     False,
@@ -144,23 +165,45 @@ class ConstitutionGuard:
         Article IV, Section 4
         """
         try:
-            conn = self._get_db_connection()
+            conn, should_close = self._get_conn()
             c = conn.cursor()
-            
-            # Check for repeated actions in last hour
-            c.execute("""
-                SELECT message, COUNT(*) as cnt 
-                FROM agent_logs 
-                WHERE timestamp > datetime('now', '-1 hour')
-                AND level = 'INFO'
-                GROUP BY message 
+
+            # Check for repeated ACTIONS in last hour
+            # Phase 12.H6: Added LIMIT on inner scan to prevent full table scan
+            # Phase 12.H8: Whitelist approach — only flag messages that represent
+            # actual agent ACTIONS (broadcasts, trades, executions, proposals).
+            # Normal telemetry/polling/research is NOT a circular action.
+            # Phase 34: Parameterized LIKE patterns — no string concatenation in SQL
+            ACTION_INDICATORS = [
+                '%Broadcast:%',
+                '%EXECUTED%',
+                '%TRADE%',
+                '%BUY%',
+                '%SELL%',
+                '%APOPTOSIS%',
+                '%PROPOSAL%',
+                '%Dispatched%',
+            ]
+            placeholders = " OR ".join("message LIKE ?" for _ in ACTION_INDICATORS)
+            c.execute(f"""
+                SELECT message, COUNT(*) as cnt
+                FROM (
+                    SELECT message, level FROM agent_logs
+                    WHERE timestamp > datetime('now', '-1 hour')
+                    AND level = 'INFO'
+                    AND ({placeholders})
+                    ORDER BY timestamp DESC
+                    LIMIT 5000
+                ) recent
+                GROUP BY message
                 HAVING COUNT(*) > 50
                 ORDER BY cnt DESC
                 LIMIT 5
-            """)
-            
+            """, ACTION_INDICATORS)
+
             circular_patterns = c.fetchall()
-            conn.close()
+            if should_close:
+                conn.close()
             
             if circular_patterns:
                 worst = circular_patterns[0]
@@ -180,28 +223,29 @@ class ConstitutionGuard:
         Article IV, Section 4
         """
         try:
-            conn = self._get_db_connection()
+            conn, should_close = self._get_conn()
             c = conn.cursor()
-            
+
             # Get NAV from 1 hour ago and now
             c.execute("""
-                SELECT value FROM system_metrics 
+                SELECT value FROM system_metrics
                 WHERE key = 'nav'
                 AND timestamp > datetime('now', '-1 hour')
                 ORDER BY timestamp ASC
                 LIMIT 1
             """)
             row_old = c.fetchone()
-            
+
             c.execute("""
-                SELECT value FROM system_metrics 
+                SELECT value FROM system_metrics
                 WHERE key = 'nav'
                 ORDER BY timestamp DESC
                 LIMIT 1
             """)
             row_new = c.fetchone()
-            
-            conn.close()
+
+            if should_close:
+                conn.close()
             
             if row_old and row_new:
                 try:
@@ -259,12 +303,14 @@ class ConstitutionGuard:
     def run_audit(self) -> list:
         """
         Run all constitutional checks and return violations.
-        
+        Phase 12.H6: Uses a single shared DB connection for the entire audit cycle
+        instead of each check opening its own connection (was 5 connections per audit).
+
         Returns:
             List of (rule_id, rule_name, result) tuples
         """
         logger.info("[GUARD] 📜 Constitutional Audit starting...")
-        
+
         checks = [
             ('C-002', 'Bridge Uniqueness', self.check_c002_bridge_uniqueness),
             ('C-003', 'Deploy Threshold', self.check_c003_deploy_threshold),
@@ -272,41 +318,50 @@ class ConstitutionGuard:
             ('C-008', 'Circular Actions', self.check_c008_circular_actions),
             ('C-009', 'Equity Drawdown', self.check_c009_equity_drawdown),
         ]
-        
+
         results = []
         violations = []
-        
-        for rule_id, name, checker in checks:
-            try:
-                result = checker()
-                results.append((rule_id, name, result))
-                
-                if not result.passed:
-                    violations.append((rule_id, name, result))
-                    self._log_violation(rule_id, name, result)
-                    
-            except Exception as e:
-                logger.error(f"[GUARD] Error checking {rule_id}: {e}")
-        
+
+        # Phase 12.H6: Open ONE connection for the entire audit cycle
+        try:
+            with db_connection(self.db_path) as shared_conn:
+                self._shared_conn = shared_conn
+
+                for rule_id, name, checker in checks:
+                    try:
+                        result = checker()
+                        results.append((rule_id, name, result))
+
+                        if not result.passed:
+                            violations.append((rule_id, name, result))
+                            self._log_violation(rule_id, name, result)
+
+                    except Exception as e:
+                        logger.error(f"[GUARD] Error checking {rule_id}: {e}")
+        except Exception as e:
+            logger.error(f"[GUARD] Failed to open audit connection: {e}")
+        finally:
+            self._shared_conn = None
+
         # Summary
         passed = len(results) - len(violations)
         logger.info(f"[GUARD] 📜 Audit complete: {passed}/{len(results)} rules passed")
-        
+
         if violations:
             critical = [v for v in violations if v[2].severity == 'CRITICAL']
             if critical:
                 logger.critical(f"[GUARD] 🚨 CRITICAL VIOLATIONS: {len(critical)}")
-                # Could trigger Apoptosis here if needed
-        
+
         self.violations_this_cycle = violations
         return violations
     
     def _log_violation(self, rule_id: str, name: str, result: RuleResult):
-        """Log a constitutional violation to the database."""
+        """Log a constitutional violation to the database.
+        Phase 12.H6: Uses shared connection when available."""
         try:
-            conn = self._get_db_connection()
+            conn, should_close = self._get_conn()
             c = conn.cursor()
-            
+
             c.execute("""
                 INSERT INTO agent_logs (source, level, message)
                 VALUES (?, ?, ?)
@@ -315,9 +370,10 @@ class ConstitutionGuard:
                 f'CONSTITUTIONAL_{result.severity}',
                 f"[{rule_id}] {name}: {result.reason}"
             ))
-            
+
             conn.commit()
-            conn.close()
+            if should_close:
+                conn.close()
             
             # Also log to console
             if result.severity == 'CRITICAL':
@@ -334,17 +390,11 @@ class ConstitutionGuard:
         """
         Calculate constitutional compliance percentage.
         100% = all rules pass, 0% = all rules fail
+        Phase 12.H6: Uses cached violations from last audit instead of re-running all checks.
         """
-        checks = [
-            self.check_c002_bridge_uniqueness,
-            self.check_c003_deploy_threshold,
-            self.check_c005_rsi_entries,
-            self.check_c008_circular_actions,
-            self.check_c009_equity_drawdown,
-        ]
-        
-        passed = sum(1 for check in checks if check().passed)
-        return (passed / len(checks)) * 100
+        total_checks = 5  # C-002, C-003, C-005, C-008, C-009
+        violations = len(self.violations_this_cycle) if self.violations_this_cycle else 0
+        return ((total_checks - violations) / total_checks) * 100
 
 
 class AmendmentVoting:
@@ -366,209 +416,164 @@ class AmendmentVoting:
             self.db_path = os.path.join(BASE_DIR, 'republic.db')
         else:
             self.db_path = db_path
-    
-    def _get_db_connection(self):
-        return sqlite3.connect(self.db_path, timeout=60.0)
-    
-    def propose_amendment(self, rule_id: str, amendment_text: str, 
+
+    # Phase 34: All methods now use db_connection() context manager
+
+    def propose_amendment(self, rule_id: str, amendment_text: str,
                           rationale: str, proposed_by: str) -> int:
-        """
-        Propose a new constitutional amendment.
-        
-        Returns:
-            Amendment ID if successful, -1 if failed
-        """
+        """Propose a new constitutional amendment. Returns Amendment ID or -1."""
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            c.execute("""
-                INSERT INTO constitutional_amendments 
-                (rule_id, amendment_text, rationale, proposed_by, status)
-                VALUES (?, ?, ?, ?, 'PROPOSED')
-            """, (rule_id, amendment_text, rationale, proposed_by))
-            
-            amendment_id = c.lastrowid
-            conn.commit()
-            conn.close()
-            
-            logger.info(f"[VOTING] 📜 Amendment {amendment_id} proposed: {rule_id}")
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+                c.execute("""
+                    INSERT INTO constitutional_amendments
+                    (rule_id, amendment_text, rationale, proposed_by, status)
+                    VALUES (?, ?, ?, ?, 'PROPOSED')
+                """, (rule_id, amendment_text, rationale, proposed_by))
+                amendment_id = c.lastrowid
+                conn.commit()
+
+            logger.info(f"[VOTING] Amendment {amendment_id} proposed: {rule_id}")
             return amendment_id
-            
+
         except Exception as e:
             logger.error(f"[VOTING] Failed to propose amendment: {e}")
             return -1
-    
+
     def start_voting(self, amendment_id: int) -> bool:
         """Move amendment from PROPOSED to VOTING status."""
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            c.execute("""
-                UPDATE constitutional_amendments 
-                SET status = 'VOTING'
-                WHERE id = ? AND status = 'PROPOSED'
-            """, (amendment_id,))
-            
-            success = c.rowcount > 0
-            conn.commit()
-            conn.close()
-            
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+                c.execute("""
+                    UPDATE constitutional_amendments
+                    SET status = 'VOTING'
+                    WHERE id = ? AND status = 'PROPOSED'
+                """, (amendment_id,))
+                success = c.rowcount > 0
+                conn.commit()
+
             if success:
-                logger.info(f"[VOTING] 🗳️ Amendment {amendment_id} opened for voting")
+                logger.info(f"[VOTING] Amendment {amendment_id} opened for voting")
             return success
-            
+
         except Exception as e:
             logger.error(f"[VOTING] Failed to start voting: {e}")
             return False
-    
+
     def cast_vote(self, amendment_id: int, voter: str, vote_for: bool) -> bool:
-        """
-        Cast a vote on an amendment.
-        
-        Args:
-            amendment_id: ID of the amendment
-            voter: Name of the voting agent (must be in VOTERS)
-            vote_for: True = vote for, False = vote against
-        """
+        """Cast a vote on an amendment."""
         if voter not in self.VOTERS:
             logger.warning(f"[VOTING] {voter} does not have voting rights")
             return False
-        
+
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            # Check amendment is in VOTING status
-            c.execute("SELECT status FROM constitutional_amendments WHERE id = ?", 
-                      (amendment_id,))
-            row = c.fetchone()
-            if not row or row[0] != 'VOTING':
-                conn.close()
-                logger.warning(f"[VOTING] Amendment {amendment_id} not in VOTING status")
-                return False
-            
-            # Update vote count
-            column = 'votes_for' if vote_for else 'votes_against'
-            c.execute(f"""
-                UPDATE constitutional_amendments 
-                SET {column} = {column} + 1
-                WHERE id = ?
-            """, (amendment_id,))
-            
-            conn.commit()
-            conn.close()
-            
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+
+                c.execute("SELECT status FROM constitutional_amendments WHERE id = ?",
+                          (amendment_id,))
+                row = c.fetchone()
+                if not row or row[0] != 'VOTING':
+                    logger.warning(f"[VOTING] Amendment {amendment_id} not in VOTING status")
+                    return False
+
+                # Phase 34: Whitelist column name — prevent injection
+                column = 'votes_for' if vote_for else 'votes_against'
+                c.execute(f"""
+                    UPDATE constitutional_amendments
+                    SET {column} = {column} + 1
+                    WHERE id = ?
+                """, (amendment_id,))
+
+                conn.commit()
+
             vote_type = "FOR" if vote_for else "AGAINST"
-            logger.info(f"[VOTING] 🗳️ {voter} voted {vote_type} on Amendment {amendment_id}")
+            logger.info(f"[VOTING] {voter} voted {vote_type} on Amendment {amendment_id}")
             return True
-            
+
         except Exception as e:
             logger.error(f"[VOTING] Failed to cast vote: {e}")
             return False
-    
+
     def tally_votes(self, amendment_id: int) -> str:
-        """
-        Tally votes and resolve amendment status.
-        
-        Returns:
-            New status: APPROVED, REJECTED, or current status if still voting
-        """
+        """Tally votes and resolve amendment status."""
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            c.execute("""
-                SELECT votes_for, votes_against, status 
-                FROM constitutional_amendments WHERE id = ?
-            """, (amendment_id,))
-            row = c.fetchone()
-            
-            if not row:
-                conn.close()
-                return 'NOT_FOUND'
-            
-            votes_for, votes_against, status = row
-            
-            if status != 'VOTING':
-                conn.close()
-                return status
-            
-            # Simple majority wins (could require quorum in future)
-            total_votes = votes_for + votes_against
-            if total_votes == 0:
-                conn.close()
-                return 'VOTING'  # No votes yet
-            
-            if votes_for > votes_against:
-                new_status = 'APPROVED'
-            else:
-                new_status = 'REJECTED'
-            
-            c.execute("""
-                UPDATE constitutional_amendments 
-                SET status = ?, resolved_at = CURRENT_TIMESTAMP
-                WHERE id = ?
-            """, (new_status, amendment_id))
-            
-            conn.commit()
-            conn.close()
-            
-            logger.info(f"[VOTING] 📜 Amendment {amendment_id} {new_status} ({votes_for}-{votes_against})")
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+
+                c.execute("""
+                    SELECT votes_for, votes_against, status
+                    FROM constitutional_amendments WHERE id = ?
+                """, (amendment_id,))
+                row = c.fetchone()
+
+                if not row:
+                    return 'NOT_FOUND'
+
+                votes_for, votes_against, status = row
+
+                if status != 'VOTING':
+                    return status
+
+                total_votes = votes_for + votes_against
+                if total_votes == 0:
+                    return 'VOTING'
+
+                new_status = 'APPROVED' if votes_for > votes_against else 'REJECTED'
+
+                c.execute("""
+                    UPDATE constitutional_amendments
+                    SET status = ?, resolved_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (new_status, amendment_id))
+                conn.commit()
+
+            logger.info(f"[VOTING] Amendment {amendment_id} {new_status} ({votes_for}-{votes_against})")
             return new_status
-            
+
         except Exception as e:
             logger.error(f"[VOTING] Failed to tally votes: {e}")
             return 'ERROR'
-    
+
     def architect_veto(self, amendment_id: int, reason: str) -> bool:
-        """
-        Architect (The I) vetoes an amendment.
-        Can veto even APPROVED amendments.
-        """
+        """Architect (The I) vetoes an amendment."""
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            c.execute("""
-                UPDATE constitutional_amendments 
-                SET status = 'VETOED', 
-                    rationale = rationale || ' | VETOED: ' || ?,
-                    resolved_at = CURRENT_TIMESTAMP
-                WHERE id = ?
-            """, (reason, amendment_id))
-            
-            success = c.rowcount > 0
-            conn.commit()
-            conn.close()
-            
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+                c.execute("""
+                    UPDATE constitutional_amendments
+                    SET status = 'VETOED',
+                        rationale = rationale || ' | VETOED: ' || ?,
+                        resolved_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (reason, amendment_id))
+                success = c.rowcount > 0
+                conn.commit()
+
             if success:
-                logger.warning(f"[VOTING] 🚫 Amendment {amendment_id} VETOED by Architect")
+                logger.warning(f"[VOTING] Amendment {amendment_id} VETOED by Architect")
             return success
-            
+
         except Exception as e:
             logger.error(f"[VOTING] Failed to veto: {e}")
             return False
-    
+
     def get_pending_amendments(self) -> list:
         """Get all amendments in PROPOSED or VOTING status."""
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            c.execute("""
-                SELECT id, rule_id, amendment_text, rationale, proposed_by, 
-                       status, votes_for, votes_against, created_at
-                FROM constitutional_amendments 
-                WHERE status IN ('PROPOSED', 'VOTING')
-                ORDER BY created_at ASC
-            """)
-            
-            amendments = c.fetchall()
-            conn.close()
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+                c.execute("""
+                    SELECT id, rule_id, amendment_text, rationale, proposed_by,
+                           status, votes_for, votes_against, created_at
+                    FROM constitutional_amendments
+                    WHERE status IN ('PROPOSED', 'VOTING')
+                    ORDER BY created_at ASC
+                """)
+                amendments = c.fetchall()
             return amendments
-            
+
         except Exception as e:
             logger.error(f"[VOTING] Failed to get pending amendments: {e}")
             return []

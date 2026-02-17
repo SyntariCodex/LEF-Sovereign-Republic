@@ -2,11 +2,14 @@
 AgentCoach (The Sensei)
 Department: Dept_Training
 Role: Automated Training Scheduler.
-- Wakes up every 12-24 hours.
+- Wakes up every 8 hours (deterministic).
 - Picks a random scenario.
 - Runs 'train_lef.py'.
 - Records the result to 'memory_experiences'.
 - Updates 'wealth_strategy.json' if a better config is found (Future).
+
+Phase 34: Replaced probabilistic busy-loop with deterministic 5-minute cycle
+    and 8-hour training interval.
 """
 import time
 import random
@@ -14,27 +17,35 @@ import os
 import logging
 import json
 
+# Training interval: 8 hours = 28800 seconds
+TRAINING_INTERVAL_SECONDS = 28800
+# Cycle check interval: 5 minutes
+CYCLE_INTERVAL_SECONDS = 300
+
+
 class AgentCoach:
     def __init__(self, db_path=None):
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # republic/
         self.db_path = db_path or os.path.join(BASE_DIR, 'republic.db')
-        logging.info("[COACH] 🥋 The Sensei is Meditating.")
+        logging.info("[COACH] The Sensei is Meditating.")
         self.scenarios_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scenarios')
+        self._last_training_time = 0  # Force first training on startup
 
     def run(self):
-        """Active Loop"""
+        """Active Loop — Phase 34: Deterministic 5-minute cycle with 8-hour training."""
         while True:
             try:
-                # 1. Wait for Training Schedule (e.g. Every 8 hours - 3x / day)
-                # Chance per minute: 1 / 480 mins = 0.002
-                
-                if random.random() < 0.002: # ~Once every 8 hours
+                now = time.time()
+                elapsed = now - self._last_training_time
+
+                if elapsed >= TRAINING_INTERVAL_SECONDS:
                     self.train()
-                
-                time.sleep(60)
+                    self._last_training_time = time.time()
+
+                time.sleep(CYCLE_INTERVAL_SECONDS)
             except Exception as e:
                 logging.error(f"[COACH] Error: {e}")
-                time.sleep(60)
+                time.sleep(CYCLE_INTERVAL_SECONDS)
 
     def train(self):
         """Executes a Training Session (Competition)"""

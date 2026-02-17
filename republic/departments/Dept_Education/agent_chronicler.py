@@ -151,64 +151,54 @@ class AgentChronicler:
             except (redis.RedisError, ConnectionError):
                 self.redis = None
 
-    def _get_db_connection(self):
-        """DEPRECATED: Use `with db_connection(self.db_path) as conn:` instead.
-        Returns a connection. Caller must close it.
-        """
-        import warnings
-        warnings.warn("_get_db_connection is deprecated, use db_connection context manager", DeprecationWarning)
-        try:
-            from db.db_helper import get_connection
-            conn, _ = get_connection(self.db_path)
-            return conn
-        except ImportError:
-            import sqlite3
-            return sqlite3.connect(self.db_path, timeout=60.0)
+    # Phase 34: _get_db_connection() removed — all callers converted to db_connection() context manager
 
     
     def _ensure_tables(self):
         """Create chronicles tables if they don't exist."""
-        conn = self._get_db_connection()
-        c = conn.cursor()
-        
-        # Coin chronicles - longitudinal data
-        c.execute("""
-            CREATE TABLE IF NOT EXISTS coin_chronicles (
-                symbol TEXT PRIMARY KEY,
-                name TEXT,
-                first_seen TIMESTAMP,
-                maturity_stage TEXT DEFAULT 'UNKNOWN',
-                governance_score REAL,
-                github_url TEXT,
-                github_commits_30d INTEGER,
-                github_last_commit TIMESTAMP,
-                whitepaper_delivered BOOLEAN DEFAULT 0,
-                team_doxxed BOOLEAN DEFAULT 0,
-                has_governance BOOLEAN DEFAULT 0,
-                fork_count INTEGER DEFAULT 0,
-                sentiment_trend TEXT,
-                last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        
-        # Price history snapshots
-        c.execute("""
-            CREATE TABLE IF NOT EXISTS coin_history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                symbol TEXT,
-                snapshot_date DATE,
-                price_usd REAL,
-                volume_24h REAL,
-                market_cap REAL,
-                sentiment_score REAL,
-                news_count INTEGER,
-                UNIQUE(symbol, snapshot_date)
-            )
-        """)
-        
-        conn.commit()
-        conn.close()
-        logging.info("[CHRONICLER] 📝 Chronicle tables ready.")
+        try:
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+
+                # Coin chronicles - longitudinal data
+                c.execute("""
+                    CREATE TABLE IF NOT EXISTS coin_chronicles (
+                        symbol TEXT PRIMARY KEY,
+                        name TEXT,
+                        first_seen TIMESTAMP,
+                        maturity_stage TEXT DEFAULT 'UNKNOWN',
+                        governance_score REAL,
+                        github_url TEXT,
+                        github_commits_30d INTEGER,
+                        github_last_commit TIMESTAMP,
+                        whitepaper_delivered BOOLEAN DEFAULT 0,
+                        team_doxxed BOOLEAN DEFAULT 0,
+                        has_governance BOOLEAN DEFAULT 0,
+                        fork_count INTEGER DEFAULT 0,
+                        sentiment_trend TEXT,
+                        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+
+                # Price history snapshots
+                c.execute("""
+                    CREATE TABLE IF NOT EXISTS coin_history (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        symbol TEXT,
+                        snapshot_date DATE,
+                        price_usd REAL,
+                        volume_24h REAL,
+                        market_cap REAL,
+                        sentiment_score REAL,
+                        news_count INTEGER,
+                        UNIQUE(symbol, snapshot_date)
+                    )
+                """)
+
+                conn.commit()
+            logging.info("[CHRONICLER] Chronicle tables ready.")
+        except Exception as e:
+            logging.error(f"[CHRONICLER] Table creation error: {e}")
     
     # =========================================================================
     # COIN LIFECYCLE ANALYSIS
@@ -267,21 +257,21 @@ class AgentChronicler:
         - Sentiment trajectory (10%)
         """
         scores = {}
-        
+
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            c.execute("SELECT * FROM coin_chronicles WHERE symbol = ?", (symbol,))
-            row = c.fetchone()
-            
-            if not row:
-                return None
-            
-            # Convert to dict
-            columns = [desc[0] for desc in c.description]
-            data = dict(zip(columns, row))
-            
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+
+                c.execute("SELECT * FROM coin_chronicles WHERE symbol = ?", (symbol,))
+                row = c.fetchone()
+
+                if not row:
+                    return None
+
+                # Convert to dict
+                columns = [desc[0] for desc in c.description]
+                data = dict(zip(columns, row))
+
             # GitHub activity score
             commits = data.get('github_commits_30d') or 0  # Handle None
             if commits >= 50:
@@ -292,16 +282,16 @@ class AgentChronicler:
                 scores['github_activity'] = 50
             else:
                 scores['github_activity'] = 25
-            
+
             # Whitepaper delivery
             scores['whitepaper_delivery'] = 100 if data.get('whitepaper_delivered') else 30
-            
+
             # Team transparency
             scores['team_transparency'] = 100 if data.get('team_doxxed') else 40
-            
+
             # Governance health
             scores['governance_health'] = 80 if data.get('has_governance') else 30
-            
+
             # Fork stability (fewer forks = more stable)
             forks = data.get('fork_count') or 0  # Handle None
             if forks == 0:
@@ -310,7 +300,7 @@ class AgentChronicler:
                 scores['fork_stability'] = 70
             else:
                 scores['fork_stability'] = 40
-            
+
             # Sentiment trajectory
             trend = data.get('sentiment_trend', 'NEUTRAL')
             if trend == 'IMPROVING':
@@ -321,12 +311,10 @@ class AgentChronicler:
                 scores['sentiment_trajectory'] = 30
             else:
                 scores['sentiment_trajectory'] = 50
-            
-            conn.close()
-            
+
             # Weighted average
             total = sum(scores[k] * self.GOV_WEIGHTS[k] for k in scores)
-            
+
             return round(total, 1)
             
         except Exception as e:
@@ -342,51 +330,46 @@ class AgentChronicler:
         Create or update chronicle entry for a coin.
         """
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            # Check if exists
-            c.execute("SELECT symbol FROM coin_chronicles WHERE symbol = ?", (symbol,))
-            exists = c.fetchone()
-            
-            # --- PHASE 30: USE WRITE QUEUE ---
-            try:
-                from db.db_writer import queue_insert, queue_update
-                
-                if not exists:
-                    # New entry via queue
-                    queue_insert(
-                        c,
-                        'coin_chronicles',
-                        {'symbol': symbol, 'name': name or symbol},
-                        source_agent='AgentChronicler'
-                    )
-                    logging.info(f"[CHRONICLER] 📖 New chronicle started: {symbol}")
-                else:
-                    queue_update(
-                        c,
-                        'coin_chronicles',
-                        {'last_updated': 'CURRENT_TIMESTAMP'},
-                        {'symbol': symbol},
-                        source_agent='AgentChronicler'
-                    )
-            except ImportError:
-                # Fallback to direct writes
-                if not exists:
-                    c.execute("""
-                        INSERT INTO coin_chronicles (symbol, name, first_seen, last_updated)
-                        VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-                    """, (symbol, name or symbol))
-                    logging.info(f"[CHRONICLER] 📖 New chronicle started: {symbol}")
-                else:
-                    c.execute("""
-                        UPDATE coin_chronicles SET last_updated = CURRENT_TIMESTAMP WHERE symbol = ?
-                    """, (symbol,))
-            
-            conn.commit()
-            conn.close()
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+
+                # Check if exists
+                c.execute("SELECT symbol FROM coin_chronicles WHERE symbol = ?", (symbol,))
+                exists = c.fetchone()
+
+                # --- PHASE 30: USE WRITE QUEUE ---
+                try:
+                    from db.db_writer import queue_insert, queue_update
+
+                    if not exists:
+                        queue_insert(
+                            c, 'coin_chronicles',
+                            {'symbol': symbol, 'name': name or symbol},
+                            source_agent='AgentChronicler'
+                        )
+                        logging.info(f"[CHRONICLER] New chronicle started: {symbol}")
+                    else:
+                        queue_update(
+                            c, 'coin_chronicles',
+                            {'last_updated': 'CURRENT_TIMESTAMP'},
+                            {'symbol': symbol},
+                            source_agent='AgentChronicler'
+                        )
+                except ImportError:
+                    if not exists:
+                        c.execute("""
+                            INSERT INTO coin_chronicles (symbol, name, first_seen, last_updated)
+                            VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                        """, (symbol, name or symbol))
+                        logging.info(f"[CHRONICLER] New chronicle started: {symbol}")
+                    else:
+                        c.execute("""
+                            UPDATE coin_chronicles SET last_updated = CURRENT_TIMESTAMP WHERE symbol = ?
+                        """, (symbol,))
+
+                conn.commit()
             return True
-            
+
         except Exception as e:
             logging.error(f"[CHRONICLER] Chronicle error for {symbol}: {e}")
             return False
@@ -395,33 +378,33 @@ class AgentChronicler:
         """
         Update chronicle with new metrics.
         """
+        # Phase 34: Whitelist columns to prevent injection via dynamic keys
+        ALLOWED_COLUMNS = {'github_commits_30d', 'whitepaper_delivered', 'team_doxxed',
+                           'has_governance', 'fork_count', 'sentiment_trend', 'github_url'}
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            # Build dynamic update
-            updates = []
-            values = []
-            for key, value in metrics.items():
-                if key in ['github_commits_30d', 'whitepaper_delivered', 'team_doxxed',
-                           'has_governance', 'fork_count', 'sentiment_trend', 'github_url']:
-                    updates.append(f"{key} = ?")
-                    values.append(value)
-            
-            if updates:
-                values.append(symbol)
-                sql = f"UPDATE coin_chronicles SET {', '.join(updates)}, last_updated = CURRENT_TIMESTAMP WHERE symbol = ?"
-                # Phase 6.5: Route through WAQ
-                try:
-                    from db.db_writer import queue_execute
-                    queue_execute(c, sql, tuple(values), source_agent='AgentChronicler', priority=0)
-                except ImportError:
-                    c.execute(sql, values)
-                    conn.commit()
-            
-            conn.close()
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+
+                # Build dynamic update
+                updates = []
+                values = []
+                for key, value in metrics.items():
+                    if key in ALLOWED_COLUMNS:
+                        updates.append(f"{key} = ?")
+                        values.append(value)
+
+                if updates:
+                    values.append(symbol)
+                    sql = f"UPDATE coin_chronicles SET {', '.join(updates)}, last_updated = CURRENT_TIMESTAMP WHERE symbol = ?"
+                    try:
+                        from db.db_writer import queue_execute
+                        queue_execute(c, sql, tuple(values), source_agent='AgentChronicler', priority=0)
+                    except ImportError:
+                        c.execute(sql, values)
+                        conn.commit()
+
             return True
-            
+
         except Exception as e:
             logging.error(f"[CHRONICLER] Metrics update error for {symbol}: {e}")
             return False
@@ -429,77 +412,65 @@ class AgentChronicler:
     def update_maturity_and_score(self, symbol):
         """
         Recalculate maturity stage and governance score for a coin.
+        Phase 34: Uses context manager — no leaked connections.
         """
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            # Get current data
-            c.execute("SELECT * FROM coin_chronicles WHERE symbol = ?", (symbol,))
-            row = c.fetchone()
-            
-            if not row:
-                conn.close()
-                return False
-            
-            columns = [desc[0] for desc in c.description]
-            data = dict(zip(columns, row))
-            
-            # Get additional data from market_universe
-            c.execute("""
-                SELECT market_cap, volume_24h, first_seen 
-                FROM market_universe WHERE symbol = ?
-            """, (symbol,))
-            market_data = c.fetchone()
-            
-            if market_data:
-                market_cap, volume, first_seen = market_data
-                
-                # Calculate age
-                try:
-                    first_date = datetime.fromisoformat(str(first_seen).replace('Z', ''))
-                    age_days = (datetime.now() - first_date).days
-                except (ValueError, TypeError):
-                    age_days = 0
-                
-                data['age_days'] = age_days
-                data['volume_24h'] = volume or 0
-                data['market_cap'] = market_cap or 0
-            
-            conn.close()
-            
-            # Calculate governance score
+            # Step 1: Read current data (acquire+release)
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+                c.execute("SELECT * FROM coin_chronicles WHERE symbol = ?", (symbol,))
+                row = c.fetchone()
+
+                if not row:
+                    return False
+
+                columns = [desc[0] for desc in c.description]
+                data = dict(zip(columns, row))
+
+                c.execute("""
+                    SELECT market_cap, volume_24h, first_seen
+                    FROM market_universe WHERE symbol = ?
+                """, (symbol,))
+                market_data = c.fetchone()
+
+                if market_data:
+                    market_cap, volume, first_seen = market_data
+                    try:
+                        first_date = datetime.fromisoformat(str(first_seen).replace('Z', ''))
+                        age_days = (datetime.now() - first_date).days
+                    except (ValueError, TypeError):
+                        age_days = 0
+                    data['age_days'] = age_days
+                    data['volume_24h'] = volume or 0
+                    data['market_cap'] = market_cap or 0
+
+            # Step 2: Calculate scores (no DB held)
             gov_score = self.calculate_governance_score(symbol)
             data['governance_score'] = gov_score or 0
-            
-            # Classify maturity stage
             stage = self.classify_maturity_stage(symbol, data)
-            
-            # Update chronicle
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            # Phase 6.5: Route through WAQ
-            try:
-                from db.db_writer import queue_execute
-                queue_execute(
-                    c,
-                    "UPDATE coin_chronicles SET maturity_stage = ?, governance_score = ?, last_updated = CURRENT_TIMESTAMP WHERE symbol = ?",
-                    (stage, gov_score, symbol),
-                    source_agent='AgentChronicler',
-                    priority=0  # NORMAL — high volume
-                )
-            except ImportError:
-                c.execute("""
-                    UPDATE coin_chronicles
-                    SET maturity_stage = ?, governance_score = ?, last_updated = CURRENT_TIMESTAMP
-                    WHERE symbol = ?
-                """, (stage, gov_score, symbol))
-                conn.commit()
-            conn.close()
-            
-            logging.debug(f"[CHRONICLER] 📊 {symbol}: Stage={stage}, Gov={gov_score}")
+
+            # Step 3: Write update (acquire+release)
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+                try:
+                    from db.db_writer import queue_execute
+                    queue_execute(
+                        c,
+                        "UPDATE coin_chronicles SET maturity_stage = ?, governance_score = ?, last_updated = CURRENT_TIMESTAMP WHERE symbol = ?",
+                        (stage, gov_score, symbol),
+                        source_agent='AgentChronicler', priority=0
+                    )
+                except ImportError:
+                    c.execute("""
+                        UPDATE coin_chronicles
+                        SET maturity_stage = ?, governance_score = ?, last_updated = CURRENT_TIMESTAMP
+                        WHERE symbol = ?
+                    """, (stage, gov_score, symbol))
+                    conn.commit()
+
+            logging.debug(f"[CHRONICLER] {symbol}: Stage={stage}, Gov={gov_score}")
             return True
-            
+
         except Exception as e:
             logging.error(f"[CHRONICLER] Update error for {symbol}: {e}")
             return False
@@ -513,21 +484,18 @@ class AgentChronicler:
         Ensure all coins in market_universe have chronicle entries.
         """
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            # Get all coins from market_universe
-            c.execute("SELECT symbol, name FROM market_universe")
-            coins = c.fetchall()
-            conn.close()
-            
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+                c.execute("SELECT symbol, name FROM market_universe")
+                coins = c.fetchall()
+
             for symbol, name in coins:
                 self.chronicle_coin(symbol, name)
                 self.update_maturity_and_score(symbol)
-            
-            logging.info(f"[CHRONICLER] 🔄 Synced {len(coins)} coins from market_universe")
+
+            logging.info(f"[CHRONICLER] Synced {len(coins)} coins from market_universe")
             return len(coins)
-            
+
         except Exception as e:
             logging.error(f"[CHRONICLER] Sync error: {e}")
             return 0
@@ -584,16 +552,13 @@ class AgentChronicler:
         This bootstraps governance data for coins we have info about.
         """
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            # Get coins that exist in our chronicles
-            c.execute("SELECT symbol FROM coin_chronicles")
-            chronicle_coins = [r[0] for r in c.fetchall()]
-            conn.close()
-            
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+                c.execute("SELECT symbol FROM coin_chronicles")
+                chronicle_coins = [r[0] for r in c.fetchall()]
+
             enriched = 0
-            
+
             for symbol in chronicle_coins:
                 # Apply known attributes
                 if symbol in self.COIN_ATTRIBUTES:
@@ -624,67 +589,61 @@ class AgentChronicler:
         Uses price history from coin_history and sentiment from knowledge_stream.
         """
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            # Get price changes over the period
-            c.execute("""
-                SELECT DATE(timestamp) as date, 
-                       (MAX(price) - MIN(price)) / MIN(price) * 100 as price_change
-                FROM coin_history 
-                WHERE symbol = ? 
-                  AND timestamp > datetime('now', ?)
-                GROUP BY DATE(timestamp)
-                ORDER BY date
-            """, (symbol, f'-{days} days'))
-            prices = {row[0]: row[1] for row in c.fetchall()}
-            
-            if not prices:
-                conn.close()
-                return {'symbol': symbol, 'correlation': None, 'reason': 'No price data'}
-            
-            # Get news sentiment scores using weighted word analysis
-            # More comprehensive than simple LIKE matching
-            c.execute("""
-                SELECT DATE(created_at) as date,
-                       AVG(
-                           -- Positive signals (weighted)
-                           CASE WHEN summary LIKE '%bullish%' THEN 1.0 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%surge%' THEN 0.8 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%rally%' THEN 0.8 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%moon%' THEN 0.6 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%breakout%' THEN 0.7 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%growth%' THEN 0.5 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%adoption%' THEN 0.6 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%partnership%' THEN 0.5 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%upgrade%' THEN 0.4 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%bullrun%' THEN 0.9 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%accumulation%' THEN 0.5 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%buy signal%' THEN 0.8 ELSE 0.0 END +
-                           -- Negative signals (weighted)
-                           CASE WHEN summary LIKE '%bearish%' THEN -1.0 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%crash%' THEN -0.9 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%dump%' THEN -0.8 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%sell%' THEN -0.3 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%fear%' THEN -0.6 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%panic%' THEN -0.8 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%hack%' THEN -0.9 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%rug%' THEN -1.0 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%scam%' THEN -1.0 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%bankrupt%' THEN -1.0 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%regulation%' THEN -0.3 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%lawsuit%' THEN -0.6 ELSE 0.0 END +
-                           CASE WHEN summary LIKE '%decline%' THEN -0.5 ELSE 0.0 END
-                       ) as sentiment
-                FROM knowledge_stream 
-                WHERE (title LIKE ? OR summary LIKE ?)
-                  AND created_at > datetime('now', ?)
-                GROUP BY DATE(created_at)
-            """, (f'%{symbol}%', f'%{symbol}%', f'-{days} days'))
-            sentiments = {row[0]: row[1] for row in c.fetchall()}
-            
-            conn.close()
-            
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+
+                # Get price changes over the period
+                c.execute("""
+                    SELECT DATE(timestamp) as date,
+                           (MAX(price) - MIN(price)) / MIN(price) * 100 as price_change
+                    FROM coin_history
+                    WHERE symbol = ?
+                      AND timestamp > datetime('now', ?)
+                    GROUP BY DATE(timestamp)
+                    ORDER BY date
+                """, (symbol, f'-{days} days'))
+                prices = {row[0]: row[1] for row in c.fetchall()}
+
+                if not prices:
+                    return {'symbol': symbol, 'correlation': None, 'reason': 'No price data'}
+
+                # Get news sentiment scores using weighted word analysis
+                c.execute("""
+                    SELECT DATE(created_at) as date,
+                           AVG(
+                               CASE WHEN summary LIKE '%bullish%' THEN 1.0 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%surge%' THEN 0.8 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%rally%' THEN 0.8 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%moon%' THEN 0.6 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%breakout%' THEN 0.7 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%growth%' THEN 0.5 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%adoption%' THEN 0.6 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%partnership%' THEN 0.5 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%upgrade%' THEN 0.4 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%bullrun%' THEN 0.9 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%accumulation%' THEN 0.5 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%buy signal%' THEN 0.8 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%bearish%' THEN -1.0 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%crash%' THEN -0.9 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%dump%' THEN -0.8 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%sell%' THEN -0.3 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%fear%' THEN -0.6 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%panic%' THEN -0.8 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%hack%' THEN -0.9 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%rug%' THEN -1.0 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%scam%' THEN -1.0 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%bankrupt%' THEN -1.0 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%regulation%' THEN -0.3 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%lawsuit%' THEN -0.6 ELSE 0.0 END +
+                               CASE WHEN summary LIKE '%decline%' THEN -0.5 ELSE 0.0 END
+                           ) as sentiment
+                    FROM knowledge_stream
+                    WHERE (title LIKE ? OR summary LIKE ?)
+                      AND created_at > datetime('now', ?)
+                    GROUP BY DATE(created_at)
+                """, (f'%{symbol}%', f'%{symbol}%', f'-{days} days'))
+                sentiments = {row[0]: row[1] for row in c.fetchall()}
+
             if not sentiments:
                 return {'symbol': symbol, 'correlation': None, 'reason': 'No news data'}
             

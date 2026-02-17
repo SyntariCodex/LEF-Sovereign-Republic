@@ -14,13 +14,31 @@ NOTE: Macro score calculation has been moved to AgentInfo (Phase 11).
 This agent now focuses purely on governance research per original v1.2 design.
 """
 
-import sqlite3
 import os
+import sys
 import time
 import json
 import logging
 import redis
 from datetime import datetime
+
+# Path setup
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, BASE_DIR)
+
+# Phase 34: Use centralized db_helper for connection pooling
+try:
+    from db.db_helper import db_connection
+except ImportError:
+    from contextlib import contextmanager
+    import sqlite3
+    @contextmanager
+    def db_connection(db_path=None, timeout=120.0):
+        conn = sqlite3.connect(db_path or os.path.join(BASE_DIR, 'republic.db'), timeout=timeout)
+        try:
+            yield conn
+        finally:
+            conn.close()
 
 # Constitutional Enforcement (Phase 21)
 try:
@@ -29,7 +47,6 @@ except ImportError:
     ConstitutionGuard = None
 
 # Paths
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.getenv('DB_PATH', os.path.join(BASE_DIR, 'republic.db'))
 CONSTITUTION_PATH = os.path.join(BASE_DIR, 'CONSTITUTION.md')
 
@@ -77,8 +94,7 @@ class AgentCivics:
             except (redis.RedisError, ConnectionError):
                 self.redis = None
     
-    def _get_db_connection(self):
-        return sqlite3.connect(self.db_path, timeout=60.0)
+    # Phase 34: _get_db_connection() removed — all callers use db_connection() context manager
     
     # =========================================================================
     # GOVERNANCE HEALTH MONITORING
@@ -144,23 +160,18 @@ class AgentCivics:
         Reads from knowledge_stream for relevant articles.
         """
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            # Check for alignment-related content in knowledge stream
-            keywords = ['alignment', 'safety', 'RLHF', 'constitutional AI', 'governance', 'ethics']
-            keyword_pattern = '|'.join(keywords)
-            
-            c.execute("""
-                SELECT id, title, summary, source FROM knowledge_stream 
-                WHERE (title LIKE '%alignment%' OR title LIKE '%safety%' 
-                       OR summary LIKE '%RLHF%' OR summary LIKE '%governance%')
-                AND timestamp > datetime('now', '-7 days')
-                ORDER BY timestamp DESC LIMIT 10
-            """)
-            
-            alignment_items = c.fetchall()
-            conn.close()
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+
+                c.execute("""
+                    SELECT id, title, summary, source FROM knowledge_stream
+                    WHERE (title LIKE '%alignment%' OR title LIKE '%safety%'
+                           OR summary LIKE '%RLHF%' OR summary LIKE '%governance%')
+                    AND timestamp > datetime('now', '-7 days')
+                    ORDER BY timestamp DESC LIMIT 10
+                """)
+
+                alignment_items = c.fetchall()
             
             if alignment_items:
                 logging.info(f"[CIVICS] 📚 Found {len(alignment_items)} alignment research items")
@@ -228,32 +239,27 @@ class AgentCivics:
         The Bridge: Apply mental models from Consciousness to governance policy.
         """
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            # Find unapplied mental models
-            c.execute("""
-                SELECT id, name, implication_bullish, implication_bearish 
-                FROM mental_models 
-                WHERE last_applied IS NULL 
-                LIMIT 1
-            """)
-            row = c.fetchone()
-            
-            if row:
-                model_id, name, bull_imp, bear_imp = row
-                logging.info(f"[CIVICS] 🏛️ Applying Mental Model: {name}")
-                
-                # Log for policy consideration
-                msg = f"POLICY INSIGHT via {name}: Consider implications for governance structure"
-                self._log_event("INFO", msg)
-                
-                # Mark as applied
-                c.execute("UPDATE mental_models SET last_applied=CURRENT_TIMESTAMP WHERE id=?", (model_id,))
-                conn.commit()
-            
-            conn.close()
-            
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+
+                c.execute("""
+                    SELECT id, name, implication_bullish, implication_bearish
+                    FROM mental_models
+                    WHERE last_applied IS NULL
+                    LIMIT 1
+                """)
+                row = c.fetchone()
+
+                if row:
+                    model_id, name, bull_imp, bear_imp = row
+                    logging.info(f"[CIVICS] Applying Mental Model: {name}")
+
+                    msg = f"POLICY INSIGHT via {name}: Consider implications for governance structure"
+                    self._log_event("INFO", msg)
+
+                    c.execute("UPDATE mental_models SET last_applied=CURRENT_TIMESTAMP WHERE id=?", (model_id,))
+                    conn.commit()
+
         except Exception as e:
             logging.error(f"[CIVICS] Intellect bridge error: {e}")
     
@@ -266,20 +272,18 @@ class AgentCivics:
         Track crypto/AI regulatory developments from knowledge stream.
         """
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            
-            # Check for regulatory content
-            c.execute("""
-                SELECT title, summary FROM knowledge_stream 
-                WHERE (title LIKE '%regulation%' OR title LIKE '%SEC%' 
-                       OR title LIKE '%compliance%' OR summary LIKE '%regulatory%')
-                AND timestamp > datetime('now', '-3 days')
-                ORDER BY timestamp DESC LIMIT 5
-            """)
-            
-            regulatory_items = c.fetchall()
-            conn.close()
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+
+                c.execute("""
+                    SELECT title, summary FROM knowledge_stream
+                    WHERE (title LIKE '%regulation%' OR title LIKE '%SEC%'
+                           OR title LIKE '%compliance%' OR summary LIKE '%regulatory%')
+                    AND timestamp > datetime('now', '-3 days')
+                    ORDER BY timestamp DESC LIMIT 5
+                """)
+
+                regulatory_items = c.fetchall()
             
             if regulatory_items:
                 logging.info(f"[CIVICS] 📋 Found {len(regulatory_items)} regulatory updates")
@@ -299,15 +303,14 @@ class AgentCivics:
     def _log_event(self, level, message):
         """Log governance event to database."""
         try:
-            conn = self._get_db_connection()
-            c = conn.cursor()
-            c.execute(
-                "INSERT INTO agent_logs (source, level, message) VALUES (?, ?, ?)",
-                (self.name, level, message)
-            )
-            conn.commit()
-            conn.close()
-        except sqlite3.Error:
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+                c.execute(
+                    "INSERT INTO agent_logs (source, level, message) VALUES (?, ?, ?)",
+                    (self.name, level, message)
+                )
+                conn.commit()
+        except Exception:
             pass
     
     # =========================================================================

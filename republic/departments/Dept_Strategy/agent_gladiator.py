@@ -39,14 +39,20 @@ class AgentGladiator:
         self.db_path = os.getenv('DB_PATH', os.path.join(self.base_dir, 'republic.db'))
         
         # Redis (The Nervous System) - Use shared singleton
+        # Phase 34: Added socket_connect_timeout and socket_timeout to prevent hangs
         try:
             from system.redis_client import get_redis
             self.r = get_redis()
         except ImportError:
-            # Fallback to direct connection
+            # Fallback to direct connection with timeouts
             try:
                 import redis
-                self.r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+                self.r = redis.Redis(
+                    host='localhost', port=6379, db=0,
+                    decode_responses=True,
+                    socket_connect_timeout=5,
+                    socket_timeout=10
+                )
                 self.r.ping()
             except Exception:
                 self.r = None

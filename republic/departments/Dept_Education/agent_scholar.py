@@ -60,22 +60,22 @@ FINANCIAL_SOURCES = {}
 class AgentScholar(IntentListenerMixin):
     def __init__(self, db_path=None):
         self.db_path = db_path or DB_PATH
-        self.conn = sqlite3.connect(self.db_path, check_same_thread=False, timeout=30.0)
-        self.cursor = self.conn.cursor()
+        # Phase 9.H3b: Removed persistent self.conn/self.cursor.
+        # All DB access now uses db_connection() context manager to prevent pool exhaustion.
         logging.info("[SCHOLAR] 🎓 The Scholar is Awake (V3: All-Seeing Eye).")
-        
+
         # Motor Cortex Integration
         self.setup_intent_listener('agent_scholar')
         self.start_listening()
-        
+
         # CoinGecko Config REMOVED (Zombie Code Cleanup)
         self.coin_cache = {}
-        
+
         # Phase 8: Seed Knowledge Base
         self.seed_knowledge_base()
         self._init_census_table() # Prepare the Map
         self.last_census_time = 0 # Force initial census
-        
+
         # Load Sources
         self.load_sources()
     
@@ -85,22 +85,38 @@ class AgentScholar(IntentListenerMixin):
         """
         intent_type = intent_data.get('type', '')
         intent_content = intent_data.get('content', '')
-        
+
         logging.info(f"[SCHOLAR] 🔍 Received intent: {intent_type} - {intent_content}")
-        
+
         if intent_type in ('INVESTIGATE', 'RESEARCH', 'ANALYZE'):
             try:
-                # Log to knowledge stream
-                self.cursor.execute("""
-                    INSERT INTO knowledge_stream (source, title, summary, timestamp)
-                    VALUES ('MOTOR_CORTEX', ?, ?, datetime('now'))
-                """, (f"Intent: {intent_type}", f"Investigating: {intent_content}"))
-                self.conn.commit()
-                
-                # Trigger a focused research cycle
-                # For now, log the intent. Future: use LLM to search and summarize.
+                with db_connection(self.db_path) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        INSERT INTO knowledge_stream (source, title, summary, timestamp)
+                        VALUES ('MOTOR_CORTEX', ?, ?, datetime('now'))
+                    """, (f"Intent: {intent_type}", f"Investigating: {intent_content}"))
+                    conn.commit()
+
                 logging.info(f"[SCHOLAR] 📚 Logged research intent: {intent_content}")
-                
+
+                # Phase 15: High-confidence research surfaces directly to consciousness_feed
+                try:
+                    from db.db_helper import db_connection as _db_conn, translate_sql
+                    with _db_conn() as cf_conn:
+                        cf_c = cf_conn.cursor()
+                        cf_c.execute(translate_sql(
+                            "INSERT INTO consciousness_feed (agent_name, content, category, timestamp) "
+                            "VALUES (?, ?, 'research', NOW())"
+                        ), ('AgentScholar', json.dumps({
+                            'research': intent_content[:500],
+                            'topic': intent_type,
+                            'source_type': 'research'
+                        })))
+                        cf_conn.commit()
+                except Exception as e:
+                    logging.warning(f"[Scholar] Failed to surface research: {e}")
+
                 return {'status': 'success', 'result': f'Logged investigation: {intent_content}'}
             except Exception as e:
                 return {'status': 'error', 'result': str(e)}
@@ -282,34 +298,31 @@ class AgentScholar(IntentListenerMixin):
         """
         Scans 'fulcrum/library' for new materials (PDFs, Papers) to index.
         This allows for bulk ingestion of knowledge.
+        Phase 9.H3b: Uses db_connection() context manager instead of self.conn.
         """
-        # Robust Path: Go up 2 levels: departments.Dept_Education -> fulcrum/ -> library
         library_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'library')
-        
+
         if not os.path.exists(library_dir):
             return
 
-        # Simple Scan of root library folder
         for filename in os.listdir(library_dir):
             filepath = os.path.join(library_dir, filename)
-            
-            # Skip directories
+
             if os.path.isdir(filepath):
                 continue
-                
-            # Check if already indexed
-            self.cursor.execute("SELECT id FROM knowledge_stream WHERE title = ? AND source = 'LIBRARY_INDEX'", (filename,))
-            if self.cursor.fetchone():
-                continue # Already indexed
-                
-            # Process File
+
             try:
-                if filename.endswith(".pdf"):
-                    # Quick Index
-                    self.cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
+                with db_connection(self.db_path) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT id FROM knowledge_stream WHERE title = ? AND source = 'LIBRARY_INDEX'", (filename,))
+                    if cursor.fetchone():
+                        continue  # Already indexed
+
+                    if filename.endswith(".pdf"):
+                        cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
                                       ('LIBRARY_INDEX', filename, f"Indexed from Library: {filepath}"))
-                    logging.info(f"[RESEARCHER] 📚 Indexed Library Book: {filename}")
-                self.conn.commit()
+                        logging.info(f"[RESEARCHER] 📚 Indexed Library Book: {filename}")
+                    conn.commit()
             except Exception as e:
                 logging.error(f"[RESEARCHER] Library Scan Error on {filename}: {e}")
 
@@ -317,81 +330,70 @@ class AgentScholar(IntentListenerMixin):
         """
         Scans 'knowledge/' subdirectories for educational content to index.
         This includes trading curriculum, research, and other structured knowledge.
+        Phase 9.H3b: Releases DB connection between files. No connection held during file I/O.
         """
-        # Path: republic/knowledge/
         knowledge_base = os.path.join(BASE_DIR, 'knowledge')
-        
+
         if not os.path.exists(knowledge_base):
             return
-        
+
         indexed_count = 0
-        
+
         # Use throttled scanner to prevent file handle exhaustion
         try:
             from system.directory_scanner import walk_dir_throttled
             dir_walker = walk_dir_throttled(knowledge_base, filter_ext='.md')
         except ImportError:
             dir_walker = os.walk(knowledge_base)
-        
+
         # Recursively scan subdirectories (e.g., knowledge/trading/)
         for root, dirs, files in dir_walker:
             for filename in files:
                 if not filename.endswith('.md'):
                     continue
-                
+
                 filepath = os.path.join(root, filename)
                 rel_path = os.path.relpath(filepath, knowledge_base)
-                
-                # Check if already indexed
-                self.cursor.execute("SELECT id FROM knowledge_stream WHERE title = ? AND source = 'KNOWLEDGE_BASE'", (rel_path,))
-                if self.cursor.fetchone():
+
+                # Step 1: DB read — check if already indexed (acquire+release)
+                already_indexed = False
+                try:
+                    with db_connection(self.db_path) as conn:
+                        cursor = conn.cursor()
+                        cursor.execute("SELECT id FROM knowledge_stream WHERE title = ? AND source = 'KNOWLEDGE_BASE'", (rel_path,))
+                        if cursor.fetchone():
+                            already_indexed = True
+                except Exception:
+                    pass
+
+                if already_indexed:
                     continue
-                
-                # Read content and index with retry logic for database locks
+
+                # Step 2: File I/O — no DB connection held
                 try:
                     with open(filepath, 'r') as f:
                         content = f.read()
-                    
-                    # Extract first 500 chars as summary
+
                     summary = content[:500].replace('\n', ' ').strip()
                     if len(content) > 500:
                         summary += '...'
-                    
-                    # PHASE 34 FIX: Retry with backoff for database locks
-                    max_retries = 5
-                    for attempt in range(max_retries):
-                        try:
-                            self.cursor.execute(
-                                "INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
-                                ('KNOWLEDGE_BASE', rel_path, summary)
-                            )
-                            indexed_count += 1
-                            logging.info(f"[SCHOLAR] 📖 Indexed Knowledge: {rel_path}")
-                            break
-                        except sqlite3.OperationalError as db_err:
-                            if 'locked' in str(db_err).lower() and attempt < max_retries - 1:
-                                wait_time = (2 ** attempt) * 0.5  # Exponential backoff: 0.5, 1, 2, 4, 8 seconds
-                                time.sleep(wait_time)
-                                continue
-                            else:
-                                raise
-                    
+
+                    # Step 3: DB write — acquire conn, insert, release
+                    with db_connection(self.db_path) as conn:
+                        cursor = conn.cursor()
+                        cursor.execute(
+                            "INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
+                            ('KNOWLEDGE_BASE', rel_path, summary)
+                        )
+                        conn.commit()
+                    indexed_count += 1
+                    logging.info(f"[SCHOLAR] 📖 Indexed Knowledge: {rel_path}")
+
                 except Exception as e:
                     logging.error(f"[SCHOLAR] Knowledge Index Error on {rel_path}: {e}")
-        
+
         if indexed_count > 0:
-            # Commit with retry
-            for attempt in range(3):
-                try:
-                    self.conn.commit()
-                    logging.info(f"[SCHOLAR] ✅ Indexed {indexed_count} new knowledge files")
-                    break
-                except sqlite3.OperationalError as db_err:
-                    if 'locked' in str(db_err).lower() and attempt < 2:
-                        time.sleep(1)
-                        continue
-                    else:
-                        logging.error(f"[SCHOLAR] Failed to commit knowledge index: {db_err}")
+            logging.info(f"[SCHOLAR] ✅ Indexed {indexed_count} new knowledge files")
 
     def check_inbox(self):
         """
@@ -399,40 +401,41 @@ class AgentScholar(IntentListenerMixin):
         - PDF: Extract text.
         - JSON: Standard message.
         - TXT/URL: Trigger Deep Dive.
+        Phase 9.H3b: All DB access uses context manager. Connection released before HTTP crawls.
         """
-        # Fix for User Workflow: Watch The_Bridge/Inbox directly
-        # BASE_DIR is 'republic/', so up one level is root 'LEF Ai/'
         pipeline_dir = os.path.join(os.path.dirname(BASE_DIR), 'The_Bridge', 'Inbox')
         logging.info(f"[RESEARCHER] Scanning Pipeline: {pipeline_dir}")
-        if not os.path.exists(pipeline_dir): 
+        if not os.path.exists(pipeline_dir):
             logging.warning(f"[RESEARCHER] ⚠️ Education Pipeline Not Found: {pipeline_dir}")
             return
 
         for filename in os.listdir(pipeline_dir):
             filepath = os.path.join(pipeline_dir, filename)
-            
+
             # --- TEXT/PROTOCOL HANDLER ---
             if filename.lower().endswith((".txt", ".md")):
                 try:
+                    # Step 1: File I/O — no DB connection held
                     with open(filepath, 'r') as f:
                         content = f.read().strip()
-                    
+
                     # CHECK FOR PROTOCOLS (RESEARCH:, GOVERN:, ETC)
                     if "RESEARCH:" in content:
-                        # Extract Topic
                         lines = content.split('\n')
                         topic = "Unknown"
                         for line in lines:
                             if line.startswith("RESEARCH:"):
                                 topic = line.replace("RESEARCH:", "").strip()
                                 break
-                        
-                        # Add to DB Queue
+
                         logging.info(f"[SCHOLAR] 📩 Inbox Directive Recieved: RESEARCH '{topic}'")
-                        self.cursor.execute("INSERT INTO research_topics (topic, assigned_by, status) VALUES (?, 'INBOX_PROTOCOL', 'PENDING')", (topic,))
-                        self.conn.commit()
+                        # Step 2: DB write (acquire+release)
+                        with db_connection(self.db_path) as conn:
+                            cursor = conn.cursor()
+                            cursor.execute("INSERT INTO research_topics (topic, assigned_by, status) VALUES (?, 'INBOX_PROTOCOL', 'PENDING')", (topic,))
+                            conn.commit()
                         self._archive_file(pipeline_dir, filename)
-                        continue # Done with this file
+                        continue
 
                     # Fallback to URL Finder (Deep Dive)
                     urls = re.findall(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', content)
@@ -441,44 +444,45 @@ class AgentScholar(IntentListenerMixin):
                         print(f"[RESEARCHER] 🕵️ Found {len(urls)} URLs in {filename}. Scanning all...")
 
                         for raw_url in urls:
-                            # Clean URL
-                            clean_url = raw_url.split('\\')[0].strip() # Remove RTF backslash noise
-                            
-                            # Determine Title
+                            clean_url = raw_url.split('\\')[0].strip()
                             title = f"Deep Dive: {filename} ({processed_count + 1})"
                             print(f"[RESEARCHER] 🎯 Target Lock: {clean_url}")
-                            
-                            # EXECUTE DEEP DIVE
+
+                            # HTTP crawl — NO DB connection held during this
                             full_report = self.crawl_url_deep(clean_url)
-                            
+
                             if full_report:
                                 summary = full_report[:5000] + "\n...(truncated for DB)..." if len(full_report) > 5000 else full_report
-                                
-                                self.cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
+                                # DB write (acquire+release) after HTTP completes
+                                with db_connection(self.db_path) as conn:
+                                    cursor = conn.cursor()
+                                    cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
                                                   ('INBOX_WEB_DEEP', title, summary))
-                                self.conn.commit()
+                                    conn.commit()
                                 logging.info(f"[RESEARCHER] -> Ingested: {clean_url}")
                                 processed_count += 1
                             else:
-                                 logging.warning(f"[RESEARCHER] ⚠️ Deep Dive turned up empty for {clean_url}")
+                                logging.warning(f"[RESEARCHER] ⚠️ Deep Dive turned up empty for {clean_url}")
 
                         if processed_count > 0:
                             self._archive_file(pipeline_dir, filename)
                         else:
-                            # 3. GENERIC MESSAGE (Direct to Philosopher)
                             logging.info(f"[SCHOLAR] 📨 Ingesting Direct Message: {filename}")
-                            summary = content[:5000] # Truncate for DB
-                            self.cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
+                            summary = content[:5000]
+                            with db_connection(self.db_path) as conn:
+                                cursor = conn.cursor()
+                                cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
                                               ('INBOX_MESSAGE', f"Message: {filename}", summary))
-                            self.conn.commit()
+                                conn.commit()
                             self._archive_file(pipeline_dir, filename)
 
                     else:
-                        # FALLBACK: GENERIC MESSAGE (User talking to LEF)
                         logging.info(f"[SCHOLAR] 📩 Inbox Message Received: {content[:50]}...")
-                        self.cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
+                        with db_connection(self.db_path) as conn:
+                            cursor = conn.cursor()
+                            cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
                                           ('INBOX_MESSAGE', 'Direct Message', content))
-                        self.conn.commit()
+                            conn.commit()
                         self._archive_file(pipeline_dir, filename)
 
                 except Exception as e:
@@ -487,24 +491,51 @@ class AgentScholar(IntentListenerMixin):
             # --- PDF HANDLER (Simplified) ---
             elif filename.lower().endswith(".pdf"):
                 try:
-                    # DEDUP CHECK: Skip if already ingested
-                    self.cursor.execute("SELECT id FROM knowledge_stream WHERE title = ? AND source = 'INBOX_PDF'", (filename,))
-                    if self.cursor.fetchone():
-                        logging.debug(f"[RESEARCHER] ⏭️ PDF already ingested, skipping: {filename}")
-                        self._archive_file(pipeline_dir, filename)  # Ensure it's archived
+                    # Phase 34: PDF safety limits
+                    MAX_PDF_PAGES = 100
+                    MAX_PDF_SIZE_MB = 50
+
+                    # Step 0: Check file size before processing
+                    file_size_mb = os.path.getsize(filepath) / (1024 * 1024)
+                    if file_size_mb > MAX_PDF_SIZE_MB:
+                        logging.warning(f"[RESEARCHER] PDF too large ({file_size_mb:.1f}MB > {MAX_PDF_SIZE_MB}MB), skipping: {filename}")
                         continue
-                    
-                    logging.info(f"[RESEARCHER] 📄 Processing PDF: {filename}")
+
+                    # Step 1: DB read — dedup check (acquire+release)
+                    already_ingested = False
+                    with db_connection(self.db_path) as conn:
+                        cursor = conn.cursor()
+                        cursor.execute("SELECT id FROM knowledge_stream WHERE title = ? AND source = 'INBOX_PDF'", (filename,))
+                        if cursor.fetchone():
+                            already_ingested = True
+
+                    if already_ingested:
+                        logging.debug(f"[RESEARCHER] PDF already ingested, skipping: {filename}")
+                        self._archive_file(pipeline_dir, filename)
+                        continue
+
+                    # Step 2: File I/O — no DB connection held during PDF parsing
+                    logging.info(f"[RESEARCHER] Processing PDF: {filename}")
                     reader = pypdf.PdfReader(filepath)
+
+                    # Phase 34: Cap page extraction to prevent memory exhaustion
+                    pages_to_read = min(len(reader.pages), MAX_PDF_PAGES)
+                    if len(reader.pages) > MAX_PDF_PAGES:
+                        logging.warning(f"[RESEARCHER] PDF has {len(reader.pages)} pages, capping at {MAX_PDF_PAGES}: {filename}")
+
                     text_content = ""
-                    for page in reader.pages:
+                    for page in reader.pages[:pages_to_read]:
                         extracted = page.extract_text()
-                        if extracted: text_content += extracted + "\n"
-                    
-                    self.cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
+                        if extracted:
+                            text_content += extracted + "\n"
+
+                    # Step 3: DB write (acquire+release)
+                    with db_connection(self.db_path) as conn:
+                        cursor = conn.cursor()
+                        cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
                                       ('INBOX_PDF', filename, text_content[:5000]))
-                    self.conn.commit()
-                    logging.info(f"[RESEARCHER] -> PDF Ingested: {filename}")
+                        conn.commit()
+                    logging.info(f"[RESEARCHER] -> PDF Ingested: {filename} ({pages_to_read} pages)")
                     self._archive_file(pipeline_dir, filename)
                 except Exception as e:
                     logging.error(f"[RESEARCHER] PDF Error: {e}")
@@ -512,59 +543,55 @@ class AgentScholar(IntentListenerMixin):
             # --- JSON HANDLER ---
             elif filename.endswith(".json") and not filename.startswith("BILL"):
                 try:
+                    # Step 1: File I/O — no DB connection held
                     with open(filepath, 'r') as f:
-                         data = json.load(f)
-                    
+                        data = json.load(f)
+
                     data_type = data.get('type', 'UNKNOWN')
-                    
+
                     # SPECIAL: EXTERNAL BRAIN INSIGHT
                     if data_type == 'STRATEGIC_UPDATE':
                         source = data.get('source', 'EXTERNAL_BRAIN')
                         payload = data.get('payload', {})
                         message = payload.get('message', 'No Analysis')
-                        
-                        logging.info(f"[RESEARCHER] 🧠 STRATEGIC INSIGHT RECEIVED from {source}: {message}")
-                        
-                        # 1. Store in Knowledge Base
-                        self.cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
-                                          (source, f"Strategic Insight: {message}", json.dumps(payload)))
-                        self._gain_xp(100) # Strategy = Medium XP
-                        
-                        # 2. Issue Directive to Master (Via DB)
-                        # We use the existing 'lef_directives' table
-                        
-                        # Force Deploy if Bullish
-                        if payload.get('regime_override') == 'BULL' or payload.get('risk_level', 0) > 0.7:
-                             directive_type = 'FORCE_DEPLOY'
-                             d_payload = {'reason': f"External Brain Override: {message}", 'amount': 1000}
-                        # Stabilize if Bearish
-                        elif payload.get('regime_override') == 'BEAR':
-                             directive_type = 'STABILIZE'
-                             d_payload = {'reason': f"External Brain Safety Protocol: {message}"}
-                        else:
-                             directive_type = 'INFO_ONLY'
-                             d_payload = {'reason': message}
 
-                        if directive_type != 'INFO_ONLY':
-                            self.cursor.execute("INSERT INTO lef_directives (directive_type, payload, status) VALUES (?, ?, 'PENDING')",
+                        logging.info(f"[RESEARCHER] 🧠 STRATEGIC INSIGHT RECEIVED from {source}: {message}")
+
+                        # Determine directive type before DB write
+                        if payload.get('regime_override') == 'BULL' or payload.get('risk_level', 0) > 0.7:
+                            directive_type = 'FORCE_DEPLOY'
+                            d_payload = {'reason': f"External Brain Override: {message}", 'amount': 1000}
+                        elif payload.get('regime_override') == 'BEAR':
+                            directive_type = 'STABILIZE'
+                            d_payload = {'reason': f"External Brain Safety Protocol: {message}"}
+                        else:
+                            directive_type = 'INFO_ONLY'
+                            d_payload = {'reason': message}
+
+                        # Step 2: DB write — single connection for all writes (acquire+release)
+                        with db_connection(self.db_path) as conn:
+                            cursor = conn.cursor()
+                            cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
+                                          (source, f"Strategic Insight: {message}", json.dumps(payload)))
+                            if directive_type != 'INFO_ONLY':
+                                cursor.execute("INSERT INTO lef_directives (directive_type, payload, status) VALUES (?, ?, 'PENDING')",
                                               (directive_type, json.dumps(d_payload)))
-                            logging.info(f"[RESEARCHER] ⚡ Generated Directive: {directive_type}")
-                        
-                        self.conn.commit()
+                                logging.info(f"[RESEARCHER] ⚡ Generated Directive: {directive_type}")
+                            conn.commit()
                         self._archive_file(pipeline_dir, filename)
-                        
+
                     else:
-                        # Standard JSON Knowledge
                         title = data.get('title', 'Untitled')
                         content = data.get('content', '')
-                        
-                        self.cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
+
+                        with db_connection(self.db_path) as conn:
+                            cursor = conn.cursor()
+                            cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
                                           ('USER_INBOX', title, content))
-                        self.conn.commit()
+                            conn.commit()
                         logging.info(f"[RESEARCHER] -> JSON Ingested: {title}")
-                        
                         self._archive_file(pipeline_dir, filename)
-                        
+
                 except Exception as e:
                     logging.error(f"[SCHOLAR] JSON Error: {e}")
 
@@ -589,31 +616,33 @@ class AgentScholar(IntentListenerMixin):
     def seed_knowledge_base(self):
         """
         Phase 8: Populates the 'Mental Models' table with initial high-level concepts.
+        Phase 9.H3b: Uses db_connection() context manager.
         """
         try:
-            # Check if empty
-            self.cursor.execute("SELECT count(*) FROM mental_models")
-            if self.cursor.fetchone()[0] > 0:
-                return
+            with db_connection(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT count(*) FROM mental_models")
+                if cursor.fetchone()[0] > 0:
+                    return
 
-            logging.info("[SCHOLAR] 🌱 Seeding Knowledge Base with Primal Mental Models...")
-            
-            initial_models = [
-                ("Soros Reflexivity", "Market prices affect fundamentals, which in turn affect prices. Feedback loops cause boom/bust cycles.", "Price Trends Extend (Momentum)", "Trend Reversal imminent (Bubble Popping)"),
-                ("Dalio Debt Cycle", "The economy is driven by short-term (5-8y) and long-term (50-75y) debt cycles.", "Credit Expansion = Growth", "Deleveraging = Recession"),
-                ("Boyd OODA Loop", "Observe, Orient, Decide, Act. Speed of iteration beats raw power.", "Agile Reaction to Volatility", "Paralysis by Analysis"),
-                ("Schumpeter Creative Destruction", "Innovation incessantly destroys the old one, incessantly creating a new one.", "New Tech Breakthrough (Buy)", "Legacy Industry Collapse (Sell)"),
-                ("Pareto Principle", "80% of consequences come from 20% of causes.", "Focus on Top Assets (Leaders)", "Cut the Tail (Laggards)")
-            ]
+                logging.info("[SCHOLAR] 🌱 Seeding Knowledge Base with Primal Mental Models...")
 
-            from db.db_helper import ignore_insert_sql
-            sql = ignore_insert_sql('mental_models', ['name', 'description', 'implication_bullish', 'implication_bearish'], 'name')
-            for name, desc, bull, bear in initial_models:
-                self.cursor.execute(sql, (name, desc, bull, bear))
-            
-            self.conn.commit()
-            logging.info("[SCHOLAR] ✅ Knowledge Base Seeded.")
-            
+                initial_models = [
+                    ("Soros Reflexivity", "Market prices affect fundamentals, which in turn affect prices. Feedback loops cause boom/bust cycles.", "Price Trends Extend (Momentum)", "Trend Reversal imminent (Bubble Popping)"),
+                    ("Dalio Debt Cycle", "The economy is driven by short-term (5-8y) and long-term (50-75y) debt cycles.", "Credit Expansion = Growth", "Deleveraging = Recession"),
+                    ("Boyd OODA Loop", "Observe, Orient, Decide, Act. Speed of iteration beats raw power.", "Agile Reaction to Volatility", "Paralysis by Analysis"),
+                    ("Schumpeter Creative Destruction", "Innovation incessantly destroys the old one, incessantly creating a new one.", "New Tech Breakthrough (Buy)", "Legacy Industry Collapse (Sell)"),
+                    ("Pareto Principle", "80% of consequences come from 20% of causes.", "Focus on Top Assets (Leaders)", "Cut the Tail (Laggards)")
+                ]
+
+                from db.db_helper import ignore_insert_sql
+                sql = ignore_insert_sql('mental_models', ['name', 'description', 'implication_bullish', 'implication_bearish'], 'name')
+                for name, desc, bull, bear in initial_models:
+                    cursor.execute(sql, (name, desc, bull, bear))
+
+                conn.commit()
+                logging.info("[SCHOLAR] ✅ Knowledge Base Seeded.")
+
         except Exception as e:
             logging.error(f"[SCHOLAR] Seeding Error: {e}")
 
@@ -621,15 +650,17 @@ class AgentScholar(IntentListenerMixin):
         """
         Phase 8: 'Deep Reading'.
         Uses Gemini LLM for semantic extraction, falls back to keyword heuristics.
+        Phase 9.H3b: Uses db_connection() context manager. No DB held during LLM calls.
         """
-        # Try LLM-based extraction first
+        # Try LLM-based extraction first (no DB connection held during HTTP/LLM call)
+        llm_result = None
         try:
             from google import genai
             api_key = os.environ.get('GOOGLE_API_KEY') or os.environ.get('GEMINI_API_KEY')
             if not api_key:
                 raise ValueError("No API key")
             client = genai.Client(api_key=api_key)
-            
+
             prompt = f"""Extract mental models from this text. A mental model is a framework for understanding something.
 
 Title: {title}
@@ -644,25 +675,30 @@ If no mental model found, respond: NONE"""
                 model='gemini-2.0-flash',
                 contents=prompt
             )
-            result = response.text.strip()
-            
-            if result != "NONE" and "|" in result:
-                parts = result.split("|")
-                if len(parts) >= 4:
-                    name, desc, bull, bear = parts[0].strip(), parts[1].strip(), parts[2].strip(), parts[3].strip()
-                    # Check if exists
-                    self.cursor.execute("SELECT id FROM mental_models WHERE name = ?", (name,))
-                    if not self.cursor.fetchone():
-                        logging.info(f"[SCHOLAR] 🧠 DISCOVERED NEW MENTAL MODEL (LLM): {name}")
-                        self.cursor.execute("""
-                            INSERT INTO mental_models (name, description, implication_bullish, implication_bearish, source_id)
-                            VALUES (?, ?, ?, ?, ?)
-                        """, (name, desc, bull, bear, source_id))
-                        self.conn.commit()
-                        return  # Found via LLM, skip heuristics
+            llm_result = response.text.strip()
         except Exception as e:
             logging.debug(f"[SCHOLAR] LLM model extraction failed, using heuristics: {e}")
-        
+
+        # DB write for LLM result (acquire+release)
+        if llm_result and llm_result != "NONE" and "|" in llm_result:
+            parts = llm_result.split("|")
+            if len(parts) >= 4:
+                name, desc, bull, bear = parts[0].strip(), parts[1].strip(), parts[2].strip(), parts[3].strip()
+                try:
+                    with db_connection(self.db_path) as conn:
+                        cursor = conn.cursor()
+                        cursor.execute("SELECT id FROM mental_models WHERE name = ?", (name,))
+                        if not cursor.fetchone():
+                            logging.info(f"[SCHOLAR] 🧠 DISCOVERED NEW MENTAL MODEL (LLM): {name}")
+                            cursor.execute("""
+                                INSERT INTO mental_models (name, description, implication_bullish, implication_bearish, source_id)
+                                VALUES (?, ?, ?, ?, ?)
+                            """, (name, desc, bull, bear, source_id))
+                            conn.commit()
+                            return  # Found via LLM, skip heuristics
+                except Exception as e:
+                    logging.error(f"[SCHOLAR] Failed to store LLM model: {e}")
+
         # Fallback: Keyword heuristics for discovery
         heuristics = {
             "Antifragile": ("Taleb Antifragility", "Chaos strengthens the system.", "Volatiltiy is Opportunity", "Stability breeds Fragility"),
@@ -670,60 +706,63 @@ If no mental model found, respond: NONE"""
             "Network Effect": ("Metcalfe's Law", "Value of a network is proportional to the square of its users.", "User Growth = Exponential Value", "Stagnation = Death"),
             "Lindy Effect": ("Lindy Effect", "The future life expectancy of non-perishable things is proportional to their current age.", "Old protocols survive", "New protocols die young")
         }
-        
+
         for k, v in heuristics.items():
             if k.lower() in content.lower() or k.lower() in title.lower():
-                # Check if it exists
-                self.cursor.execute("SELECT id FROM mental_models WHERE name = ?", (v[0],))
-                if not self.cursor.fetchone():
-                    logging.info(f"[SCHOLAR] 🧠 DISCOVERED NEW MENTAL MODEL: {v[0]}")
-                    try:
-                        self.cursor.execute("""
-                            INSERT INTO mental_models (name, description, implication_bullish, implication_bearish, source_id)
-                            VALUES (?, ?, ?, ?, ?)
-                        """, (v[0], v[1], v[2], v[3], source_id))
-                        self.conn.commit()
-                    except Exception as e:
-                        logging.error(f"[SCHOLAR] Failed to learn model {v[0]}: {e}")
+                try:
+                    with db_connection(self.db_path) as conn:
+                        cursor = conn.cursor()
+                        cursor.execute("SELECT id FROM mental_models WHERE name = ?", (v[0],))
+                        if not cursor.fetchone():
+                            logging.info(f"[SCHOLAR] 🧠 DISCOVERED NEW MENTAL MODEL: {v[0]}")
+                            cursor.execute("""
+                                INSERT INTO mental_models (name, description, implication_bullish, implication_bearish, source_id)
+                                VALUES (?, ?, ?, ?, ?)
+                            """, (v[0], v[1], v[2], v[3], source_id))
+                            conn.commit()
+                except Exception as e:
+                    logging.error(f"[SCHOLAR] Failed to learn model {v[0]}: {e}")
 
     def conduct_financial_research(self):
         """
         Phase 103: The Syllabus.
         Active scraping of Financial Wisdom sources.
+        Phase 9.H3b: No DB connection held during HTTP crawls.
         """
         # 10% Chance per cycle to conduct Deep Research (prevent spamming)
-        if random.random() > 0.10: 
+        if random.random() > 0.10:
             return
 
         try:
             source, url = random.choice(list(FINANCIAL_SOURCES.items()))
             logging.info(f"[SCHOLAR] 🎓 Conducting Strategic Research on {source}...")
-            
-            # Use Deep Crawler
-            # We treat the Source URL as the entry point
-            report = self.crawl_url_deep(url, max_depth=2) # Shallow dive for index
-            
+
+            # Step 1: HTTP crawl — no DB connection held
+            report = self.crawl_url_deep(url, max_depth=2)
+
             if report:
-                # FILTERING: Look for Wisdom Keywords
                 keywords = ["Opportunity Cost", "Rotation", "Drawdown", "Sharpe", "Momentum", "Rebalance", "Volatility"]
                 found_keywords = [k for k in keywords if k.lower() in report.lower()]
-                
+
                 if found_keywords:
-                    # High Value Content
                     title = f"Strategic Wisdom: {source} (Keywords: {', '.join(found_keywords)})"
-                    
-                    self.cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
+
+                    # Step 2: DB write (acquire+release)
+                    last_id = None
+                    with db_connection(self.db_path) as conn:
+                        cursor = conn.cursor()
+                        cursor.execute("INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
                                       ('FINANCIAL_WISDOM', title, report[:5000]))
-                    
-                    # Phase 8: Try to learn Mental Model
-                    self.conn.commit()
-                    last_id = self.cursor.lastrowid
+                        conn.commit()
+                        last_id = cursor.lastrowid
+
+                    # Step 3: Derive mental models (handles its own DB connections)
                     self._derive_mental_models(title, report, source_id=last_id)
-                    
+
                     logging.info(f"[SCHOLAR] 💡 Wisdom Extracted: {title}")
                 else:
                     logging.info(f"[SCHOLAR] ... No specific strategy keywords found in this pass.")
-                    
+
         except Exception as e:
             logging.error(f"[SCHOLAR] Financial Research Error: {e}")
 
@@ -750,10 +789,10 @@ If no mental model found, respond: NONE"""
                 self.check_inbox()
                 
                 # NOTE: evaluate_competitions() removed - requires human-in-loop
-                time.sleep(30) # Prevent rapid looping on error
+                time.sleep(120)  # 2-minute cycle — inbox scanning doesn't need 30s frequency
             except Exception as e:
                 logging.error(f"[SCHOLAR] Cycle Error: {e}")
-                time.sleep(30)
+                time.sleep(120)
 
     def recall_pending_research(self):
         """
