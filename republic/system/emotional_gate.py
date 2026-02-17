@@ -19,6 +19,7 @@ Usage:
 """
 
 import sqlite3
+import json
 import logging
 import os
 from datetime import datetime, timedelta
@@ -54,13 +55,17 @@ class EmotionalGate:
     def __init__(self, db_path: str = None):
         self.db_path = db_path or DB_PATH
         self.hippocampus = None
-        
+        self._previous_state = None  # Phase 32.4: For exponential smoothing
+
         # Try to connect to Hippocampus for scar context
         try:
             from departments.Dept_Consciousness.claude_context_manager import get_claude_context_manager
             self.hippocampus = get_claude_context_manager()
         except ImportError:
             pass
+
+        # Phase 32.4: Load persisted emotional state
+        self._load_persisted_state()
     
     def check_emotional_state(self) -> Dict:
         """
@@ -80,7 +85,12 @@ class EmotionalGate:
             "sizing_multiplier": self.NEUTRAL_SIZING_MULTIPLIER,
             "caution_flags": [],
             "mood_history": [],
-            "checked_at": datetime.now().isoformat()
+            "checked_at": datetime.now().isoformat(),
+            # Phase 32.5: Explicit stress/fear/joy levels (0.0 - 1.0)
+            "stress_level": 0.0,
+            "fear_level": 0.0,
+            "joy_level": 0.0,
+            "risk_multiplier": 1.0,
         }
         
         # 1. Get recent mood data
@@ -96,6 +106,17 @@ class EmotionalGate:
         avg_score = sum(mood_scores) / len(mood_scores)
         result["score"] = round(avg_score, 1)
         
+        # Phase 32.5: Compute stress, fear, joy levels (0.0 - 1.0)
+        # Low score → high fear/stress. High score → high joy.
+        result["fear_level"] = round(max(0.0, (self.FEAR_THRESHOLD - avg_score) / self.FEAR_THRESHOLD), 2)
+        result["stress_level"] = round(max(0.0, (50 - avg_score) / 50), 2)
+        result["joy_level"] = round(max(0.0, (avg_score - 50) / 50), 2)
+
+        # Phase 32.5: Formula-based risk multiplier
+        # risk_multiplier = 1.0 - (stress * 0.3) - (fear * 0.2)
+        risk_mult = 1.0 - (result["stress_level"] * 0.3) - (result["fear_level"] * 0.2)
+        result["risk_multiplier"] = round(max(0.1, risk_mult), 3)
+
         # 3. Determine emotional state
         if avg_score < self.FEAR_THRESHOLD:
             result["state"] = "FEAR"
@@ -132,7 +153,16 @@ class EmotionalGate:
         if fear_streak >= 3:
             result["caution_flags"].append(f"Fear persisting for {fear_streak} cycles - defensive mode")
             result["sizing_multiplier"] = 0.3  # Severe reduction
-        
+
+        # Phase 32.4: Exponential smoothing with previous state
+        if self._previous_state is not None:
+            prev_score = self._previous_state.get('score', 50)
+            result["score"] = round(0.3 * result["score"] + 0.7 * prev_score, 1)
+
+        # Phase 32.4: Persist current state
+        self._previous_state = result
+        self._persist_state(result)
+
         return result
     
     def _get_recent_moods(self) -> list:
@@ -282,6 +312,63 @@ class EmotionalGate:
             
         except Exception as e:
             logging.debug(f"[EMOTIONAL_GATE] Could not log influence: {e}")
+
+    def _load_persisted_state(self):
+        """Phase 32.4: Load last emotional state from DB. Provides continuity across restarts."""
+        try:
+            conn = sqlite3.connect(self.db_path, timeout=30.0)
+            c = conn.cursor()
+
+            # Check if system_state table exists
+            c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='system_state'")
+            if not c.fetchone():
+                conn.close()
+                return
+
+            c.execute("SELECT value FROM system_state WHERE key = 'emotional_state'")
+            row = c.fetchone()
+            conn.close()
+
+            if row:
+                try:
+                    self._previous_state = json.loads(row[0])
+                    logging.info(
+                        f"[EMOTIONAL_GATE] Loaded persisted state: "
+                        f"{self._previous_state.get('state', 'UNKNOWN')} "
+                        f"(score={self._previous_state.get('score', '?')})"
+                    )
+                except (json.JSONDecodeError, TypeError):
+                    pass
+        except Exception as e:
+            logging.debug(f"[EMOTIONAL_GATE] Could not load persisted state: {e}")
+
+    def _persist_state(self, state: Dict):
+        """Phase 32.4: Save emotional state to DB for restart continuity."""
+        try:
+            # Only persist key fields (not mood_history which is large)
+            snapshot = {
+                'state': state.get('state', 'NEUTRAL'),
+                'score': state.get('score', 50),
+                'sizing_multiplier': state.get('sizing_multiplier', 1.0),
+                'checked_at': state.get('checked_at', datetime.now().isoformat()),
+                'scar_count': len(state.get('caution_flags', [])),
+            }
+
+            conn = sqlite3.connect(self.db_path, timeout=30.0)
+            c = conn.cursor()
+
+            # Ensure system_state exists
+            c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='system_state'")
+            if c.fetchone():
+                c.execute(
+                    "INSERT OR REPLACE INTO system_state (key, value) VALUES (?, ?)",
+                    ('emotional_state', json.dumps(snapshot))
+                )
+                conn.commit()
+
+            conn.close()
+        except Exception as e:
+            logging.debug(f"[EMOTIONAL_GATE] Could not persist state: {e}")
 
 
 # Singleton

@@ -381,6 +381,92 @@ class ScarResonance:
             logger.debug("[SCAR_RESONANCE] AgentArchitect not available for proposal")
 
 
+    def decay_scars(self):
+        """
+        Phase 32.3: Apply age-based decay to scars.
+
+        Scars that haven't been re-triggered decay over time.
+        decay_factor = base_decay * (1 + 0.01 * scar_age_days)
+
+        - Scars seen recently (< 7 days) are not decayed.
+        - Scars where times_repeated drops to 0 are removed.
+        - Severity downgraded over time: CRITICAL → HIGH → MEDIUM → LOW.
+
+        Should be called once per consciousness cycle (~5 min).
+        """
+        try:
+            conn = sqlite3.connect(self.db_path, timeout=30.0)
+            c = conn.cursor()
+
+            c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='book_of_scars'")
+            if not c.fetchone():
+                conn.close()
+                return 0
+
+            # Get scars not seen in last 7 days
+            c.execute("""
+                SELECT id, severity, times_repeated, last_seen, timestamp
+                FROM book_of_scars
+                WHERE last_seen < datetime('now', '-7 days')
+            """)
+            rows = c.fetchall()
+
+            removed = 0
+            decayed = 0
+            severity_order = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
+
+            for row in rows:
+                scar_id, severity, times_repeated, last_seen, created = row
+
+                # Calculate age in days
+                try:
+                    created_dt = datetime.fromisoformat(str(created)) if created else datetime.now()
+                    age_days = (datetime.now() - created_dt).days
+                except (ValueError, TypeError):
+                    age_days = 30  # Default to 30 days if parse fails
+
+                # Base decay: 0.1 per cycle, accelerated by age
+                base_decay = 0.1
+                decay_amount = base_decay * (1 + 0.01 * age_days)
+
+                new_repeated = max(0, (times_repeated or 1) - decay_amount)
+
+                if new_repeated < 0.01:
+                    # Remove fully decayed scar
+                    c.execute("DELETE FROM book_of_scars WHERE id = ?", (scar_id,))
+                    removed += 1
+                else:
+                    # Downgrade severity if repeated count low
+                    new_severity = severity
+                    if new_repeated < 1 and severity in severity_order:
+                        idx = severity_order.index(severity)
+                        if idx > 0:
+                            new_severity = severity_order[idx - 1]
+
+                    c.execute(
+                        "UPDATE book_of_scars SET times_repeated = ?, severity = ? WHERE id = ?",
+                        (int(new_repeated) if new_repeated >= 1 else round(new_repeated, 2), new_severity, scar_id)
+                    )
+                    decayed += 1
+
+            conn.commit()
+            conn.close()
+
+            if removed > 0 or decayed > 0:
+                logger.info(f"[SCAR_RESONANCE] Scar decay: {decayed} decayed, {removed} removed")
+            return removed + decayed
+
+        except Exception as e:
+            logger.error(f"[SCAR_RESONANCE] Scar decay error: {e}")
+            return 0
+
+
+def decay_scars(db_path: str = None):
+    """Phase 32.3: Convenience function to run scar decay."""
+    engine = get_resonance_engine(db_path)
+    return engine.decay_scars()
+
+
 # Singleton instance
 _engine = None
 

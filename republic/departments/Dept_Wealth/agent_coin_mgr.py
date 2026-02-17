@@ -152,12 +152,32 @@ class AgentCoinMgr:
             return json.load(f)
     
     def _save_config(self, config):
-        """Save updated wealth_strategy.json"""
+        """
+        Save updated wealth_strategy.json.
+
+        Phase 32.6: Atomic write via tempfile + os.replace.
+        Prevents corruption if crash occurs mid-write.
+        """
+        import tempfile
         config['LAST_UPDATED_BY'] = self.name
         config['UPDATE_TIMESTAMP'] = datetime.now().isoformat()
-        with open(CONFIG_PATH, 'w') as f:
-            json.dump(config, f, indent=2)
-        logging.info(f"[COIN_MGR] 📝 Updated wealth_strategy.json")
+        try:
+            dir_name = os.path.dirname(CONFIG_PATH)
+            with tempfile.NamedTemporaryFile(
+                mode='w', dir=dir_name, delete=False, suffix='.tmp'
+            ) as tmp:
+                json.dump(config, tmp, indent=2)
+                tmp_path = tmp.name
+            os.replace(tmp_path, CONFIG_PATH)
+            logging.info(f"[COIN_MGR] 📝 Updated wealth_strategy.json (atomic)")
+        except Exception as e:
+            logging.error(f"[COIN_MGR] Failed to save config: {e}")
+            # Cleanup temp file on failure
+            try:
+                if 'tmp_path' in locals():
+                    os.unlink(tmp_path)
+            except OSError:
+                pass
     
     def get_market_universe(self):
         """

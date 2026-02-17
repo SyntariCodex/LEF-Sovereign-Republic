@@ -162,6 +162,9 @@ class CoinbaseAgent(IntentListenerMixin):
         self.error_streak = 0
         self.max_error_streak = coinbase_cfg.get('max_error_streak', 5)
 
+        # Phase 32.2: Load persisted API state
+        self._load_api_state()
+
 
 
         
@@ -320,26 +323,85 @@ class CoinbaseAgent(IntentListenerMixin):
 
     
     def _check_rate_limit(self):
-        """Check and enforce Coinbase rate limits (10,000 requests/hour)"""
+        """
+        Check and enforce Coinbase rate limits (10,000 requests/hour).
+
+        Phase 32.1: Exponential backoff on errors.
+        max_calls = base_limit * (0.5 ** error_count). Minimum 1 call/hour.
+        """
         current_time = time.time()
-        
+
         # Remove API calls older than 1 hour
         self.api_call_times = [t for t in self.api_call_times if current_time - t < 3600]
-        
-        # If we're approaching the limit, wait
-        if len(self.api_call_times) >= self.max_requests_per_hour:
+
+        # Phase 32.1: Exponential rate reduction on error streaks
+        effective_limit = max(1, int(self.max_requests_per_hour * (0.5 ** self.error_streak)))
+        if self.error_streak > 0:
+            SafeLogger.debug(
+                f"Rate limit adjusted: {self.max_requests_per_hour} × 0.5^{self.error_streak} "
+                f"= {effective_limit} calls/hour"
+            )
+
+        # If we're approaching the effective limit, wait
+        if len(self.api_call_times) >= effective_limit:
             oldest_call = min(self.api_call_times)
             wait_time = 3600 - (current_time - oldest_call) + 1  # +1 second buffer
             if wait_time > 0:
-                SafeLogger.info(f"Rate limit approaching, waiting {wait_time:.0f} seconds...")
+                SafeLogger.info(f"Rate limit approaching ({effective_limit}/hr), waiting {wait_time:.0f} seconds...")
                 time.sleep(wait_time)
                 # Clean up again after sleep
+                current_time = time.time()
                 self.api_call_times = [t for t in self.api_call_times if current_time - t < 3600]
-        
+
         # Track this API call
         self.api_call_times.append(time.time())
         self.api_call_count += 1
-    
+
+        # Phase 32.2: Persist API state every 10 calls
+        if self.api_call_count % 10 == 0:
+            self._save_api_state()
+
+    def _load_api_state(self):
+        """Phase 32.2: Load persisted API state from DB. Survives restarts."""
+        try:
+            with db_connection(self.db_path) as conn:
+                c = conn.cursor()
+                c.execute("SELECT key, value FROM system_state WHERE key IN ('coinbase_api_call_count', 'coinbase_error_streak', 'coinbase_last_error_at')")
+                rows = c.fetchall()
+                state = {r[0]: r[1] for r in rows}
+                if 'coinbase_api_call_count' in state:
+                    self.api_call_count = int(state['coinbase_api_call_count'])
+                if 'coinbase_error_streak' in state:
+                    self.error_streak = int(state['coinbase_error_streak'])
+                # Reset error_streak if last error > 24h ago
+                if 'coinbase_last_error_at' in state:
+                    try:
+                        from datetime import datetime, timedelta
+                        last_error = datetime.fromisoformat(state['coinbase_last_error_at'])
+                        if datetime.now() - last_error > timedelta(hours=24):
+                            self.error_streak = 0
+                            SafeLogger.info("[MOUTH] Error streak reset (last error > 24h ago)")
+                    except Exception:
+                        pass
+                if self.api_call_count > 0 or self.error_streak > 0:
+                    SafeLogger.info(f"[MOUTH] Loaded API state: calls={self.api_call_count}, errors={self.error_streak}")
+        except Exception as e:
+            SafeLogger.debug(f"[MOUTH] Could not load API state: {e}")
+
+    def _save_api_state(self):
+        """Phase 32.2: Persist API state to DB."""
+        try:
+            from db.db_helper import db_connection as _db_conn, upsert_sql
+            with _db_conn() as conn:
+                c = conn.cursor()
+                sql = upsert_sql('system_state', ['key', 'value'], 'key')
+                c.execute(sql, ('coinbase_api_call_count', str(self.api_call_count)))
+                c.execute(sql, ('coinbase_error_streak', str(self.error_streak)))
+                if self.error_streak > 0:
+                    c.execute(sql, ('coinbase_last_error_at', datetime.now().isoformat()))
+                conn.commit()
+        except Exception as e:
+            SafeLogger.debug(f"[MOUTH] Could not save API state: {e}")
 
     def _call_exchange(self, method, *args, timeout=30):
         """
@@ -480,6 +542,7 @@ class CoinbaseAgent(IntentListenerMixin):
 
                 print(f"[MOUTH] Warning: Could not fetch real price: {e}")
                 self.error_streak += 1
+                self._save_api_state()  # Phase 32.2: Persist on error change
                 if self.error_streak >= self.max_error_streak:
                     SafeLogger.warning("🔌 SILENCE PROTOCOL: Disabling Exchange Connection (Too many errors). Switching to Offline Mode.")
                     self.exchange = None
