@@ -57,7 +57,22 @@ class MemoryRetriever:
         self.budget = budget or TokenBudget()
         self.conv_memory = get_conversation_memory()
         self.hippocampus = get_hippocampus()
+        # Phase 33.6: Redis conversation cache
+        self._redis = None
+        self._redis_available = False
+        self._init_redis()
     
+    def _init_redis(self):
+        """Phase 33.6: Initialize Redis client for conversation caching."""
+        try:
+            import redis
+            self._redis = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+            self._redis.ping()
+            self._redis_available = True
+        except Exception:
+            self._redis = None
+            self._redis_available = False
+
     def _estimate_tokens(self, text: str) -> int:
         """Estimate token count from text."""
         return len(text) // self.CHARS_PER_TOKEN
@@ -284,23 +299,35 @@ class MemoryRetriever:
             return ""
     
     def _build_consciousness_feed(self, max_items: int = 5) -> Optional[str]:
-        """Retrieve recent unconsumed consciousness outputs for prompt injection."""
+        """Retrieve recent unconsumed consciousness outputs for prompt injection.
+        Phase 33.6: Redis cache with 1-hour TTL for conversation context."""
+
+        # Phase 33.6: Try Redis cache first
+        cache_key = "conv_mem:consciousness_feed:recent"
+        if self._redis_available:
+            try:
+                cached = self._redis.get(cache_key)
+                if cached:
+                    return cached
+            except Exception:
+                pass
+
         try:
             from db.db_helper import db_connection, get_db_path
-            
+
             db_path = get_db_path()
-            
+
             with db_connection(db_path) as conn:
                 cursor = conn.cursor()
-                
+
                 # Check if table exists
                 cursor.execute("""
-                    SELECT name FROM sqlite_master 
+                    SELECT name FROM sqlite_master
                     WHERE type='table' AND name='consciousness_feed'
                 """)
                 if not cursor.fetchone():
                     return None
-                
+
                 cursor.execute("""
                     SELECT id, agent_name, content, category, timestamp
                     FROM consciousness_feed
@@ -309,17 +336,17 @@ class MemoryRetriever:
                     LIMIT ?
                 """, (max_items,))
                 rows = cursor.fetchall()
-                
+
                 if not rows:
                     return None
-                
+
                 sections = []
                 ids = []
                 for row in rows:
                     row_id, agent, content, category, ts = row
                     sections.append(f"[{category.upper()} from {agent}, {ts}]\n{content}")
                     ids.append(row_id)
-                
+
                 # Mark as consumed
                 placeholders = ','.join('?' * len(ids))
                 cursor.execute(
@@ -328,8 +355,17 @@ class MemoryRetriever:
                 )
                 conn.commit()
                 
-                return "\n\n".join(sections)
-                
+                result = "\n\n".join(sections)
+
+                # Phase 33.6: Cache in Redis with 1-hour TTL
+                if self._redis_available and result:
+                    try:
+                        self._redis.setex(cache_key, 3600, result)
+                    except Exception:
+                        pass
+
+                return result
+
         except Exception:
             return None
     

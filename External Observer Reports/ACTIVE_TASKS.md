@@ -19852,45 +19852,53 @@ Fix all Phase 25 gaps. Create config notification infrastructure, reload gravity
 
 ### Tasks:
 
-#### 33.1 — Config Notification Infrastructure (LRN-13)
+#### 33.1 — Config Notification Infrastructure (LRN-13) ✅
 **File:** `system/gravity_learner.py` (and other learners)
 **Spec:** See Phase 25.1a (line 17486). After writing gravity_config.json, publish to Redis channel 'config_changed' with config_type and keys_changed.
 **Verify:** Update config → Redis channel receives message within 1 second.
+**Report-back:** Added `_broadcast_config_change()` method to GravityLearner. Called at end of `_apply_adjustments()` after writing gravity_config.json. Publishes JSON with config_type, timestamp, keys_changed, source to Redis channel 'config_changed'. Graceful fallback if Redis unavailable.
 
-#### 33.2 — Gravity Config Reload (LRN-02)
+#### 33.2 — Gravity Config Reload (LRN-02) ✅
 **File:** `system/gravity.py`
 **Spec:** See Phase 25.1b (line 17520). Add Redis subscriber for 'config_changed'. On message, call reload_config() to re-read gravity_config.json. Daemon thread listener.
 **Verify:** Change gravity_config.json → gravity.py reloads weights within 5 seconds.
+**Report-back:** Added `_setup_config_listener()` in __init__ — daemon thread subscribes to Redis 'config_changed' channel. Filters for config_type='gravity', calls `reload_config()`. Added `reload_config()` method that re-reads gravity_config.json from disk. Stored `_config_path` for reload access. Graceful if Redis unavailable.
 
-#### 33.3 — Fix Sabbath Baseline (LRN-03)
+#### 33.3 — Fix Sabbath Baseline (LRN-03) ✅
 **File:** `system/sabbath_learner.py`
 **Spec:** See Phase 25.1c (line 17569). Baseline EXCLUDES post-Sabbath recovery data. Query only data before last Sabbath trigger.
 **Verify:** Sabbath baseline computed from pre-Sabbath data only. Recovery spikes excluded.
+**Report-back:** Rewrote `_calculate_baseline_reverb()`. Builds NOT BETWEEN exclusion clauses for each Sabbath event's 24h recovery window. Also queries consciousness_feed for last sabbath_triggered timestamp. Limits baseline to 30-day window. Recovery spikes no longer inflate baseline.
 
-#### 33.4 — Hippocampus Atomic Writes (LRN-04)
+#### 33.4 — Hippocampus Atomic Writes (LRN-04) ✅
 **File:** `departments/Dept_Memory/agent_hippocampus.py`
 **Spec:** See Phase 25.2a (line 17615). Use tempfile + os.replace for claude_memory.json writes.
 **Verify:** 100 memory writes with simulated kills → file never corrupted.
+**Report-back:** Replaced `_save_claude_memory()` with atomic write pattern: `tempfile.NamedTemporaryFile()` → `json.dump()` → `os.replace()`. Same pattern as agent_coin_mgr (Phase 32.6). Temp file cleanup on failure.
 
-#### 33.5 — Memory.db Migration to PostgreSQL (LRN-09)
+#### 33.5 — Memory.db Migration to PostgreSQL (LRN-09) ✅
 **File:** NEW `tools/migrate_memory_db.py`
 **Spec:** See Phase 25.2b (line 17651). Read from SQLite memory.db, write to PostgreSQL republic database. Upsert to avoid duplicates. Backup original.
 **Verify:** All memory.db tables in PostgreSQL. Row counts match. memory.db.backup exists.
+**Report-back:** Created `tools/migrate_memory_db.py`. Auto-detects if memory.db exists (it doesn't — memory already in republic.db). If found: backs up, discovers tables, connects to PostgreSQL, upserts all rows with ON CONFLICT DO NOTHING, reports per-table counts. Currently reports "Nothing to migrate" since no separate memory.db exists.
 
-#### 33.6 — Conversation Cache to Redis (LRN-11)
-**File:** Conversation memory reader
+#### 33.6 — Conversation Cache to Redis (LRN-11) ✅
+**File:** `departments/Dept_Memory/memory_retriever.py`
 **Spec:** See Phase 25.2c (line 17703). Redis cache with 1-hour TTL. Cache key: `conv_mem:{agent_id}:recent`. DB fallback on miss.
 **Verify:** Cache hit rate > 90% under normal load.
+**Report-back:** Added Redis client init to MemoryRetriever.__init__ via `_init_redis()`. Updated `_build_consciousness_feed()`: checks Redis cache first (key: `conv_mem:consciousness_feed:recent`), falls back to DB on miss, caches result with 3600s TTL. Graceful fallback if Redis unavailable.
 
-#### 33.7 — Batch Gravity Queries (LRN-05)
+#### 33.7 — Batch Gravity Queries (LRN-05) ✅
 **File:** `system/gravity.py`
 **Spec:** See Phase 25.3a (line 17760). Replace per-pattern queries with single IN clause batch.
 **Verify:** assess(100 patterns) → 1 query, not 100. Latency reduced by 90%.
+**Report-back:** Added `assess_batch(patterns)` method that pre-fetches all scar data via `_batch_fetch_scars()` — single query with OR clauses for all unique domains. Maps results back to per-domain scar counts. Full gravity profile computed per pattern using cached scars. N patterns = 1 scar query instead of N.
 
-#### 33.8 — Fix season_synthesizer Column Name (LRN-07) + Resonance Window (LRN-06)
+#### 33.8 — Fix season_synthesizer Column Name (LRN-07) + Resonance Window (LRN-06) ✅
 **Files:** `system/season_synthesizer.py`, `system/resonance_learner.py` line 167
 **Spec:** See Phase 25.3c (line 17852) and 25.3b (line 17807). Fix created_at → timestamp column. Reduce 48h join window to 12h with time decay.
 **Verify:** season_synthesizer runs without "column does not exist". Resonance query < 500ms.
+**Report-back:** season_synthesizer.py: Fixed 3 column references — governance_proposals uses `state`/`discovered_at` (not status/created_at), reverb_log uses `timestamp` (not created_at), sovereign_reflection uses `timestamp` (not created_at). resonance_learner.py: Reduced join window from 48h to 12h. Added EXP time decay weighting (decay_weight = EXP(-seconds/21600)) so recent events count more. Weighted accuracy calculation.
 
 ### Phase 33 Verification
 1. Config change → Redis notification

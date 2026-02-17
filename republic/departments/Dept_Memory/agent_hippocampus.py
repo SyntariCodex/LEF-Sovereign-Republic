@@ -90,14 +90,26 @@ class AgentHippocampus:
         return {"memory": {"key_insights": [], "relationship_context": {}}}
     
     def _save_claude_memory(self):
-        """Persist the hippocampus to disk."""
+        """Phase 33.4: Persist hippocampus to disk using atomic write (tempfile + os.replace)."""
+        import tempfile
         try:
             CLAUDE_MEMORY_PATH.parent.mkdir(parents=True, exist_ok=True)
-            with open(CLAUDE_MEMORY_PATH, 'w') as f:
-                json.dump(self.claude_memory, f, indent=2)
-            logger.info("[Hippocampus] Memory persisted")
+            # Atomic write: write to temp file, then replace
+            with tempfile.NamedTemporaryFile(
+                mode='w', dir=str(CLAUDE_MEMORY_PATH.parent),
+                delete=False, suffix='.tmp'
+            ) as tmp:
+                json.dump(self.claude_memory, tmp, indent=2)
+                tmp_path = tmp.name
+            os.replace(tmp_path, str(CLAUDE_MEMORY_PATH))
+            logger.info("[Hippocampus] Memory persisted (atomic)")
         except Exception as e:
             logger.error(f"[Hippocampus] Failed to save memory: {e}")
+            try:
+                if 'tmp_path' in locals():
+                    os.unlink(tmp_path)
+            except OSError:
+                pass
     
     # =========================================================================
     # Session Compression
