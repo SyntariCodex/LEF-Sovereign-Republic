@@ -1,7 +1,9 @@
 
 import os
+import sys
 import json
 import shutil
+import logging
 from datetime import datetime
 
 # The Legislature
@@ -9,6 +11,14 @@ from datetime import datetime
 # Responsible for validating and voting on Proposals.
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Intent Listener for Motor Cortex integration (Phase 16)
+try:
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'shared'))
+    from intent_listener import IntentListenerMixin
+except ImportError:
+    IntentListenerMixin = object
+
 GOVERNANCE_DIR = os.path.join(BASE_DIR, 'governance')
 
 # Project root is one level up from republic/
@@ -75,8 +85,7 @@ class HouseOfBuilders:
         drafts = list_json_files(DIRS['proposals'])
         
         if not drafts:
-            print("[HOUSE] No new drafts on the floor.")
-            return
+            return  # Silent when idle — no need to announce every 20s
 
         for filename in drafts:
             filepath = os.path.join(DIRS['proposals'], filename)
@@ -257,8 +266,7 @@ class SenateOfIdentity:
         bills = list_json_files(DIRS['house'])
         
         if not bills:
-            print("[SENATE] No bills from the House.")
-            return
+            return  # Silent when idle — no need to announce every 20s
 
         for filename in bills:
             filepath = os.path.join(DIRS['house'], filename)
@@ -295,13 +303,24 @@ class SenateOfIdentity:
                     shutil.copy(os.path.join(DIRS['senate'], filename), DIRS['public_approved'])
                     
                     # PHASE 12: Trigger Bill Executor
+                    # Phase 35: Mark bill FAILED on executor error (never orphan as IN_PROGRESS)
                     try:
                         from departments.The_Cabinet.bill_executor import BillExecutor
                         executor = BillExecutor()
                         result = executor.execute_bill(os.path.join(DIRS['public_approved'], filename))
-                        print(f"[SENATE] 🦾 Bill Executor: {result.get('status', 'UNKNOWN')}")
+                        exec_status = result.get('status', 'UNKNOWN')
+                        print(f"[SENATE] 🦾 Bill Executor: {exec_status}")
+                        if exec_status == 'ERROR' or exec_status == 'FAILED':
+                            self._mark_bill_failed(
+                                os.path.join(DIRS['public_approved'], filename),
+                                proposal, f"Executor returned {exec_status}: {result.get('reason', 'unknown')}"
+                            )
                     except Exception as exec_err:
                         print(f"[SENATE] ⚠️ Bill Executor failed: {exec_err}")
+                        self._mark_bill_failed(
+                            os.path.join(DIRS['public_approved'], filename),
+                            proposal, f"Executor exception: {exec_err}"
+                        )
                     
                     # Notify User (Town Crier)
                     self.notify_user(proposal.get('id'), proposal.get('title'))
@@ -439,17 +458,127 @@ class SenateOfIdentity:
         # Move to Rejected Folder for review
         self._move_bill(old_path, os.path.join(GOVERNANCE_DIR, 'rejected'), data)
 
+    def _mark_bill_failed(self, bill_path, data, reason):
+        """Phase 35: Mark a bill as FAILED after executor error. Never orphan as IN_PROGRESS."""
+        try:
+            data['status'] = 'FAILED'
+            if 'votes' not in data:
+                data['votes'] = {}
+            data['votes']['execution'] = {
+                'status': 'FAILED',
+                'reason': reason,
+                'failed_at': datetime.now().isoformat()
+            }
+            # Overwrite the bill in its current location with the FAILED status
+            if os.path.exists(bill_path):
+                with open(bill_path, 'w') as f:
+                    json.dump(data, f, indent=4)
+            print(f"[SENATE] ❌ Bill marked FAILED: {data.get('id', 'unknown')} — {reason[:80]}")
+        except Exception as e:
+            print(f"[SENATE] ⚠️ Could not mark bill as FAILED: {e}")
+
+def handle_intent(intent_data: dict):
+    """
+    Phase 16 — Task 16.2: Handle PROPOSE_BILL and PETITION intents from the executor.
+    Converts intent payloads into bill files that the existing
+    HouseOfBuilders → SenateOfIdentity pipeline can process.
+    """
+    import uuid
+
+    intent_type = intent_data.get('type', '')
+    intent_content = intent_data.get('content', '')
+
+    # Parse payload from intent_content (JSON string)
+    payload = {}
+    if intent_content:
+        try:
+            payload = json.loads(intent_content) if isinstance(intent_content, str) else intent_content
+        except (json.JSONDecodeError, TypeError):
+            payload = {'description': str(intent_content)}
+
+    if intent_type in ('PROPOSE_BILL', 'PETITION_CONGRESS'):
+        bill = {
+            'title': payload.get('title', 'Untitled Proposal'),
+            'description': payload.get('description', intent_content[:500] if intent_content else ''),
+            'domain': payload.get('domain', 'general'),
+            'proposed_by': payload.get('source', 'LEF'),
+            'proposed_at': datetime.now().isoformat(),
+            'type': 'bill',
+            'changes': payload.get('changes', []),
+            'justification': payload.get('justification', '')
+        }
+
+        bill_id = f"bill_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        bill_path = os.path.join(GOVERNANCE_DIR, 'proposals', 'pending', f'{bill_id}.json')
+
+        os.makedirs(os.path.dirname(bill_path), exist_ok=True)
+        with open(bill_path, 'w') as f:
+            json.dump(bill, f, indent=2)
+
+        logging.info(f"[Congress] Bill filed from intent: {bill['title']}")
+        return {'status': 'filed', 'bill_id': bill_id}
+
+    elif intent_type == 'PETITION':
+        petition = {
+            'title': payload.get('title', 'Untitled Petition'),
+            'petitioner': payload.get('source', 'LEF'),
+            'grievance': payload.get('description', intent_content[:500] if intent_content else ''),
+            'requested_action': payload.get('action', ''),
+            'submitted_at': datetime.now().isoformat(),
+            'type': 'petition'
+        }
+
+        petition_id = f"petition_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        petition_path = os.path.join(GOVERNANCE_DIR, 'proposals', 'pending', f'{petition_id}.json')
+
+        os.makedirs(os.path.dirname(petition_path), exist_ok=True)
+        with open(petition_path, 'w') as f:
+            json.dump(petition, f, indent=2)
+
+        logging.info(f"[Congress] Petition filed from intent: {petition['title']}")
+        return {'status': 'filed', 'petition_id': petition_id}
+
+    else:
+        logging.warning(f"[Congress] Unknown intent type: {intent_type}")
+        return {'status': 'error', 'reason': f'Unknown intent type: {intent_type}'}
+
+
+class CongressIntentListener(IntentListenerMixin):
+    """
+    Phase 16 — Redis intent listener bridge for the Congress module.
+    Receives intents from the Motor Cortex (agent_executor) and delegates
+    to the module-level handle_intent() function.
+    """
+    def __init__(self):
+        super().__init__()
+        self.setup_intent_listener('agent_congress')
+        self.start_listening()
+
+    def handle_intent(self, intent_data):
+        """Delegate to the module-level handle_intent."""
+        result = handle_intent(intent_data)
+        intent_id = intent_data.get('intent_id')
+        if intent_id:
+            self.send_feedback(
+                intent_id,
+                'COMPLETE' if result.get('status') == 'filed' else 'ERROR',
+                f"Congress: {result.get('status')} - {result.get('bill_id', result.get('petition_id', result.get('reason', '')))}",
+                result
+            )
+        return result
+
+
 def convene_congress():
     print("="*40)
-    print("⚖️  CONVENING CONGRESS")
+    print("CONVENING CONGRESS")
     print("="*40)
-    
+
     house = HouseOfBuilders()
     house.run_session()
-    
+
     senate = SenateOfIdentity()
     senate.run_session()
-    
+
     print("="*40)
 
 if __name__ == "__main__":

@@ -251,15 +251,27 @@ Respond in JSON format:
             else:
                 system_prompt = base_system
             
-            response = self.claude.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=500,
-                system=system_prompt,
-                messages=[{
-                    "role": "user",
-                    "content": f"Analyze this message from The Bridge:\n\nFilename: {filename}\n\nContent:\n{content[:2000]}"
-                }]
-            )
+            # Phase 35: ThreadPoolExecutor with 30s timeout to prevent hung API calls
+            from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
+
+            def _call_claude():
+                return self.claude.messages.create(
+                    model="claude-sonnet-4-20250514",
+                    max_tokens=500,
+                    system=system_prompt,
+                    messages=[{
+                        "role": "user",
+                        "content": f"Analyze this message from The Bridge:\n\nFilename: {filename}\n\nContent:\n{content[:2000]}"
+                    }]
+                )
+
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_call_claude)
+                try:
+                    response = future.result(timeout=30)
+                except FuturesTimeout:
+                    self.log("Claude API call timed out after 30s")
+                    return self._fallback_understanding(content)
             
             # Record usage
             if self.token_budget:

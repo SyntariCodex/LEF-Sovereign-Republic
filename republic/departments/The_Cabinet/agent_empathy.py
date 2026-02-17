@@ -1,4 +1,5 @@
 import sqlite3
+import logging
 
 # Use centralized db_helper for connection pooling
 try:
@@ -116,9 +117,9 @@ class AgentEmpathy:
                 except sqlite3.Error:
                     pass  # Keep default
                     
-        except sqlite3.Error:
-            # Database completely inaccessible - use defaults
-            pass
+        except sqlite3.Error as e:
+            # Phase 35: Log warning instead of silent swallow
+            logging.warning(f"[Empathy] DB query failed: {e}")
         
         # 4. Process Emotions (The Triad Weighing)
         new_state = "ZEN"

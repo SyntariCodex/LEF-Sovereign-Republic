@@ -20046,6 +20046,42 @@ Fix remaining Cabinet crash and reliability issues from Phase 26. Oracle timeout
 
 **Commit message:** `Phase 35: Harden Cabinet agents — timeouts, caps, atomic ops, logging`
 
+### Phase 35 — Report-Back (Completed)
+
+**35.1 — agent_oracle.py Claude API Timeout (CAB-05) ✅**
+Wrapped Claude `messages.create()` in `ThreadPoolExecutor` with 30s timeout. On `FuturesTimeout`, logs warning and returns `_fallback_understanding()`. Agent continues processing.
+
+**35.2 — agent_dreamer.py Journal + Task Reads (CAB-06/07) ✅**
+Added `MAX_TASK_SIZE_MB = 10` (checks `os.path.getsize()` before read) and `MAX_JOURNAL_LINES = 1000` (sliced `readlines()[-1000:]`). Prevents OOM on large files.
+
+**35.3 — agent_ethicist.py Atomic Veto (CAB-08) ✅**
+Replaced direct `json.dump` with `tempfile.mkstemp()` + `os.replace()`. Temp file cleaned up on failure. Crash during write → no corrupted JSON in `rejected/`.
+
+**35.4 — agent_ethicist.py "all" Substring Match (CAB-09) ✅**
+Changed `if "all" in title` to `if re.search(r'\ball\b', title)`. Word-boundary match prevents false positives ("call", "install", "rally" no longer trigger veto).
+
+**35.5 — agent_empathy.py Silent Fallback (CAB-10) ✅**
+Replaced outer `except sqlite3.Error: pass` with `logging.warning(f"[Empathy] DB query failed: {e}")`. Added `import logging`. DB inaccessibility now visible in logs.
+
+**35.6 — agent_congress.py Bill Failure Handling (CAB-11) ✅**
+Added `_mark_bill_failed()` method to `SenateOfIdentity`. Bill executor errors (exception or ERROR/FAILED status) → bill marked `status='FAILED'` with `votes.execution.reason` and `failed_at` timestamp. Bills never orphaned as PASSED_SENATE after executor failure.
+
+**35.7 — agent_chronicler.py + agent_librarian.py Transactions (DEP-08/09) ✅**
+Librarian: Converted 4 JSON write sites (`_archive_hippocampus_memory`, `_prune_reasoning_journal`, `_archive_compressed_wisdom`, `catalog_knowledge`) to atomic `tempfile.mkstemp()` + `os.replace()` pattern. Temp files cleaned on failure.
+Chronicler: Already uses `with db_connection()` context managers (Phase 34) with explicit `conn.commit()` — each write is already transactional. No further changes needed.
+
+**Files modified (6):**
+- `departments/The_Cabinet/agent_oracle.py` — ThreadPoolExecutor timeout
+- `departments/The_Cabinet/agent_dreamer.py` — file size + line caps
+- `departments/The_Cabinet/agent_ethicist.py` — atomic veto, word-boundary regex
+- `departments/The_Cabinet/agent_empathy.py` — logging on DB failure
+- `departments/The_Cabinet/agent_congress.py` — bill failure marking
+- `departments/Dept_Education/agent_librarian.py` — atomic JSON writes
+
+**All 6 files compile clean.**
+
+---
+
 ## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
 
 ---

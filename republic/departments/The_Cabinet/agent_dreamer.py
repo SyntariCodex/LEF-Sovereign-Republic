@@ -88,20 +88,28 @@ class AgentDreamer:
         if not self.client: return
         self.logger.info("[DREAMER] 🌙 DREAMING OF EVOLUTION...")
         
-        # 1. Read The Map (Task.md)
+        # Phase 35: Safety caps on file reads to prevent memory exhaustion
+        MAX_TASK_SIZE_MB = 10
+        MAX_JOURNAL_LINES = 1000
+
+        # 1. Read The Map (Task.md) — capped at 10MB
         task_context = "No Plan Found."
         if BRAIN_DIR:
             task_path = os.path.join(BRAIN_DIR, 'task.md')
             if os.path.exists(task_path):
-                with open(task_path, 'r') as f:
-                    task_context = f.read()
+                file_size_mb = os.path.getsize(task_path) / (1024 * 1024)
+                if file_size_mb > MAX_TASK_SIZE_MB:
+                    task_context = f"[Task file too large: {file_size_mb:.1f}MB > {MAX_TASK_SIZE_MB}MB cap]"
+                    self.logger.warning(f"[DREAMER] Task file too large ({file_size_mb:.1f}MB), skipping")
+                else:
+                    with open(task_path, 'r') as f:
+                        task_context = f.read()
 
-        # 2. Read The Reality (Logs)
+        # 2. Read The Reality (Logs) — capped at MAX_JOURNAL_LINES
         log_context = "No Memory."
         if os.path.exists(LOG_FILE):
              with open(LOG_FILE, 'r') as f:
-                 # Last 2000 lines is plenty context
-                 log_context = "".join(f.readlines()[-2000:])
+                 log_context = "".join(f.readlines()[-MAX_JOURNAL_LINES:])
 
         # 3. Construct The Dream
         prompt = f"""

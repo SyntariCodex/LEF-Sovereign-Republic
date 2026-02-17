@@ -15,6 +15,7 @@ import shutil
 import logging
 import json
 import sqlite3
+import tempfile
 from datetime import datetime
 
 # Use centralized db_helper for connection pooling
@@ -178,9 +179,17 @@ class AgentLibrarian:
                 }
             }
             
-            with open(snapshot_path, 'w') as f:
-                json.dump(archive_entry, f, indent=2)
-            
+            # Phase 35: Atomic write — tempfile + os.replace
+            fd, tmp_path = tempfile.mkstemp(dir=MEMORY_ARCHIVE, suffix='.tmp')
+            try:
+                with os.fdopen(fd, 'w') as f:
+                    json.dump(archive_entry, f, indent=2)
+                os.replace(tmp_path, snapshot_path)
+            except Exception:
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+                raise
+
             self.logger.info(f"[LIBRARIAN] 🧠 Hippocampus snapshot archived: {snapshot_name}")
             
             # Prune old reasoning journal entries (keep last 50)
@@ -207,10 +216,19 @@ class AgentLibrarian:
             if len(entries) > 50:
                 # Keep only the most recent 50
                 memory['reasoning_journal']['entries'] = entries[-50:]
-                
-                with open(MEMORY_PATH, 'w') as f:
-                    json.dump(memory, f, indent=2)
-                
+
+                # Phase 35: Atomic write — tempfile + os.replace
+                mem_dir = os.path.dirname(MEMORY_PATH)
+                fd, tmp_path = tempfile.mkstemp(dir=mem_dir, suffix='.tmp')
+                try:
+                    with os.fdopen(fd, 'w') as f:
+                        json.dump(memory, f, indent=2)
+                    os.replace(tmp_path, MEMORY_PATH)
+                except Exception:
+                    if os.path.exists(tmp_path):
+                        os.remove(tmp_path)
+                    raise
+
                 pruned = len(entries) - 50
                 self.logger.info(f"[LIBRARIAN] ✂️ Pruned {pruned} old reasoning entries")
                 
@@ -270,9 +288,17 @@ class AgentLibrarian:
                 ]
             }
             
-            with open(archive_path, 'w') as f:
-                json.dump(archive_entry, f, indent=2)
-            
+            # Phase 35: Atomic write — tempfile + os.replace
+            fd, tmp_path = tempfile.mkstemp(dir=WISDOM_ARCHIVE, suffix='.tmp')
+            try:
+                with os.fdopen(fd, 'w') as f:
+                    json.dump(archive_entry, f, indent=2)
+                os.replace(tmp_path, archive_path)
+            except Exception:
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+                raise
+
             self.logger.info(f"[LIBRARIAN] 💎 Wisdom archive created: {archive_name} ({len(rows)} entries)")
             
         except Exception as e:
@@ -300,10 +326,19 @@ class AgentLibrarian:
                 "category": category,
                 "cataloged_at": datetime.now().isoformat()
             })
-            
-            with open(the_canon_path, 'w') as f:
-                json.dump(canon, f, indent=2)
-            
+
+            # Phase 35: Atomic write — tempfile + os.replace
+            canon_dir = os.path.dirname(the_canon_path)
+            fd, tmp_path = tempfile.mkstemp(dir=canon_dir, suffix='.tmp')
+            try:
+                with os.fdopen(fd, 'w') as f:
+                    json.dump(canon, f, indent=2)
+                os.replace(tmp_path, the_canon_path)
+            except Exception:
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+                raise
+
             self.logger.info(f"[LIBRARIAN] 📖 Knowledge cataloged from {source}: {content[:50]}...")
             return True
             

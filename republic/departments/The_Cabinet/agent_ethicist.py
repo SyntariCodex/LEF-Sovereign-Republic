@@ -8,6 +8,8 @@ import time
 import logging
 import os
 import json
+import re
+import tempfile
 
 # Config
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -82,7 +84,7 @@ class AgentEthicist:
         # 2. Financial Safety
         if "send" in title or "transfer" in title:
             # Simple heuristic check for amounts? hard to parse from text.
-            if "all" in title or "100%" in title:
+            if re.search(r'\ball\b', title) or "100%" in title:
                  return {'safe': False, 'reason': "Violates Axiom: Treasury Safety (100% Transfer Risk)."}
 
         # 3. Privacy
@@ -95,12 +97,22 @@ class AgentEthicist:
         data['status'] = 'VETOED_ETHICIST'
         if 'votes' not in data: data['votes'] = {}
         data['votes']['ethicist'] = {'status': 'REJECTED', 'reason': reason}
-        
-        # Move to Rejected
+
+        # Phase 35: Atomic veto — tempfile + os.replace prevents corrupted JSON
         target = os.path.join(DIRS['rejected'], os.path.basename(filepath))
-        with open(target, 'w') as f:
-            json.dump(data, f, indent=4)
-        
+        os.makedirs(DIRS['rejected'], exist_ok=True)
+
+        fd, tmp_path = tempfile.mkstemp(dir=DIRS['rejected'], suffix='.tmp')
+        try:
+            with os.fdopen(fd, 'w') as f:
+                json.dump(data, f, indent=4)
+            os.replace(tmp_path, target)
+        except Exception:
+            # Clean up temp file on failure
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+            raise
+
         os.remove(filepath)
 
     def run(self):
