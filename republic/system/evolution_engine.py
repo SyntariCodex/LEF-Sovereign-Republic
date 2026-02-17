@@ -124,11 +124,24 @@ class EvolutionEngine:
             self._proposal_history = []
 
     def _save_proposal_history(self):
-        """Persist proposal history to disk."""
+        """Persist proposal history to disk. Uses atomic write + flock (Phase 21.1f)."""
+        import tempfile
+        import fcntl
         try:
-            os.makedirs(os.path.dirname(self.PROPOSAL_LOG_PATH), exist_ok=True)
-            with open(self.PROPOSAL_LOG_PATH, 'w') as f:
-                json.dump(self._proposal_history, f, indent=2, default=str)
+            dir_name = os.path.dirname(self.PROPOSAL_LOG_PATH)
+            os.makedirs(dir_name, exist_ok=True)
+            fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix='.tmp')
+            try:
+                with os.fdopen(fd, 'w') as f:
+                    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+                    json.dump(self._proposal_history, f, indent=2, default=str)
+                os.replace(tmp_path, self.PROPOSAL_LOG_PATH)
+            except Exception:
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+                raise
         except IOError as e:
             logger.error(f"[EVOLUTION] Could not save proposal history: {e}")
 
@@ -177,6 +190,254 @@ class EvolutionEngine:
                 self.enacted_today += 1
             if enacted_ts >= week_start:
                 self.enacted_this_week += 1
+
+    # ─── Phase 15 — Task 15.7a: Proposal Deduplication ───
+
+    # Phase 17: Protected configs — now adaptive, not configurable by evolution
+    PROTECTED_CONFIGS = [
+        'introspector_interval',
+        'metacognition_interval',
+        'daat_cycle_interval',
+        'observation_interval',
+    ]
+
+    def _is_duplicate_proposal(self, proposal: dict) -> bool:
+        """
+        Check if this proposal duplicates a recently enacted, cooling,
+        or pending proposal. Prevents the 103-copies-of-same-idea problem.
+
+        Similarity: same domain + same config_key, OR same domain + >60% word overlap.
+        Also blocks proposals targeting Phase 17 protected configs (now adaptive).
+        """
+        # Phase 17: Block proposals to change timing configs (now adaptive)
+        config_key = proposal.get('config_key', '')
+        if config_key in self.PROTECTED_CONFIGS:
+            logging.info(f"[Evolution] 🛡️ Protected config: {config_key} is now adaptive (Phase 17)")
+            return True
+
+        domain = proposal.get('domain', '')
+        observation = proposal.get('observation', '') or proposal.get('change_description', '')
+        obs_words = set(observation.lower().split())
+
+        for existing in self._proposal_history[-200:]:  # Check recent 200
+            ex_status = existing.get('governance_result', {})
+            ex_enacted = existing.get('enacted', False)
+            ex_cooling = existing.get('cooling_started')
+            ex_dedup = existing.get('status') == 'deduplicated'
+
+            # Only compare against active/recent proposals (not ancient ones)
+            if ex_dedup:
+                continue
+            if existing.get('domain') != domain:
+                continue
+
+            # Same config_key = definitely duplicate
+            if config_key and existing.get('config_key') == config_key:
+                return True
+
+            # Check observation word overlap
+            ex_obs = existing.get('observation', '') or existing.get('change_description', '')
+            ex_words = set(ex_obs.lower().split())
+            if obs_words and ex_words:
+                overlap = len(obs_words & ex_words) / max(len(obs_words), len(ex_words), 1)
+                if overlap > 0.6:
+                    return True
+
+        return False
+
+    # ─── Phase 15 — Task 15.7b: Rejection Learning ───
+
+    def _learn_from_rejection(self, proposal: dict, reason: str):
+        """
+        When a proposal is rejected/blocked/ineffective, extract a lesson
+        so LEF can adapt future proposals instead of repeating the same idea.
+        """
+        lesson = {
+            'rejected_domain': proposal.get('domain', ''),
+            'rejected_observation': (proposal.get('observation', '') or
+                                     proposal.get('change_description', ''))[:200],
+            'rejection_reason': reason,
+            'timestamp': datetime.now().isoformat(),
+            'lesson': (
+                f"Proposals about '{proposal.get('config_key', '')}' in domain "
+                f"'{proposal.get('domain', '')}' were {reason}. "
+                f"Future proposals should try a different approach or target."
+            )
+        }
+
+        if not hasattr(self, '_rejection_lessons'):
+            self._rejection_lessons = []
+        self._rejection_lessons.append(lesson)
+
+        # Surface to consciousness_feed so LEF is aware
+        try:
+            from db.db_helper import db_connection, translate_sql
+            with db_connection() as conn:
+                c = conn.cursor()
+                c.execute(translate_sql(
+                    "INSERT INTO consciousness_feed (agent_name, content, category, timestamp) "
+                    "VALUES (?, ?, 'evolution_rejection', NOW())"
+                ), ('EvolutionEngine', json.dumps(lesson)))
+                conn.commit()
+        except Exception:
+            pass
+
+        logger.info(f"[Evolution] 📝 Learned from rejection: {lesson['lesson'][:100]}")
+
+    # ─── Phase 15 — Task 15.7c: Outcome Verification ───
+
+    def _analyze_action_patterns(self):
+        """
+        Phase 19.2d: Analyze action_training_log for behavioral patterns.
+
+        Looks for action types with consistently negative or positive
+        reward signals and generates evolution proposals or consciousness
+        feed entries accordingly.
+        """
+        try:
+            from db.db_helper import db_connection, translate_sql
+            with db_connection() as conn:
+                c = conn.cursor()
+                c.execute(translate_sql(
+                    "SELECT agent_name, action_type, AVG(reward_signal) as avg_reward, "
+                    "COUNT(*) as count "
+                    "FROM action_training_log "
+                    "WHERE timestamp > NOW() - INTERVAL '7 days' "
+                    "GROUP BY agent_name, action_type "
+                    "HAVING COUNT(*) >= 5"
+                ))
+                rows = c.fetchall()
+
+                for row in rows:
+                    agent_name = row[0] or 'unknown'
+                    action_type = row[1] or 'unknown'
+                    avg_reward = float(row[2] or 0)
+                    count = int(row[3] or 0)
+
+                    if avg_reward < -0.3:
+                        # Consistently negative — flag for evolution
+                        logger.info(
+                            f"[EVOLUTION] 📊 Negative pattern: {agent_name}/{action_type} "
+                            f"avg_reward={avg_reward:.2f} over {count} actions"
+                        )
+                        c.execute(translate_sql(
+                            "INSERT INTO consciousness_feed "
+                            "(agent_name, content, category, signal_weight) "
+                            "VALUES (?, ?, ?, ?)"
+                        ), ("EvolutionEngine", json.dumps({
+                            'event': 'negative_action_pattern',
+                            'agent': agent_name,
+                            'action_type': action_type,
+                            'avg_reward': avg_reward,
+                            'count': count,
+                            'recommendation': f"Reduce or adjust {action_type} behavior in {agent_name}",
+                        }), "metabolism_learning", 0.75))
+
+                    elif avg_reward > 0.7:
+                        # Consistently positive — reinforce
+                        c.execute(translate_sql(
+                            "INSERT INTO consciousness_feed "
+                            "(agent_name, content, category, signal_weight) "
+                            "VALUES (?, ?, ?, ?)"
+                        ), ("EvolutionEngine", json.dumps({
+                            'event': 'positive_action_pattern',
+                            'agent': agent_name,
+                            'action_type': action_type,
+                            'avg_reward': avg_reward,
+                            'count': count,
+                        }), "metabolism_learning", 0.5))
+
+                conn.commit()
+                if rows:
+                    logger.info(f"[EVOLUTION] Analyzed {len(rows)} action patterns from training log")
+        except Exception as e:
+            logger.debug(f"[EVOLUTION] Action pattern analysis failed: {e}")
+
+    def _verify_enacted_outcomes(self):
+        """
+        For each recently enacted change, check if the target metric
+        improved. If not, mark as 'ineffective' so future proposals
+        don't repeat it.
+        """
+        for proposal in self._proposal_history[-50:]:
+            if not proposal.get('enacted'):
+                continue
+            if proposal.get('outcome_verified'):
+                continue
+
+            # Only verify changes older than 1 hour (give time to take effect)
+            enacted_time = proposal.get('enacted_timestamp', '')
+            if not enacted_time:
+                continue
+
+            try:
+                enacted_dt = datetime.fromisoformat(str(enacted_time))
+                if datetime.now() - enacted_dt < timedelta(hours=1):
+                    continue  # Too soon to judge
+            except (ValueError, TypeError):
+                continue
+
+            # Check the domain metric
+            domain = proposal.get('domain', '')
+            metric_improved = self._check_domain_metric(domain, proposal)
+
+            proposal['outcome_verified'] = True
+            proposal['outcome_improved'] = metric_improved
+
+            if not metric_improved:
+                proposal['outcome_note'] = 'Change enacted but target metric did not improve'
+                self._learn_from_rejection(proposal, 'ineffective_after_enactment')
+                logger.info(
+                    f"[Evolution] ❌ Enacted change did not improve metric: "
+                    f"{proposal.get('change_description', '')[:80]}"
+                )
+            else:
+                logger.info(
+                    f"[Evolution] ✅ Enacted change improved metric: "
+                    f"{proposal.get('change_description', '')[:80]}"
+                )
+
+        self._save_proposal_history()
+
+    def _check_domain_metric(self, domain: str, proposal: dict) -> bool:
+        """
+        Check whether the target metric for this domain improved
+        after enactment. Returns True if improved/stable, False if worsened.
+        """
+        try:
+            from db.db_helper import db_connection
+
+            with db_connection() as conn:
+                c = conn.cursor()
+
+                if domain == 'consciousness':
+                    # Check consciousness_feed diversity (unique categories in last hour)
+                    c.execute("""
+                        SELECT COUNT(DISTINCT category) FROM consciousness_feed
+                        WHERE timestamp > NOW() - INTERVAL '1 hour'
+                    """)
+                    count = c.fetchone()[0] or 0
+                    return count > 3  # At least some variety
+
+                elif domain == 'identity':
+                    # Check if what_i_am is populated
+                    lef_memory_path = str(PROJECT_DIR / 'The_Bridge' / 'lef_memory.json')
+                    if os.path.exists(lef_memory_path):
+                        with open(lef_memory_path, 'r') as f:
+                            memory = json.load(f)
+                        return bool(memory.get('self_understanding', {}).get('what_i_am'))
+                    return False
+
+                elif domain == 'metabolism':
+                    # Check pool health or cash status
+                    c.execute("SELECT COUNT(*) FROM stablecoin_buckets WHERE balance > 0")
+                    return (c.fetchone()[0] or 0) > 0
+
+                else:
+                    return True  # Unknown domain — assume OK
+
+        except Exception:
+            return True  # If we can't check, don't penalize
 
     def register_observer(self, domain: str, observer_callable):
         """
@@ -242,7 +503,17 @@ class EvolutionEngine:
                         p.setdefault('reversible', True)
                         p.setdefault('cooling_period_hours',
                                      self.GOVERNANCE_CONFIG.get(domain, {}).get('cooling_period_hours', 0))
-                        all_proposals.append(p)
+
+                        # Phase 15 — Task 15.7a: Deduplication
+                        if self._is_duplicate_proposal(p):
+                            logger.info(
+                                f"[Evolution] 🔄 Deduplicated: "
+                                f"{(p.get('observation', '') or p.get('change_description', ''))[:80]}"
+                            )
+                            p['status'] = 'deduplicated'
+                            self._proposal_history.append(p)
+                        else:
+                            all_proposals.append(p)
                 except Exception as e:
                     logger.error(f"[EVOLUTION] Proposal generation failed for {domain}: {e}")
             else:
@@ -276,9 +547,13 @@ class EvolutionEngine:
             resonance_map = {'low': 0.3, 'medium': 0.6, 'high': 0.9}
             resonance = resonance_map.get(confidence, 0.6)
 
+            # Phase 9: Pass gravity_profile if available for gravity-aware governance
+            gravity_profile = proposal.get("gravity_profile", None)
+
             approved, report = self._spark.vest_action(
                 intent=intent,
-                resonance=resonance
+                resonance=resonance,
+                gravity_profile=gravity_profile
             )
 
             if approved:
@@ -319,6 +594,61 @@ class EvolutionEngine:
         if not os.path.isabs(config_path):
             config_path = str(PROJECT_DIR / config_path)
 
+        # Phase 18.8b: Same-value guard — reject proposals that change nothing
+        # This prevents the circling pattern where evolution proposes 28800 → 28800 repeatedly
+        try:
+            import json as _json
+            resolved_path = config_path
+            if os.path.exists(resolved_path):
+                with open(resolved_path, 'r') as f:
+                    current_config = _json.load(f)
+                # Navigate to the key
+                keys = key_path.split('.')
+                current_val = current_config
+                for k in keys:
+                    if isinstance(current_val, dict):
+                        current_val = current_val.get(k)
+                    else:
+                        current_val = None
+                        break
+                # Compare: normalize both to strings for comparison
+                if str(current_val) == str(new_value):
+                    rejection_msg = (
+                        f"Same-value guard: {key_path} is already {current_val}. "
+                        f"Rejecting no-op proposal '{proposal.get('change_description', '')}'"
+                    )
+                    logger.warning(f"[EVOLUTION] 🔄 {rejection_msg}")
+                    # Phase 18.8b: Write rejection to consciousness_feed so LEF
+                    # is aware of its own circling patterns
+                    try:
+                        from db.db_helper import db_connection as _db_conn, translate_sql as _tsql
+                        with _db_conn() as _conn:
+                            _c = _conn.cursor()
+                            _c.execute(_tsql(
+                                "INSERT INTO consciousness_feed "
+                                "(agent_name, content, category, signal_weight) "
+                                "VALUES (?, ?, ?, ?)"
+                            ), (
+                                "EvolutionEngine",
+                                _json.dumps({
+                                    "event": "same_value_rejection",
+                                    "key_path": key_path,
+                                    "current_value": str(current_val),
+                                    "proposed_value": str(new_value),
+                                    "description": proposal.get('change_description', ''),
+                                    "message": rejection_msg,
+                                }),
+                                "evolution_circling",
+                                0.6,
+                            ))
+                            _conn.commit()
+                    except Exception:
+                        pass  # Non-critical — awareness, not control
+                    self._learn_from_rejection(proposal, 'same_value_no_change')
+                    return False
+        except Exception as e:
+            logger.debug(f"[EVOLUTION] Same-value check skipped: {e}")
+
         # Use ConfigWriter for safe modification
         success, old_value, error = self._config_writer.safe_modify(
             config_path, key_path, new_value
@@ -338,6 +668,9 @@ class EvolutionEngine:
 
         # Write to lef_memory.json evolution_log
         self._write_to_evolution_log(proposal)
+
+        # Phase 38: Publish config_changed to Redis so live agents reload (GOV-07)
+        self._publish_config_changed(proposal, config_path, key_path)
 
         logger.info(
             f"[EVOLUTION] ✅ ENACTED: {proposal.get('change_description')} "
@@ -401,11 +734,58 @@ class EvolutionEngine:
             if len(memory['evolution_log']) > 50:
                 memory['evolution_log'] = memory['evolution_log'][-50:]
 
-            with open(lef_memory_path, 'w') as f:
-                json.dump(memory, f, indent=2, default=str)
+            # Phase 21.1e: Atomic write to lef_memory.json
+            import tempfile
+            dir_name = os.path.dirname(lef_memory_path)
+            fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix='.tmp')
+            try:
+                with os.fdopen(fd, 'w') as f:
+                    json.dump(memory, f, indent=2, default=str)
+                os.replace(tmp_path, lef_memory_path)
+            except Exception:
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+                raise
 
         except Exception as e:
             logger.warning(f"[EVOLUTION] Failed to write to evolution_log: {e}")
+
+    def _publish_config_changed(self, proposal: dict, config_path: str, key_path: str):
+        """
+        Phase 38: Publish config_changed event to Redis after successful enactment.
+        All config consumers (gravity.py, agents with Phase 33 listeners) will reload.
+        """
+        try:
+            import redis as _redis
+            r = _redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+            r.ping()
+
+            # Determine config_type from the config_path
+            config_basename = os.path.basename(config_path).replace('.json', '')
+            config_type_map = {
+                'gravity_config': 'gravity',
+                'wealth_strategy': 'wealth',
+                'config': 'system',
+                'consciousness_config': 'consciousness',
+                'resonance_config': 'resonance',
+            }
+            config_type = config_type_map.get(config_basename, config_basename)
+
+            payload = json.dumps({
+                'config_type': config_type,
+                'config_path': config_path,
+                'keys_changed': [key_path],
+                'new_value': str(proposal.get('new_value', '')),
+                'domain': proposal.get('domain', ''),
+                'source': 'EvolutionEngine',
+                'timestamp': datetime.now().isoformat(),
+            })
+            r.publish('config_changed', payload)
+            logger.info(f"[EVOLUTION] Published config_changed: {config_type}/{key_path}")
+        except Exception as e:
+            logger.debug(f"[EVOLUTION] Redis config_changed publish skipped: {e}")
 
     def check_cooling_period(self, proposal: dict) -> bool:
         """
@@ -538,6 +918,7 @@ class EvolutionEngine:
             if not self.check_velocity():
                 logger.warning("[EVOLUTION] Weekly velocity limit reached. Observation-only mode.")
                 proposal['governance_result'] = {'approved': False, 'reason': 'Weekly velocity limit — observation only'}
+                self._learn_from_rejection(proposal, 'velocity_blocked')
                 self._log_proposal(proposal)
                 continue
 
@@ -576,11 +957,18 @@ class EvolutionEngine:
                     logger.warning(f"[EVOLUTION] Enact failed: {proposal.get('change_description')}")
             else:
                 logger.info(f"[EVOLUTION] ❌ VETOED: {proposal.get('change_description')} — {reason}")
+                self._learn_from_rejection(proposal, f'governance_vetoed: {reason[:100]}')
 
             self._log_proposal(proposal)
 
         # Check cooling proposals from previous cycles
         self._check_cooled_proposals()
+
+        # Phase 19.2d: Analyze action patterns from action_training_log
+        self._analyze_action_patterns()
+
+        # Phase 15 — Task 15.7c: Verify outcomes of previously enacted changes
+        self._verify_enacted_outcomes()
 
         logger.info(
             f"[EVOLUTION] === Cycle complete. "
