@@ -13,8 +13,13 @@ Security:
 """
 
 import os
+import gc
 import json
+import stat
+import time
 import logging
+import secrets
+import threading
 from datetime import datetime
 from pathlib import Path
 
@@ -83,6 +88,15 @@ class WalletManager:
         self.account = None
         self.wallet_data = None
 
+        # Phase 36: Nonce tracking (IDN-01)
+        self._local_nonce = None
+        self._nonce_lock = threading.Lock()
+
+        # Phase 36: Private key cache with TTL (IDN-10)
+        self._key_cache = None
+        self._key_cache_time = 0
+        self._KEY_CACHE_TTL = 300  # 5 minutes
+
         # Network setup
         if network not in self.NETWORKS:
             raise ValueError(f"Unknown network: {network}. Use: {list(self.NETWORKS.keys())}")
@@ -92,6 +106,10 @@ class WalletManager:
 
         # Web3 provider (lazy init — only connect when needed)
         self._w3 = None
+
+        # Phase 36: Enforce wallet file permissions on startup (IDN-11)
+        if os.path.exists(self.WALLET_PATH):
+            self._enforce_file_permissions()
 
         logger.info(f"[WalletManager] Initialized for network: {self.network_config['name']}")
 
@@ -104,6 +122,81 @@ class WalletManager:
             if not self._w3.is_connected():
                 logger.warning(f"[WalletManager] Cannot connect to {rpc_url}")
         return self._w3
+
+    # === Phase 36: File Permissions (IDN-11) ===
+
+    def _enforce_file_permissions(self):
+        """
+        Enforce 0600 (owner read/write only) on wallet file.
+        Halts startup if chmod fails.
+        """
+        try:
+            os.chmod(self.WALLET_PATH, 0o600)
+            # Verify permissions were applied
+            file_stat = os.stat(self.WALLET_PATH)
+            actual_mode = stat.S_IMODE(file_stat.st_mode)
+            if actual_mode != 0o600:
+                raise SystemExit(
+                    f"[WalletManager] FATAL: Wallet file permissions are {oct(actual_mode)}, "
+                    f"expected 0600. Cannot guarantee key security."
+                )
+            logger.info("[WalletManager] Wallet file permissions verified: 0600")
+        except OSError as e:
+            raise SystemExit(
+                f"[WalletManager] FATAL: Cannot set wallet file permissions: {e}. "
+                "Wallet security cannot be guaranteed. Halting."
+            )
+
+    # === Phase 36: Private Key Cache (IDN-10) ===
+
+    def _clear_key_cache(self):
+        """Overwrite cached key with random data, then set to None."""
+        if self._key_cache is not None:
+            # Overwrite with random data before releasing
+            self._key_cache = secrets.token_hex(32)
+            self._key_cache = None
+            self._key_cache_time = 0
+
+    def _is_key_cache_valid(self) -> bool:
+        """Check if key cache is still within TTL."""
+        if self._key_cache is None:
+            return False
+        if time.time() - self._key_cache_time > self._KEY_CACHE_TTL:
+            self._clear_key_cache()
+            return False
+        return True
+
+    def __del__(self):
+        """Destructor: clear private key from memory."""
+        self._clear_key_cache()
+        if self.account is not None:
+            self.account = None
+        gc.collect()
+
+    # === Phase 36: Nonce Tracking (IDN-01) ===
+
+    def _sync_nonce_from_chain(self):
+        """Sync local nonce with chain at startup or on mismatch."""
+        if not self.account:
+            return
+        try:
+            if self.w3.is_connected():
+                chain_nonce = self.w3.eth.get_transaction_count(self.account.address)
+                self._local_nonce = chain_nonce
+                logger.info(f"[WalletManager] Nonce synced from chain: {chain_nonce}")
+        except Exception as e:
+            logger.warning(f"[WalletManager] Nonce sync failed: {e}")
+
+    def _get_next_nonce(self) -> int:
+        """Get the next nonce, using local tracking to prevent reuse."""
+        with self._nonce_lock:
+            if self._local_nonce is None:
+                self._sync_nonce_from_chain()
+            if self._local_nonce is None:
+                raise RuntimeError("Cannot determine nonce: chain sync failed")
+            nonce = self._local_nonce
+            self._local_nonce += 1
+            return nonce
 
     @staticmethod
     def generate_encryption_key() -> str:
@@ -156,11 +249,8 @@ class WalletManager:
         with open(self.WALLET_PATH, 'w') as f:
             json.dump(self.wallet_data, f, indent=2)
 
-        # Set restrictive file permissions (owner read/write only)
-        try:
-            os.chmod(self.WALLET_PATH, 0o600)
-        except OSError:
-            logger.warning("[WalletManager] Could not set restrictive file permissions")
+        # Phase 36: Enforce restrictive file permissions (IDN-11)
+        self._enforce_file_permissions()
 
         self.account = account
         logger.info(f"[WalletManager] Wallet created: {account.address}")
@@ -202,13 +292,25 @@ class WalletManager:
         # Reconstruct account from private key
         self.account = Account.from_key(decrypted_key)
 
+        # Phase 36: Cache the decrypted key with TTL (IDN-10)
+        self._key_cache = decrypted_key
+        self._key_cache_time = time.time()
+
+        # Clear decrypted_key local variable
+        decrypted_key = secrets.token_hex(32)
+        del decrypted_key
+
         # Verify address matches stored address
         if self.account.address != self.wallet_data['address']:
+            self._clear_key_cache()
             raise ValueError(
                 f"Address mismatch: decrypted key gives {self.account.address}, "
                 f"but wallet file says {self.wallet_data['address']}. "
                 "Wallet file may be corrupted."
             )
+
+        # Phase 36: Sync nonce from chain on load (IDN-01)
+        self._sync_nonce_from_chain()
 
         logger.info(f"[WalletManager] Wallet loaded: {self.account.address}")
         return self.account.address
@@ -306,9 +408,9 @@ class WalletManager:
         if not self.w3.is_connected():
             raise RuntimeError(f"Cannot connect to {self.network_config['name']}")
 
-        # Auto-fill nonce if not provided
+        # Phase 36: Use local nonce tracking to prevent nonce reuse (IDN-01)
         if 'nonce' not in tx:
-            tx['nonce'] = self.w3.eth.get_transaction_count(self.account.address)
+            tx['nonce'] = self._get_next_nonce()
 
         # Auto-fill gas if not provided
         if 'gas' not in tx:

@@ -27,6 +27,34 @@ logger = logging.getLogger("LEF.GitSafety")
 # Base directory (LEF Ai root)
 BASE_DIR = Path(__file__).parent.parent.parent
 
+# Phase 36: Explicit file patterns for staging (never use git add -A)
+SAFE_FILE_PATTERNS = [
+    "republic/*.py",
+    "republic/**/*.py",
+    "republic/**/*.json",
+    "republic/**/*.md",
+    "republic/**/*.sol",
+    "External Observer Reports/*.md",
+    "The_Bridge/*.json",
+    "The_Bridge/*.md",
+    "public/*.html",
+    "public/*.css",
+    "public/*.js",
+]
+
+# Phase 36: Files that must NEVER be staged (secrets, credentials, keys)
+FORBIDDEN_PATTERNS = [
+    "wallet_encrypted.json",
+    ".env",
+    "*.pem",
+    "*.key",
+    "*credentials*",
+    "*secret*",
+    "*_key.json",
+    "*.p12",
+    "*.pfx",
+]
+
 
 class GitSafety:
     """
@@ -94,14 +122,9 @@ class GitSafety:
             return None
             
         try:
-            # Stage all changes first
-            subprocess.run(
-                ["git", "add", "-A"],
-                cwd=self.repo_path,
-                capture_output=True,
-                timeout=30
-            )
-            
+            # Phase 36: Stage with explicit file patterns (never git add -A)
+            self._safe_stage_files()
+
             # Create commit
             commit_msg = message or f"[LEF-AUTO] {bill_id}: Pre-change snapshot"
             result = subprocess.run(
@@ -147,14 +170,9 @@ class GitSafety:
             return None
             
         try:
-            # Stage all changes
-            subprocess.run(
-                ["git", "add", "-A"],
-                cwd=self.repo_path,
-                capture_output=True,
-                timeout=30
-            )
-            
+            # Phase 36: Stage with explicit file patterns (never git add -A)
+            self._safe_stage_files()
+
             # Create commit with bill reference
             commit_msg = f"[LEF-AUTO] {bill_id}: {description}"
             result = subprocess.run(
@@ -263,6 +281,73 @@ class GitSafety:
             logger.error(f"[GIT] Failed to get commit history: {e}")
             return []
     
+    def _safe_stage_files(self):
+        """
+        Phase 36: Stage files using explicit patterns instead of git add -A.
+        After staging, check for and unstage any forbidden (secret) files.
+        """
+        # Stage only safe file patterns
+        for pattern in SAFE_FILE_PATTERNS:
+            try:
+                subprocess.run(
+                    ["git", "add", "--", pattern],
+                    cwd=self.repo_path,
+                    capture_output=True,
+                    timeout=15
+                )
+            except Exception:
+                pass  # Pattern may not match any files — that's fine
+
+        # Check staged files for secrets and unstage them
+        self._unstage_forbidden()
+
+    def _unstage_forbidden(self):
+        """
+        Phase 36: Check staged files against forbidden patterns.
+        Automatically unstage any files that match secret/credential patterns.
+        """
+        try:
+            result = subprocess.run(
+                ["git", "diff", "--cached", "--name-only"],
+                cwd=self.repo_path,
+                capture_output=True,
+                text=True,
+                timeout=15
+            )
+            if result.returncode != 0:
+                return
+
+            staged_files = result.stdout.strip().split('\n')
+            for filepath in staged_files:
+                if not filepath:
+                    continue
+                filename = os.path.basename(filepath).lower()
+                for pattern in FORBIDDEN_PATTERNS:
+                    # Simple pattern match (supports * prefix/suffix)
+                    pat = pattern.lower()
+                    match = False
+                    if pat.startswith('*') and pat.endswith('*'):
+                        match = pat[1:-1] in filename
+                    elif pat.startswith('*'):
+                        match = filename.endswith(pat[1:])
+                    elif pat.endswith('*'):
+                        match = filename.startswith(pat[:-1])
+                    else:
+                        match = filename == pat
+
+                    if match:
+                        logger.warning(f"[GIT] 🚫 Unstaging forbidden file: {filepath} (matched {pattern})")
+                        subprocess.run(
+                            ["git", "reset", "HEAD", "--", filepath],
+                            cwd=self.repo_path,
+                            capture_output=True,
+                            timeout=10
+                        )
+                        break
+
+        except Exception as e:
+            logger.error(f"[GIT] Failed to check staged files: {e}")
+
     def _get_current_commit(self) -> str:
         """Get the current HEAD commit hash."""
         try:

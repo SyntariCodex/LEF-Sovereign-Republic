@@ -20137,6 +20137,36 @@ Fix all remaining Phase 27 security gaps. Wallet nonce tracking, private key cle
 
 **Commit message:** `Phase 36: Fix wallet security, git safety, event bus, comms reconnection`
 
+### Phase 36 — Report-Back (Completed)
+
+**36.1 — Wallet Nonce Tracking (IDN-01) ✅**
+Added `_local_nonce`, `_nonce_lock` (threading.Lock), `_sync_nonce_from_chain()`, and `_get_next_nonce()`. Nonce syncs from chain on `load_wallet()`. `send_transaction()` uses `_get_next_nonce()` with lock-protected increment instead of `get_transaction_count()` per call. Prevents nonce reuse on rapid transactions.
+
+**36.2 — Clear Private Key from Memory (IDN-10) ✅**
+Added 5-minute key cache (`_KEY_CACHE_TTL = 300`). `_clear_key_cache()` overwrites with `secrets.token_hex(32)` then sets None. `_is_key_cache_valid()` checks TTL and auto-clears expired cache. `__del__()` destructor clears key and calls `gc.collect()`. `load_wallet()` caches decrypted key with TTL and overwrites local variable immediately.
+
+**36.3 — Enforce Wallet File Permissions (IDN-11) ✅**
+Added `_enforce_file_permissions()` method — `os.chmod(0o600)` + verification via `os.stat()`. Called on `__init__()` (if wallet exists) and after `create_wallet()`. Raises `SystemExit` if chmod fails or permissions don't match. Replaced old try/except warning with hard halt.
+
+**36.4 — Git Safety Explicit File List (IDN-09) ✅**
+Replaced both `git add -A` calls with `_safe_stage_files()`. Stages only `SAFE_FILE_PATTERNS` (*.py, *.json, *.md, *.sol, *.html, *.css, *.js). Added `_unstage_forbidden()` — checks staged files against `FORBIDDEN_PATTERNS` (wallet_encrypted.json, .env, *.pem, *.key, *credentials*, *secret*). Auto-unstages any matches with warning. No more blind staging.
+
+**36.5 — Event Bus Async Write Queue (IDN-05) ✅**
+Replaced blocking `db_connection()` write in `_listen()` with `queue.Queue(maxsize=1000)` put. Added `_db_writer_loop()` in separate daemon thread — drains queue with 2s timeout poll. Queue full → event dropped with warning. Event processing never blocks the Redis listener.
+
+**36.6 — Agent Comms Reconnection (IDN-06) ✅**
+Added `_connect()` and `_reconnect()` methods with exponential backoff (5s→60s cap, max 10 retries). `publish_event()` auto-reconnects on `ConnectionError`/`TimeoutError` and retries the publish. `listen()` wrapped in outer `while True` loop — catches connection drops, triggers `_reconnect()`, resubscribes. Added `socket_connect_timeout=5` and `socket_timeout=10` to Redis constructor.
+
+**Files modified (4):**
+- `system/wallet_manager.py` — nonce tracking, key cache, file permissions
+- `system/git_safety.py` — explicit staging, secret unstaging
+- `system/event_bus.py` — async write queue
+- `system/agent_comms.py` — auto-reconnect with exponential backoff
+
+**All 4 files compile clean.**
+
+---
+
 ## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
 
 ---
