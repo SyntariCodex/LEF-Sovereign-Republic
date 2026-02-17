@@ -19728,10 +19728,11 @@ Fix the remaining consciousness crash bugs (wake cascade partial failure, dream�
 **Spec:** See Phase 24.1c (line 16929). Wrap run_cascade() so if any layer fails, cascade stops and returns error. Don't write wake summary on partial failure.
 **Verify:** Force layer 3 to raise exception → cascade stops, error returned, no wake summary written.
 
-#### 31.2 — Wire dream_cycle.py into wake_cascade.py (CSP-03)
-**File:** `system/dream_cycle.py`, `system/wake_cascade.py` — lines 49-65
-**Spec:** See Phase 24.2a (line 16080). In wake_cascade._layer_environment(), consume dream cycle output via `dream.get_last_dream_report()`. Mark as consumed.
+#### 31.2 — Wire dream_cycle.py into wake_cascade.py (CSP-03) — Complete
+**File:** `system/dream_cycle.py`, `system/wake_cascade.py`
+**Spec:** See Phase 24.2a (line 17080). In wake_cascade._layer_environment(), consume dream cycle output via `dream.get_last_dream_report()`. Mark as consumed.
 **Verify:** Run sleep→dream→wake cycle. Wake summary includes dream_insights.
+**Report-back:** Added `get_last_dream_report()` to DreamCycle — queries most recent unconsumed dream_dialogue from consciousness_feed (filters by `content NOT LIKE '%consumed: true%'`), fetches associated tensions and alignments, marks dream as consumed by updating the content JSON with `consumed: true`. In wake_cascade `_layer_environment()`, added call to `DreamCycle.get_last_dream_report()` — stores result as `report['dream_insights']`. Updated `_write_wake_summary()` to include dream_insights dict (dream_image, tensions, alignments, counts) in the wake summary written to consciousness_feed. Both files compiled clean.
 
 #### 31.3 — Fix agent_executor.py Unreachable Code (CAB-01) — Complete
 **File:** `departments/The_Cabinet/agent_executor.py` — lines 224-310
