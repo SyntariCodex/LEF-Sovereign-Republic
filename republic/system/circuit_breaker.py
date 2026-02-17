@@ -20,6 +20,13 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
+# Phase 19.1e: Redis for emergency stop coordination
+try:
+    from system.redis_client import get_redis
+    _redis_available = True
+except ImportError:
+    _redis_available = False
+
 BASE_DIR = Path(__file__).parent.parent  # republic/
 
 logger = logging.getLogger("LEF.CircuitBreaker")
@@ -53,6 +60,20 @@ class CircuitBreaker:
         self._last_health = None
         self._last_check_time = 0
         self._cache_ttl = 30  # Cache health for 30 seconds to avoid DB hammering
+        self._previous_level = 0  # Phase 20.2b: track level changes for Da'at signals
+
+        # Phase 20.2b: Register Safety Da'at Node
+        self._safety_daat = None
+        try:
+            from system.daat_node import DaatNode
+            self._safety_daat = DaatNode(
+                node_id='safety_daat',
+                lattice_position=(2, 1, 3),  # X2 (reflective), Body One (Y=1), Z3 (existential)
+                scan_interval=30
+            )
+            logger.info("[CircuitBreaker] 🔮 Safety Da'at Node registered at (2,1,3)")
+        except Exception as e:
+            logger.debug("[CircuitBreaker] Da'at node registration skipped: %s", e)
 
         # Load thresholds from config (Phase 4 — Task 4.2)
         try:
@@ -206,8 +227,104 @@ class CircuitBreaker:
             if health['trades_today'] >= self.MAX_TRADES_PER_DAY:
                 level = max(level, 2)  # At least STOP_BUYING
 
+            # Phase 20.3b: Concentration-aware risk escalation
+            try:
+                if _redis_available:
+                    r = get_redis()
+                    if r:
+                        # Scan for concentration keys set by PortfolioMgr (20.3a)
+                        conc_keys = r.keys('portfolio:concentration:*')
+                        for key in (conc_keys or []):
+                            try:
+                                raw = r.get(key)
+                                if not raw:
+                                    continue
+                                conc_data = json.loads(raw)
+                                conc_pct = conc_data.get('concentration_pct', 0)
+                                asset = key.split(':')[-1] if ':' in key else 'UNKNOWN'
+
+                                if conc_pct > 0.40:
+                                    # Any asset >40% → automatic Level 1 minimum
+                                    if level < 1:
+                                        level = 1
+                                        logger.info(
+                                            "[CircuitBreaker] 📊 %s at %.1f%% concentration "
+                                            "— auto Level 1",
+                                            asset, conc_pct * 100
+                                        )
+
+                                elif conc_pct > 0.30 and drawdown < 0:
+                                    # >30% AND portfolio in drawdown → escalate by +1
+                                    level = min(level + 1, 4)
+                                    logger.info(
+                                        "[CircuitBreaker] 📊 %s at %.1f%% + drawdown %.2f%% "
+                                        "— escalating to Level %d",
+                                        asset, conc_pct * 100,
+                                        drawdown * 100, level
+                                    )
+                            except (json.JSONDecodeError, TypeError):
+                                continue
+            except Exception as conc_err:
+                logger.debug("[CircuitBreaker] Concentration check: %s", conc_err)
+
             health['level'] = level
             health['action'] = self.ACTIONS.get(level, 'NORMAL')
+
+            # Phase 19.1c: Publish CB level to Redis for cross-agent coordination
+            try:
+                if _redis_available:
+                    r = get_redis()
+                    if r:
+                        r.set('safety:circuit_breaker_level', str(level))
+            except Exception:
+                pass
+
+            # Phase 19.1e: Emergency stop on Level 4 (APOPTOSIS)
+            if level >= 4:
+                # Phase 30.2: External alert on APOPTOSIS
+                try:
+                    from system.alerting import send_alert
+                    send_alert('critical', 'APOPTOSIS — Circuit Breaker Level 4',
+                               {'drawdown_pct': drawdown, 'daily_loss_usd': health['daily_loss_usd'],
+                                'portfolio_value_usd': health['portfolio_value_usd']})
+                except Exception:
+                    pass
+                self._trigger_emergency_stop(health)
+
+            # Phase 20.2b: Publish Da'at signal on CB level change
+            if level != self._previous_level and self._safety_daat:
+                try:
+                    # Graduated signal weight: Level 0→1=0.5, 1→2=0.7, 2→3=0.9, 3→4=1.0
+                    weight_map = {0: 0.3, 1: 0.5, 2: 0.7, 3: 0.9, 4: 1.0}
+                    signal = {
+                        'source': 'safety_daat',
+                        'event': 'circuit_breaker_level_change',
+                        'old_level': self._previous_level,
+                        'new_level': level,
+                        'action': self.ACTIONS.get(level, 'NORMAL'),
+                        'drawdown_pct': drawdown,
+                        'daily_loss_usd': health['daily_loss_usd'],
+                        'category': 'safety_state',
+                        'signal_weight': weight_map.get(level, 0.5),
+                        'x': 2, 'y': 1, 'z': 3,  # Z3 = existential
+                        'z_position': 3,
+                        'content': (
+                            f"CircuitBreaker level changed: {self._previous_level} "
+                            f"({self.ACTIONS.get(self._previous_level, 'NORMAL')}) → "
+                            f"{level} ({self.ACTIONS.get(level, 'NORMAL')}). "
+                            f"Drawdown: {drawdown:.2%}"
+                        ),
+                        'timestamp': time.time(),
+                    }
+                    self._safety_daat.propagate(signal)
+                    self._safety_daat.publish_to_mesh(signal)
+                    logger.info(
+                        "[CircuitBreaker] 📡 Da'at signal: level %d → %d",
+                        self._previous_level, level
+                    )
+                except Exception:
+                    pass
+                self._previous_level = level
 
             # Log if circuit breaker is active
             if level > 0:
@@ -254,6 +371,80 @@ class CircuitBreaker:
         self._last_check_time = now
         return health
 
+    def _trigger_emergency_stop(self, health):
+        """
+        Phase 19.1e: Fire the emergency stop reflex.
+
+        When CircuitBreaker hits Level 4 (APOPTOSIS / -20% drawdown):
+        1. Set global Redis flag  system:emergency_stop = true
+        2. Publish portfolio snapshot to  emergency:apoptosis  channel
+        3. Write to consciousness_feed (Brainstem also subscribes)
+        4. Drop a notification in The_Bridge/Inbox for the Architect
+        """
+        logger.critical(
+            "[CircuitBreaker] 🚨 LEVEL 4 APOPTOSIS — EMERGENCY STOP ENGAGED. "
+            "Drawdown: %.2f%%, Daily Loss: $%.2f",
+            health['drawdown_pct'] * 100, health['daily_loss_usd']
+        )
+
+        # 1. Redis: global stop flag + channel publish
+        try:
+            if _redis_available:
+                r = get_redis()
+                if r:
+                    r.set('system:emergency_stop', 'true')
+                    snapshot = json.dumps({
+                        'level': health['level'],
+                        'action': health['action'],
+                        'drawdown_pct': health['drawdown_pct'],
+                        'daily_loss_usd': health['daily_loss_usd'],
+                        'portfolio_value_usd': health['portfolio_value_usd'],
+                        'high_watermark_usd': health['high_watermark_usd'],
+                        'triggered_at': datetime.now().isoformat(),
+                    })
+                    r.publish('emergency:apoptosis', snapshot)
+        except Exception as e:
+            logger.error("[CircuitBreaker] Redis emergency publish failed: %s", e)
+
+        # 2. consciousness_feed: existential_threat signal
+        try:
+            from db.db_helper import db_connection as _dbc, translate_sql as _ts
+            with _dbc() as conn:
+                c = conn.cursor()
+                c.execute(_ts(
+                    "INSERT INTO consciousness_feed "
+                    "(agent_name, content, category, signal_weight) "
+                    "VALUES (?, ?, ?, ?)"
+                ), ("CircuitBreaker", json.dumps({
+                    'event': 'emergency_stop',
+                    'drawdown_pct': health['drawdown_pct'],
+                    'daily_loss_usd': health['daily_loss_usd'],
+                    'message': 'Portfolio drawdown hit Level 4 APOPTOSIS. '
+                               'All trading halted. Architect intervention required.',
+                }), "existential_threat", 1.0))
+                conn.commit()
+        except Exception:
+            pass
+
+        # 3. The_Bridge/Inbox: Architect notification
+        try:
+            inbox_dir = BASE_DIR / 'The_Bridge' / 'Inbox'
+            inbox_dir.mkdir(parents=True, exist_ok=True)
+            note_path = inbox_dir / f"EMERGENCY_STOP_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+            note_path.write_text(
+                f"🚨 EMERGENCY STOP ACTIVATED\n"
+                f"Time: {datetime.now().isoformat()}\n"
+                f"Drawdown: {health['drawdown_pct']:.2%}\n"
+                f"Daily Loss: ${health['daily_loss_usd']:.2f}\n"
+                f"Portfolio Value: ${health['portfolio_value_usd']:.2f}\n"
+                f"High Watermark: ${health['high_watermark_usd']:.2f}\n"
+                f"\nAll trading is halted. To resume:\n"
+                f"  redis-cli DEL system:emergency_stop\n"
+                f"Or restart LEF after resolving the issue.\n"
+            )
+        except Exception:
+            pass
+
     def gate_trade(self, proposed_trade: dict) -> tuple:
         """
         Called BEFORE a trade is queued.
@@ -264,9 +455,64 @@ class CircuitBreaker:
           'amount': float (USD for BUY, units for SELL)
           'asset': str (optional, for logging)
         """
+        # Phase 20.1a: Brainstem heartbeat
+        try:
+            from system.brainstem import brainstem_heartbeat
+            brainstem_heartbeat("CircuitBreaker", status="gate_trade")
+        except Exception:
+            pass
+
         health = self.check_portfolio_health()
         asset = proposed_trade.get('asset', 'UNKNOWN')
         action = proposed_trade.get('action', 'BUY')
+
+        # Phase 19.1e: Emergency stop check — refuse ALL orders
+        try:
+            if _redis_available:
+                r = get_redis()
+                if r and r.get('system:emergency_stop') == 'true':
+                    reason = "EMERGENCY STOP active — all trading halted. Architect must clear."
+                    logger.warning(f"[CircuitBreaker] BLOCKED {action} {asset}: {reason}")
+                    return False, reason
+        except Exception:
+            pass
+
+        # Phase 19.1a: Scar-aware circuit breaking (per-asset history)
+        if action == 'BUY' and asset != 'UNKNOWN':
+            scar_adjustment = self._get_asset_scar_level(asset)
+            if scar_adjustment >= 2:
+                # 5+ scars → auto Level 2 (STOP_BUYING) for this asset
+                reason = (
+                    f"Scar history block: {asset} has {scar_adjustment} HIGH+ scars in 30 days. "
+                    f"Auto Level 2 — no buying allowed."
+                )
+                logger.warning(f"[CircuitBreaker] BLOCKED BUY {asset}: {reason}")
+                return False, reason
+            elif scar_adjustment >= 1:
+                # 3+ scars → tighten by one level (reduce size by 50%)
+                original_amount = proposed_trade.get('amount', 0)
+                proposed_trade['amount'] = original_amount * 0.5
+                reason = (
+                    f"Scar history caution: {asset} has scar history. "
+                    f"Size reduced 50% (${original_amount:.2f} -> ${proposed_trade['amount']:.2f})"
+                )
+                logger.info(f"[CircuitBreaker] REDUCED BUY {asset}: {reason}")
+                # Don't return — continue with other checks
+
+        # Phase 19.1c: Cross-agent coordination — DEFCON 1 or 2 raises CB to Level 1 min
+        try:
+            if _redis_available:
+                r = get_redis()
+                if r:
+                    defcon = r.get('safety:defcon_level') or r.get('risk_model:defcon')
+                    if defcon and int(defcon) <= 2 and health['level'] < 1:
+                        health['level'] = 1
+                        health['action'] = self.ACTIONS[1]
+                        logger.info(
+                            f"[CircuitBreaker] ⚡ DEFCON {defcon} — auto-raising to Level 1"
+                        )
+        except Exception:
+            pass
 
         # Hard stop: daily loss limit
         if health['daily_loss_usd'] >= self.MAX_DAILY_LOSS_USD:
@@ -314,6 +560,38 @@ class CircuitBreaker:
             return True, reason
 
         return True, "NORMAL"
+
+    def _get_asset_scar_level(self, asset: str) -> int:
+        """
+        Phase 19.1a: Query book_of_scars for recent HIGH+ severity entries
+        on a specific asset.
+
+        Returns:
+            0: No concerning history
+            1: 3+ scars in 30 days → tighten by one level
+            2: 5+ scars in 30 days → auto Level 2 (STOP_BUYING for this asset)
+        """
+        try:
+            from db.db_helper import db_connection, translate_sql
+            with db_connection() as conn:
+                c = conn.cursor()
+                c.execute(translate_sql(
+                    "SELECT COUNT(*) FROM book_of_scars "
+                    "WHERE asset = ? "
+                    "AND severity IN ('HIGH', 'CRITICAL') "
+                    "AND timestamp > NOW() - INTERVAL '30 days'"
+                ), (asset,))
+                row = c.fetchone()
+                scar_count = int(row[0]) if row else 0
+
+                if scar_count >= 5:
+                    return 2
+                elif scar_count >= 3:
+                    return 1
+                return 0
+        except Exception as e:
+            logger.debug("[CircuitBreaker] Scar query failed for %s: %s", asset, e)
+            return 0
 
     def get_weakest_positions(self, limit=3) -> list:
         """

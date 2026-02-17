@@ -15,6 +15,7 @@ import json
 import math
 import random
 import redis
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from datetime import datetime
 from typing import Optional, Dict
 from pathlib import Path
@@ -56,58 +57,39 @@ except ImportError:
 
 class SafeLogger:
     """
-    Biological Safety: The Membrane must speak clearly without choking.
-    Bypasses standard logging module locks that cause deadlocks in threaded execution.
-    Uses connection pool to prevent file descriptor exhaustion.
-    """
-    db_path = None # Set by Agent on Init
-    _pool = None   # Connection pool reference
+    Logging wrapper for AgentCoinbase.
 
-    @staticmethod
-    def _get_pool():
-        if SafeLogger._pool is None:
-            try:
-                from db.db_pool import get_pool
-                SafeLogger._pool = get_pool()
-            except ImportError:
-                SafeLogger._pool = None
-        return SafeLogger._pool
+    Phase 9.H4b: Previously wrote directly to DB on every call (pool connection
+    per message — ~79 call sites). Now delegates to Python logging — the
+    BatchedLogHandler in main.py handles DB writes in batches, eliminating
+    per-message pool acquisitions.
+    """
+    _logger = logging.getLogger("AgentCoinbase")
 
     @staticmethod
     def _write(level, msg):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S,%f')[:-3]
-        # Format similar to standard logging: TIMESTAMP - LEVEL - MSG
         output = f"{timestamp} - [MOUTH] {level}: {msg}\n"
         sys.stdout.write(output)
         sys.stdout.flush()
-
-        # Database Logging (Proprioception) - uses pool
-        if SafeLogger.db_path:
-            try:
-                with db_connection(SafeLogger.db_path) as conn:
-                    # Parse source: Usually [MOUTH] or [SYNAPSE] if logged from there
-                    source = "AgentCoinbase"
-                    if "[SYNAPSE]" in msg: source = "Synapse"
-
-                    conn.execute(
-                        translate_sql("INSERT INTO agent_logs (source, level, message) VALUES (?, ?, ?)"),
-                        (source, level, msg)
-                    )
-                    conn.commit()
-            except Exception:
-                pass # Fail silently to avoid breaking execution loop
+        # Let the BatchedLogHandler handle DB persistence
+        if level == "INFO":
+            SafeLogger._logger.info(msg)
+        elif level == "ERROR":
+            SafeLogger._logger.error(msg)
+        elif level == "WARNING":
+            SafeLogger._logger.warning(msg)
+        elif level == "DEBUG":
+            SafeLogger._logger.debug(msg)
 
     @staticmethod
-    def info(msg):
-        SafeLogger._write("INFO", msg)
-        
+    def info(msg):  SafeLogger._write("INFO", msg)
     @staticmethod
-    def warning(msg):
-        SafeLogger._write("WARNING", msg)
-        
+    def error(msg): SafeLogger._write("ERROR", msg)
     @staticmethod
-    def error(msg):
-        SafeLogger._write("ERROR", msg)
+    def warning(msg): SafeLogger._write("WARNING", msg)
+    @staticmethod
+    def debug(msg): SafeLogger._write("DEBUG", msg)
 
 # Redirect standard logging to prevent accidental usage
 logging.info = SafeLogger.info
@@ -157,8 +139,7 @@ class CoinbaseAgent(IntentListenerMixin):
         else:
              self.db_path = db_path
         
-        # Connect SafeLogger to DB
-        SafeLogger.db_path = self.db_path
+        # Phase 9.H4b: SafeLogger no longer writes to DB directly — BatchedLogHandler handles it
         if config_path is None:
              # Default to relative path from this file: ../../../config/config.json
              config_path = str(Path(__file__).parent.parent.parent / 'config' / 'config.json')
@@ -212,14 +193,17 @@ class CoinbaseAgent(IntentListenerMixin):
         api_key = coinbase_config.get('api_key', '')
         api_secret = coinbase_config.get('api_secret', '')
         
-        # Resolve ENV placeholders
+        # Resolve ENV placeholders (Phase 21.3g: secrets now in .env)
         if api_key.startswith('ENV:'):
             env_key = api_key.split('ENV:')[1]
             api_key = os.environ.get(env_key, '')
-            
+
         if api_secret.startswith('ENV:'):
             env_key = api_secret.split('ENV:')[1]
             api_secret = os.environ.get(env_key, '')
+            # .env stores PEM key with literal \n — restore actual newlines
+            if api_secret and '\\n' in api_secret:
+                api_secret = api_secret.replace('\\n', '\n')
 
         # Try loading separate coinbase.json (Direct Download from Portal)
         coinbase_json_path = str(Path(__file__).parent.parent.parent / 'config' / 'coinbase.json')
@@ -245,6 +229,7 @@ class CoinbaseAgent(IntentListenerMixin):
                     'apiKey': api_key,
                     'secret': api_secret,
                     'enableRateLimit': True,
+                    'timeout': 30000,  # Phase 21.3d: 30 second timeout
                 })
                 # Verify credentials (optional)
                 # self.exchange.fetch_balance() 
@@ -356,6 +341,35 @@ class CoinbaseAgent(IntentListenerMixin):
         self.api_call_count += 1
     
 
+    def _call_exchange(self, method, *args, timeout=30):
+        """
+        Phase 21.3d: Application-level timeout wrapper for exchange API calls.
+        Prevents hung API calls from deadlocking the trade queue.
+        On timeout: logs scar, returns None (callers must handle).
+        """
+        try:
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                future = pool.submit(method, *args)
+                return future.result(timeout=timeout)
+        except FuturesTimeoutError:
+            method_name = getattr(method, '__name__', str(method))
+            SafeLogger.error(f"[EXCHANGE] ⏱️ Timeout ({timeout}s) calling {method_name}")
+            # Log scar for pattern detection
+            try:
+                with db_connection(self.db_path) as conn:
+                    c = conn.cursor()
+                    c.execute(translate_sql(
+                        "INSERT INTO book_of_scars (scar_type, severity, description, created_at) "
+                        "VALUES (?, ?, ?, CURRENT_TIMESTAMP)"
+                    ), ('api_timeout', 'warning', f"Exchange API timeout on {method_name}({args[:1]})"))
+                    conn.commit()
+            except Exception:
+                pass
+            return None
+        except Exception as e:
+            SafeLogger.error(f"[EXCHANGE] API call failed: {e}")
+            return None
+
     def get_balance(self, symbol: str = 'USDC') -> float:
         """
         Checks available balance.
@@ -366,7 +380,9 @@ class CoinbaseAgent(IntentListenerMixin):
         if self.exchange:
             try:
                 self._check_rate_limit()
-                balance = self.exchange.fetch_balance()
+                balance = self._call_exchange(self.exchange.fetch_balance)
+                if balance is None:
+                    raise Exception("Exchange timeout on fetch_balance")
                 if symbol in balance:
                     free_balance = balance[symbol].get('free', 0.0)
                     # SafeLogger.info(f"Real Available {symbol}: {free_balance}")
@@ -430,16 +446,18 @@ class CoinbaseAgent(IntentListenerMixin):
             try:
                 self._check_rate_limit()
                 market_symbol = f"{symbol}/USD"
-                ticker = self.exchange.fetch_ticker(market_symbol)
+                ticker = self._call_exchange(self.exchange.fetch_ticker, market_symbol)
+                if ticker is None:
+                    # Phase 21.3d: Timeout — fall back to Redis cache
+                    SafeLogger.warning(f"[EXCHANGE] Timeout fetching {symbol} price — using fallback")
+                    return None
                 price = ticker.get('last', None)
                 
                 if price:
                     # Broadcast to Redis for Master Agent ("The Brain")
                     if self.r:
                         self.r.set(f"price:{symbol}", price)
-                        # Optional: Publish to channel if needed
-                        # self.r.publish('price_updates', json.dumps({'symbol': symbol, 'price': price}))
-                    
+
                     # SILENCE: Reduced terminal noise as requested by User
                     # print(f"[MOUTH] Real Price for {symbol}: ${price}")
                     return float(price)
@@ -525,10 +543,42 @@ class CoinbaseAgent(IntentListenerMixin):
         
         This is the 'Voice' speaking to the world.
         """
+        # Phase 16 — Task 16.5: All trades must pass through CircuitBreaker
+        try:
+            from system.circuit_breaker import CircuitBreaker
+            _cb = CircuitBreaker(self.db_path)
+            _allowed, _cb_reason = _cb.gate_trade({
+                'asset': symbol,
+                'action': action,
+                'amount': amount,
+                'price': price or 0
+            })
+            if not _allowed:
+                logging.warning(f"[Coinbase] Trade blocked by CircuitBreaker: {_cb_reason}")
+                try:
+                    from db.db_helper import db_connection as _cb_db_conn, translate_sql as _cb_translate
+                    with _cb_db_conn() as _cb_conn:
+                        _cb_c = _cb_conn.cursor()
+                        _cb_c.execute(_cb_translate(
+                            "INSERT INTO consciousness_feed (agent_name, content, category, timestamp) "
+                            "VALUES (?, ?, 'trade_blocked', NOW())"
+                        ), ('CircuitBreaker', json.dumps({
+                            'blocked_trade': {'asset': str(symbol), 'side': str(action)},
+                            'reason': str(_cb_reason),
+                        })))
+                        _cb_conn.commit()
+                except Exception:
+                    pass
+                return {'status': 'blocked', 'reason': _cb_reason}
+        except ImportError:
+            pass  # CircuitBreaker not available — fail-open
+        except Exception as cb_err:
+            logging.warning(f"[Coinbase] CircuitBreaker check failed (fail-open): {cb_err}")
+
         if not self.exchange and not self.simulation_mode:
             SafeLogger.warning("Cannot execute: Exchange not configured.")
             return None
-        
+
         # SIMULATION MODE
         if self.simulation_mode:
             start_time = time.time()
@@ -579,12 +629,46 @@ class CoinbaseAgent(IntentListenerMixin):
                         conn.commit()
             except Exception as e_log:
                 SafeLogger.warning(f"Failed to log execution metrics: {e_log}")
-            
+
+            # Phase 15: Surface noteworthy trade execution to consciousness
+            try:
+                is_noteworthy = (
+                    abs(slippage_pct) > 0.005 or  # >0.5% slippage
+                    abs(slippage_pct) < 0.0001     # Unusually clean fill
+                )
+                if is_noteworthy:
+                    from db.db_helper import db_connection as _db_conn, translate_sql
+                    quality = 'poor' if slippage_pct > 0.005 else 'excellent' if slippage_pct < 0.0001 else 'notable'
+                    with _db_conn() as cf_conn:
+                        cf_c = cf_conn.cursor()
+                        cf_c.execute(translate_sql(
+                            "INSERT INTO consciousness_feed (agent_name, content, category, timestamp) "
+                            "VALUES (?, ?, 'trade_execution', NOW())"
+                        ), ('AgentCoinbase', json.dumps({
+                            'asset': symbol,
+                            'side': action,
+                            'slippage_pct': round(slippage_pct, 6),
+                            'latency_ms': latency_ms,
+                            'execution_quality': quality,
+                            'mode': 'simulation'
+                        })))
+                        cf_conn.commit()
+            except Exception:
+                pass  # Non-critical — don't break trade flow
+
+            # Phase 30.4: Metrics
+            try:
+                from system.metrics import Metrics
+                Metrics.histogram('trade.latency_ms', latency_ms)
+                Metrics.increment('trade.executions')
+            except Exception:
+                pass
+
             return {
                 'id': f'sim_order_{int(time.time())}',
                 'status': 'open',
                 'filled': 0.0,
-                'amount': executed_amount, 
+                'amount': executed_amount,
                 'price': executed_price
             }
         
@@ -614,21 +698,27 @@ class CoinbaseAgent(IntentListenerMixin):
                 
                 SafeLogger.info(f"🗣️ TRANSLATION: Nucleus Intent ${amount:.2f} -> Membrane Action {quantity_units:.6f} {symbol}")
                 
-                order = self.exchange.create_limit_buy_order(
-                    market_symbol, 
-                    quantity_units, 
-                    limit_price
+                order = self._call_exchange(
+                    self.exchange.create_limit_buy_order,
+                    market_symbol, quantity_units, limit_price,
+                    timeout=45  # Longer timeout for order placement
                 )
+                if order is None:
+                    SafeLogger.error(f"[EXCHANGE] Timeout placing BUY order for {symbol}")
+                    return None
                 SafeLogger.info(f"ORDER PLACED: BUY {amount} {symbol} @ ${limit_price:.2f} (Limit Order)")
-                
+
             elif action == 'SELL':
                 limit_price = price * 1.001  # 0.1% above market
-                
-                order = self.exchange.create_limit_sell_order(
-                    market_symbol,
-                    amount,
-                    limit_price
+
+                order = self._call_exchange(
+                    self.exchange.create_limit_sell_order,
+                    market_symbol, amount, limit_price,
+                    timeout=45
                 )
+                if order is None:
+                    SafeLogger.error(f"[EXCHANGE] Timeout placing SELL order for {symbol}")
+                    return None
                 SafeLogger.info(f"ORDER PLACED: SELL {amount} {symbol} @ ${limit_price:.2f} (Limit Order)")
                 
             else:
@@ -651,6 +741,14 @@ class CoinbaseAgent(IntentListenerMixin):
             except Exception as e_log:
                 SafeLogger.warning(f"Failed to log real execution metrics: {e_log}")
 
+            # Phase 30.4: Metrics
+            try:
+                from system.metrics import Metrics
+                Metrics.histogram('trade.latency_ms', latency_ms)
+                Metrics.increment('trade.executions')
+            except Exception:
+                pass
+
             return order
             
         except Exception as e:
@@ -659,6 +757,13 @@ class CoinbaseAgent(IntentListenerMixin):
                  SafeLogger.error(f"🛑 CRITICAL AUTH ERROR during Trade: {e}.")
                  self.exchange = None
                  self.simulation_mode = True
+                 # Phase 30.2: Alert on auth failure
+                 try:
+                     from system.alerting import send_alert
+                     send_alert('high', 'Exchange auth failed',
+                                {'error': str(e), 'symbol': symbol, 'action': action})
+                 except Exception:
+                     pass
             
             SafeLogger.error(f"Error executing trade: {e}")
             return None
@@ -686,11 +791,21 @@ class CoinbaseAgent(IntentListenerMixin):
         conn = _cm.__enter__()
         c = conn.cursor()
 
+        # Phase 19.1e: Emergency stop check — refuse ALL orders
+        try:
+            if self.r:
+                if self.r.get('system:emergency_stop') == 'true':
+                    print("[MOUTH] 🚨 EMERGENCY STOP ACTIVE — refusing all orders")
+                    _cm.__exit__(None, None, None)
+                    return
+        except Exception:
+            pass
+
         # DEBUG: Loud Print
         print(f"[MOUTH] Checking Queue... (DB: {self.db_path})")
         c.execute("""
             SELECT id, asset, action, amount, price, created_at, schema_version
-            FROM trade_queue 
+            FROM trade_queue
             WHERE status = 'APPROVED'
             AND (schema_version IS NULL OR schema_version = 'v1_spot')
             ORDER BY created_at ASC
@@ -720,8 +835,13 @@ class CoinbaseAgent(IntentListenerMixin):
             # If order is > 5 minutes old, it might be from before the internet went out.
             # Parse created_at
             try:
-                # Assuming format YYYY-MM-DD HH:MM:SS
-                order_time = datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
+                # PostgreSQL returns datetime objects; SQLite returns strings
+                if isinstance(created_at, str):
+                    order_time = datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
+                elif isinstance(created_at, datetime):
+                    order_time = created_at
+                else:
+                    order_time = datetime.now()  # Fallback: skip stale check
                 stale_cutoff_sec = self.config.get('coinbase', {}).get('stale_order_minutes', 5) * 60
                 if (datetime.now() - order_time).total_seconds() > stale_cutoff_sec:
                      print(f"[MOUTH] STALE ORDER DETECTED: {order_id} is > {stale_cutoff_sec//60} mins old. Expiring for safety.")
@@ -730,6 +850,55 @@ class CoinbaseAgent(IntentListenerMixin):
                      continue
             except Exception as e:
                 print(f"[MOUTH] Warning: Could not verify order age: {e}")
+
+            # Phase 19.1d: Re-verify order status before execution (race-condition guard)
+            # An order may have been VETOED by RiskMonitor after we read it as APPROVED
+            try:
+                c.execute(translate_sql(
+                    "SELECT status FROM trade_queue WHERE id = ?"
+                ), (order_id,))
+                recheck_row = c.fetchone()
+                if not recheck_row or recheck_row[0] != 'APPROVED':
+                    actual_status = recheck_row[0] if recheck_row else 'MISSING'
+                    print(f"[MOUTH] ⚡ ORDER {order_id} status changed to {actual_status} — skipping")
+                    try:
+                        from db.db_helper import db_connection as _dbc2, translate_sql as _ts2
+                        with _dbc2() as _conn2:
+                            _c2 = _conn2.cursor()
+                            _c2.execute(_ts2(
+                                "INSERT INTO consciousness_feed "
+                                "(agent_name, content, category, signal_weight) "
+                                "VALUES (?, ?, ?, ?)"
+                            ), ("AgentCoinbase", json.dumps({
+                                'event': 'safety_intercept',
+                                'order_id': order_id,
+                                'asset': asset,
+                                'action': action,
+                                'original_status': 'APPROVED',
+                                'current_status': actual_status,
+                            }), "safety_intercept", 0.75))
+                            _conn2.commit()
+                    except Exception:
+                        pass
+                    continue
+            except Exception as e:
+                print(f"[MOUTH] Warning: Order recheck failed: {e}")
+
+            # Phase 19.1d: DEFCON check — refuse BUY orders at DEFCON 1 or 2
+            if action == 'BUY':
+                try:
+                    if self.r:
+                        defcon = self.r.get('safety:defcon_level') or self.r.get('risk_model:defcon')
+                        if defcon and int(defcon) <= 2:
+                            print(f"[MOUTH] 🛑 DEFCON {defcon} — refusing BUY {asset}")
+                            c.execute(translate_sql(
+                                "UPDATE trade_queue SET status = 'BLOCKED_BY_DEFCON', "
+                                "reason = ? WHERE id = ?"
+                            ), (f"DEFCON {defcon} — all BUY orders refused", order_id))
+                            conn.commit()
+                            continue
+                except Exception:
+                    pass
 
             SafeLogger.info(f"Processing Order ID: {order_id} - {action} {amount} {asset}")
 
@@ -742,6 +911,61 @@ class CoinbaseAgent(IntentListenerMixin):
                           (f"Exceeds {self.trading_mode} mode limit (${self.mode_max_trade_size})", order_id))
                 conn.commit()
                 continue
+
+            # Phase 19.3c: Last-line scar defense — refuse execution on CRITICAL scars
+            if action == 'BUY':
+                try:
+                    from db.db_helper import db_connection as _dbc_sg, translate_sql as _ts_sg
+                    with _dbc_sg() as _conn_sg:
+                        _c_sg = _conn_sg.cursor()
+                        _c_sg.execute(_ts_sg(
+                            "SELECT COUNT(*) FROM book_of_scars "
+                            "WHERE asset = ? AND severity = 'CRITICAL' "
+                            "AND timestamp > NOW() - INTERVAL '24 hours'"
+                        ), (asset,))
+                        crit_row = _c_sg.fetchone()
+                        if crit_row and int(crit_row[0]) > 0:
+                            print(f"[MOUTH] 💀 SCAR GATE: {asset} has {crit_row[0]} CRITICAL scars in 24h — BLOCKED")
+                            c.execute(translate_sql(
+                                "UPDATE trade_queue SET status = 'BLOCKED_BY_SCARS', "
+                                "reason = ? WHERE id = ?"
+                            ), (f"CRITICAL scars ({crit_row[0]}) in last 24h — last-line defense", order_id))
+                            conn.commit()
+                            # Log to consciousness_feed
+                            try:
+                                _c_sg.execute(_ts_sg(
+                                    "INSERT INTO consciousness_feed "
+                                    "(agent_name, content, category, signal_weight) "
+                                    "VALUES (?, ?, ?, ?)"
+                                ), ("AgentCoinbase", json.dumps({
+                                    'event': 'scar_gate_block',
+                                    'asset': asset,
+                                    'order_id': order_id,
+                                    'critical_scars': int(crit_row[0]),
+                                }), "safety_intercept", 0.8))
+                                _conn_sg.commit()
+                            except Exception:
+                                pass
+                            continue
+                except Exception as e:
+                    print(f"[MOUTH] Warning: Scar gate check failed: {e}")
+
+            # Phase 21.3c: Atomic claim — mark IN_PROGRESS before executing
+            # If process crashes during execution, 21.3b startup recovery marks
+            # orphaned IN_PROGRESS → FAILED, preventing duplicate trades on restart.
+            try:
+                c.execute(translate_sql(
+                    "UPDATE trade_queue SET status = 'IN_PROGRESS', "
+                    "executed_at = CURRENT_TIMESTAMP "
+                    "WHERE id = ? AND status = 'APPROVED'"
+                ), (order_id,))
+                conn.commit()
+                if c.rowcount != 1:
+                    print(f"[MOUTH] ⚡ ORDER {order_id} already claimed (rowcount={c.rowcount}) — skipping")
+                    continue
+            except Exception as e:
+                print(f"[MOUTH] Warning: Atomic claim failed for order {order_id}: {e}")
+                continue  # Don't execute if we can't claim
 
             try:
                 # 1. Check if we have sufficient balance and Identify Fund Source
@@ -871,7 +1095,47 @@ class CoinbaseAgent(IntentListenerMixin):
                         )
                     except Exception as e_log:
                         pass  # Don't block trading for logging failures
-                    
+
+                    # Phase 19.2a: Execution feedback for strategy learning
+                    try:
+                        actual_price_exec = price
+                        if order_result and isinstance(order_result, dict):
+                            actual_price_exec = float(order_result.get('price', price) or price)
+                        intended_qty = amount / price if price and price > 0 else 0
+                        actual_qty_exec = intended_qty
+                        if order_result and isinstance(order_result, dict):
+                            actual_qty_exec = float(order_result.get('filled', intended_qty) or intended_qty)
+                        slippage = ((actual_price_exec - price) / price * 100) if price and price > 0 else 0
+                        fill_rate = actual_qty_exec / intended_qty if intended_qty > 0 else 1.0
+                        fees = 0.0
+                        if order_result and isinstance(order_result, dict) and order_result.get('fee'):
+                            try:
+                                fees = float(order_result['fee'].get('cost', 0) or 0)
+                            except (TypeError, ValueError):
+                                pass
+                        from db.db_helper import db_connection as _dbc_ef, translate_sql as _ts_ef
+                        with _dbc_ef() as _conn_ef:
+                            _c_ef = _conn_ef.cursor()
+                            _c_ef.execute(_ts_ef(
+                                "INSERT INTO execution_feedback "
+                                "(trade_queue_id, asset, intended_price, actual_price, "
+                                "slippage_pct, intended_qty, actual_qty, fill_rate, "
+                                "fees_usd, execution_time_ms, status) "
+                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                            ), (order_id, asset, price, actual_price_exec,
+                                slippage, intended_qty, actual_qty_exec, fill_rate,
+                                fees, 0, 'SUCCESS'))
+                            _conn_ef.commit()
+                        # Also publish to Redis for real-time consumers
+                        if self.r:
+                            self.r.publish('execution:feedback', json.dumps({
+                                'order_id': order_id, 'asset': asset,
+                                'slippage_pct': slippage, 'fill_rate': fill_rate,
+                                'fees_usd': fees, 'status': 'SUCCESS',
+                            }))
+                    except Exception:
+                        pass  # Don't block trading for feedback failures
+
                     # 4. Wealth Management Logic (The Mind)
                     try:
                         if action == 'BUY':
@@ -965,7 +1229,7 @@ class CoinbaseAgent(IntentListenerMixin):
                                 INSERT INTO assets (symbol, quantity, avg_buy_price, current_wallet_id, strategy_type)
                                 VALUES (?, ?, ?, ?, ?)
                                 ON CONFLICT(symbol) DO UPDATE SET
-                                    quantity = quantity + ?,
+                                    quantity = assets.quantity + ?,
                                     avg_buy_price = ?,
                                     current_wallet_id = ?,
                                     strategy_type = ?
@@ -1219,7 +1483,7 @@ class CoinbaseAgent(IntentListenerMixin):
              market_symbol = f"{symbol}/USD"
              
              # Fetch 100 hours of 1h candles
-             candles = self.exchange.fetch_ohlcv(market_symbol, timeframe='1h', limit=100)
+             candles = self._call_exchange(self.exchange.fetch_ohlcv, market_symbol, '1h', 100)
              
              if not candles:
                  return
@@ -1298,7 +1562,10 @@ class CoinbaseAgent(IntentListenerMixin):
 
         SafeLogger.info("🔄 Syncing Wallet with Coinbase...")
         try:
-            balance = self.exchange.fetch_balance()
+            balance = self._call_exchange(self.exchange.fetch_balance)
+            if balance is None:
+                SafeLogger.warning("[EXCHANGE] Timeout syncing wallet — skipping sync cycle")
+                return
             total = balance.get('total', {})
             
             with db_connection(self.db_path) as conn:
@@ -1398,6 +1665,13 @@ class CoinbaseAgent(IntentListenerMixin):
          
          while True:
              try:
+                 # Phase 20.1a: Brainstem heartbeat — report liveness and status
+                 try:
+                     from system.brainstem import brainstem_heartbeat
+                     brainstem_heartbeat("AgentCoinbase", status="processing_queue")
+                 except Exception:
+                     pass
+
                  # 1. Process Orders
                  self.process_queue()
                  

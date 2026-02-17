@@ -34,9 +34,9 @@ DB_PATH = os.getenv('DB_PATH', str(BASE_DIR / 'republic.db'))
 DATABASE_BACKEND = os.getenv('DATABASE_BACKEND', 'sqlite').lower()
 
 # Configuration
-POOL_SIZE = 200 if DATABASE_BACKEND == 'sqlite' else 200  # Match SQLite pool size for 46-agent swarm
+POOL_SIZE = 200 if DATABASE_BACKEND == 'sqlite' else 150  # PostgreSQL: 150 shared across 50+ agents (headroom for Phase 10 systems)
 CONNECTION_TIMEOUT = 120.0  # seconds
-MAX_OVERFLOW = 50 if DATABASE_BACKEND == 'sqlite' else 20  # PostgreSQL needs fewer
+MAX_OVERFLOW = 50 if DATABASE_BACKEND == 'sqlite' else 0  # PostgreSQL: hard cap at POOL_SIZE (150 of 300 max_connections)
 CONNECTION_RECYCLE_SECONDS = 120  # Recycle connections older than 2 minutes
 
 logger = logging.getLogger(__name__)
@@ -165,10 +165,21 @@ class ConnectionPool:
         """Get a connection from the pool."""
         self._maybe_log_health()
 
-        if self.backend == 'postgresql':
-            return self._get_pg(timeout)
-        else:
-            return self._get_sqlite(timeout)
+        _t0 = time.time()
+        try:
+            if self.backend == 'postgresql':
+                return self._get_pg(timeout)
+            else:
+                return self._get_sqlite(timeout)
+        finally:
+            # Phase 30.4: Metrics instrumentation
+            try:
+                from system.metrics import Metrics
+                Metrics.histogram('db.checkout_ms', (time.time() - _t0) * 1000)
+                Metrics.increment('db.checkouts')
+                Metrics.gauge('db.pool_active', self._active_count)
+            except Exception:
+                pass
 
     def _get_sqlite(self, timeout: float):
         """Get a SQLite connection from the pool."""
@@ -197,25 +208,34 @@ class ConnectionPool:
     def _get_pg(self, timeout: float):
         """Get a PostgreSQL connection from the pool, wrapped for SQLite compat."""
         import psycopg2
-        try:
-            raw_conn = self._pg_pool.getconn()
-            raw_conn.autocommit = False
-            with self._pool_lock:
-                self._in_use.add(id(raw_conn))
-                self._active_count += 1
-            # Wrap with auto-translating wrapper so ALL agents get SQL translation
-            # Pass pool reference so close() returns to pool instead of closing
+
+        # Retry with backoff if pool is temporarily exhausted
+        max_retries = 3
+        for attempt in range(max_retries):
             try:
-                from db.db_helper import _PgConnectionWrapper
-                return _PgConnectionWrapper(raw_conn, pool=self)
-            except ImportError:
-                return raw_conn
-        except psycopg2.pool.PoolError as e:
-            logger.error(f"[DB_POOL] PostgreSQL pool error: {e}")
-            raise
-        except Exception as e:
-            logger.error(f"[DB_POOL] PostgreSQL connection error: {e}")
-            raise
+                raw_conn = self._pg_pool.getconn()
+                raw_conn.autocommit = False
+                with self._pool_lock:
+                    self._in_use.add(id(raw_conn))
+                    self._active_count += 1
+                # Wrap with auto-translating wrapper so ALL agents get SQL translation
+                # Pass pool reference so close() returns to pool instead of closing
+                try:
+                    from db.db_helper import _PgConnectionWrapper
+                    return _PgConnectionWrapper(raw_conn, pool=self)
+                except ImportError:
+                    return raw_conn
+            except psycopg2.pool.PoolError as e:
+                if attempt < max_retries - 1:
+                    wait = (attempt + 1) * 2  # 2s, 4s backoff
+                    logger.warning(f"[DB_POOL] Pool exhausted, retry {attempt+1}/{max_retries} in {wait}s...")
+                    time.sleep(wait)
+                else:
+                    logger.error(f"[DB_POOL] PostgreSQL pool exhausted after {max_retries} retries: {e}")
+                    raise
+            except Exception as e:
+                logger.error(f"[DB_POOL] PostgreSQL connection error: {e}")
+                raise
 
     def release(self, conn):
         """Return a connection to the pool."""
@@ -312,6 +332,16 @@ class ConnectionPool:
                     f"Utilization: {utilization:.0f}% of {total_capacity} | "
                     f"Lifetime overflow: {self._overflow_total}"
                 )
+            # Phase 30.2: Alert when pool near exhaustion (> 90%)
+            if utilization > 90:
+                try:
+                    from system.alerting import send_alert
+                    send_alert('medium', 'DB pool near exhaustion',
+                               {'utilization_pct': round(utilization, 1),
+                                'active': self._active_count,
+                                'backend': self.backend})
+                except Exception:
+                    pass
 
     @property
     def active_connections(self) -> int:

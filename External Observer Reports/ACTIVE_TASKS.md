@@ -19662,35 +19662,41 @@ Build the monitoring infrastructure. Create health endpoint, metrics collection,
 
 ### Tasks:
 
-#### 30.1 — Health Endpoint (EXT-01)
-**File:** NEW `system/health_server.py`, wire in `main.py`
+#### 30.1 — Health Endpoint (EXT-01) — Complete
+**File:** NEW `system/health_server.py`, wired in `main.py`
 **Spec:** See Phase 23.1a (line 16629) for full implementation. Lightweight HTTP on port 8080. Returns JSON: healthy, timestamp, db_pool stats, redis status, brainstem heartbeat, consciousness cycle, financial state, uptime.
 **Verify:** `curl http://localhost:8080/health` → JSON 200 or 503.
+**Report-back:** Created `system/health_server.py` (191 lines). `_collect_health()` gathers db_pool stats, redis status, brainstem data, consciousness cycle count, financial state (CB level, DEFCON, pending orders). `/health` returns 200 OK or 503 Degraded. `/metrics` proxies `Metrics.snapshot()`. Wired into `main.py` as daemon thread after thread registration. Compiled clean.
 
-#### 30.2 — External Alerting (EXT-04)
+#### 30.2 — External Alerting (EXT-04) — Complete
 **File:** NEW `system/alerting.py`
 **Spec:** See Phase 23.1b (line 16663). Create `send_alert(level, message, context)`. Hook into: brainstem silence > 30 min, CircuitBreaker Level 4, Coinbase auth failure, Redis down > 5 min, DB pool > 90%.
 **Verify:** Trigger brain silence alert → appears in The_Bridge/Inbox/alerts/ and consciousness_feed.
+**Report-back:** Created `system/alerting.py` with `send_alert(level, message, context)`. Three destinations: (1) file-based JSON alerts to `The_Bridge/Inbox/alerts/`, (2) consciousness_feed table with signal_weight mapped by level (critical=0.95, high=0.8, medium=0.5, low=0.3), (3) Discord webhook via `DISCORD_WEBHOOK_URL` env var. Wired 5 hooks: brainstem.py `_check_brain_silence()` at 30-min mark, circuit_breaker.py Level 4 APOPTOSIS, agent_coinbase.py auth failure (401/unauthorized), redis_client.py when backoff >= 160s (~5+ min down), db_pool.py when utilization > 90%. All 6 files compiled clean.
 
 #### 30.3 — Self-Diagnostic Command (TST-03) — Complete
 **File:** NEW `system/diagnostics.py`
 **Spec:** See Phase 23.1c (line 16682). Run diagnostics callable via The_Bridge/Inbox. Checks: DB, Redis, table row counts, agent liveness, config integrity, last consciousness cycle, last trade, scar count, evolution proposals.
 **Verify:** `python system/diagnostics.py` → JSON report to The_Bridge/Outbox/.
+**Report-back:** Created `system/diagnostics.py` with `run_diagnostics()` returning dict of 9 checks: DB connectivity, Redis availability, table row counts (10 tables), agent liveness (via brainstem heartbeat registry), config integrity (JSON validity), last consciousness entry, last trade, scar count (24h), evolution proposals. Each check returns `{'status': 'OK'|'WARN'|'FAIL', 'detail': ...}`. CLI mode writes JSON report to `The_Bridge/Outbox/diagnostics_TIMESTAMP.json`. Compiled clean.
 
-#### 30.4 — Basic Metrics (OPS-09)
+#### 30.4 — Basic Metrics (OPS-09) — Complete
 **File:** NEW `system/metrics.py`
 **Spec:** See Phase 23.1d (line 16705). Metrics class with counters, gauges, histograms. Instrument: db_pool checkout, redis calls, gemini latency, trade latency. Expose via `/metrics` on health server.
 **Verify:** `curl http://localhost:8080/metrics` → JSON with pool, redis, gemini stats.
+**Report-back:** Created `system/metrics.py` with thread-safe `Metrics` class: `increment(name, n)`, `gauge(name, value)`, `histogram(name, value)`. Histograms bounded to last 1000 samples with percentile reporting (p50/p95/p99). `snapshot()` returns full JSON dict. Instrumented 4 locations: (1) `db_pool.py` — `db.checkout_ms` histogram, `db.checkouts` counter, `db.pool_active` gauge; (2) `redis_client.py` — `redis.connected` gauge (1/0); (3) `agent_lef.py` — `gemini.latency_ms` histogram, `gemini.failures` counter; (4) `agent_coinbase.py` — `trade.latency_ms` histogram, `trade.executions` counter. Exposed via `/metrics` endpoint on health server. All files compiled clean.
 
 #### 30.5 — SafeThread Exception Reporting (OPS-05) — Complete
 **File:** `main.py` — lines 361-404
 **Spec:** See Phase 23.2c (line 16763). On SafeThread crash, report to brainstem: `brainstem_heartbeat(self.name, status=f"crashed:{type(e).__name__}")`.
 **Verify:** Force SafeThread crash → brainstem shows crash status immediately (not just heartbeat timeout).
+**Report-back:** Added brainstem crash reporting to SafeThread exception handler in main.py. On any exception, immediately calls `brainstem_heartbeat(self.name, status=f"crashed:{type(e).__name__}")` before retrying. Wrapped in try/except so crash reporting failure doesn't prevent thread recovery. Compiled clean.
 
-#### 30.6 — Startup Validation Script (TST-02)
+#### 30.6 — Startup Validation Script (TST-02) — Complete
 **File:** NEW `scripts/preflight.py`
 **Spec:** See Phase 23.3a (line 16786). Checks: PostgreSQL, Redis, tables exist, config valid JSON, env vars, Coinbase auth, Gemini auth, disk space, file descriptors, orphaned trades.
 **Verify:** `python scripts/preflight.py` → all checks pass or clear error messages.
+**Report-back:** Created `scripts/preflight.py` (standalone, no heavy imports). 10 preflight checks: (1) DB backend detection (PostgreSQL/SQLite), (2) Redis connectivity, (3) required tables (10 tables), (4) config.json valid JSON, (5) wealth_strategy.json valid JSON, (6) required env vars (GEMINI_API_KEY, ANTHROPIC_API_KEY), (7) Coinbase key format validation (PEM for api_secret), (8) Gemini key presence, (9) disk space (>100MB warning, >10MB fail), (10) file descriptors (>80% warning). CLI with colored status output. Compiled clean.
 
 ### Phase 30 Verification
 1. Health endpoint returns valid JSON
