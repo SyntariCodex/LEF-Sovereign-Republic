@@ -8,6 +8,7 @@ starving others of their voice.
 """
 import time
 import os
+import logging
 import threading
 from datetime import datetime, timedelta
 
@@ -141,8 +142,8 @@ class TokenBudget:
                 return True
                 
             except Exception as e:
-                print(f"[TokenBudget] Check error: {e}")
-                return True  # Fail open to avoid blocking everything
+                logging.error(f"[TokenBudget] Check failed (denying): {e}")
+                return False  # Fail-closed: deny if budget check fails
     
     def record_usage(self, model: str, tokens_used: int, agent_name: str):
         """

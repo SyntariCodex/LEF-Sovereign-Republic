@@ -200,56 +200,70 @@ class MEVProtection:
     ) -> Dict:
         """
         Get comprehensive execution recommendation.
-        
+
         Combines all MEV protection strategies into a single recommendation.
-        
+
         Args:
             symbol: Asset to trade
             amount_usd: Trade size in USD
             intended_price: Price when order was generated (optional)
-            
+
         Returns:
             Dict with execution recommendations
         """
-        recommendation = {
-            'proceed': True,
-            'delay': self.randomize_timing(),
-            'split': amount_usd > self.LARGE_ORDER_USD,
-            'slices': None,
-            'max_slice': self.MAX_SLICE_USD,
-            'whale_warning': False,
-            'slippage_ok': True,
-            'notes': []
-        }
-        
-        # 1. Check for iceberg splitting
-        if recommendation['split']:
-            recommendation['slices'] = self.split_large_order(amount_usd)
-            recommendation['notes'].append(
-                f"Large order (${amount_usd:.0f}) split into {len(recommendation['slices'])} slices"
-            )
-        
-        # 2. Check for whale activity
-        whale_check = self.detect_whale_activity(symbol)
-        if whale_check['suspicious']:
-            recommendation['whale_warning'] = True
-            recommendation['delay'] *= 2  # Double delay on whale activity
-            recommendation['notes'].append(
-                f"Whale activity detected ({whale_check['volume_ratio']:.1f}x volume)"
-            )
-        
-        # 3. Check slippage guard (if price provided)
-        if intended_price:
-            is_safe, current_price = self.check_slippage_guard(symbol, intended_price)
-            recommendation['slippage_ok'] = is_safe
-            if not is_safe:
-                recommendation['proceed'] = False
-                recommendation['notes'].append("BLOCKED: Price moved beyond tolerance")
-        
-        # 4. Add random execution jitter
-        recommendation['delay'] += random.uniform(0, 0.5)  # Extra jitter
-        
-        return recommendation
+        try:
+            recommendation = {
+                'proceed': True,
+                'delay': self.randomize_timing(),
+                'split': amount_usd > self.LARGE_ORDER_USD,
+                'slices': None,
+                'max_slice': self.MAX_SLICE_USD,
+                'whale_warning': False,
+                'slippage_ok': True,
+                'notes': []
+            }
+
+            # 1. Check for iceberg splitting
+            if recommendation['split']:
+                recommendation['slices'] = self.split_large_order(amount_usd)
+                recommendation['notes'].append(
+                    f"Large order (${amount_usd:.0f}) split into {len(recommendation['slices'])} slices"
+                )
+
+            # 2. Check for whale activity
+            whale_check = self.detect_whale_activity(symbol)
+            if whale_check['suspicious']:
+                recommendation['whale_warning'] = True
+                recommendation['delay'] *= 2  # Double delay on whale activity
+                recommendation['notes'].append(
+                    f"Whale activity detected ({whale_check['volume_ratio']:.1f}x volume)"
+                )
+
+            # 3. Check slippage guard (if price provided)
+            if intended_price:
+                is_safe, current_price = self.check_slippage_guard(symbol, intended_price)
+                recommendation['slippage_ok'] = is_safe
+                if not is_safe:
+                    recommendation['proceed'] = False
+                    recommendation['notes'].append("BLOCKED: Price moved beyond tolerance")
+
+            # 4. Add random execution jitter
+            recommendation['delay'] += random.uniform(0, 0.5)  # Extra jitter
+
+            return recommendation
+
+        except Exception as e:
+            logging.error(f"[MEV] Check failed (blocking): {e}")
+            return {
+                'proceed': False,
+                'delay': 0,
+                'split': False,
+                'slices': None,
+                'max_slice': self.MAX_SLICE_USD,
+                'whale_warning': False,
+                'slippage_ok': False,
+                'notes': [f'MEV check failed: {e}']
+            }
     
     def _get_current_price(self, symbol: str) -> Optional[float]:
         """Get current price from Redis cache."""

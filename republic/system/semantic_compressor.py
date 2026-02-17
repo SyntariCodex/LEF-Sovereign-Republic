@@ -17,6 +17,14 @@ import logging
 import os
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
+from contextlib import contextmanager
+
+# Phase 12.H7: Use centralized db_helper for PG-compatible connections
+try:
+    from db.db_helper import db_connection as _db_connection
+    _USE_DB_HELPER = True
+except ImportError:
+    _USE_DB_HELPER = False
 
 # Try to import Google GenAI for compression
 try:
@@ -54,10 +62,26 @@ class SemanticCompressor:
             else:
                 logging.warning("[COMPRESSOR] No API key found for GenAI")
     
-    def _get_connection(self) -> sqlite3.Connection:
+    def _get_connection(self):
+        """Get DB connection. Uses db_helper (PG-compatible) if available, else raw SQLite."""
+        if _USE_DB_HELPER:
+            from db.db_helper import get_connection, release_connection
+            conn, pool = get_connection()
+            # Attach release info so caller can release properly
+            conn._compressor_pool = pool
+            return conn
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         return conn
+
+    def _release_connection(self, conn):
+        """Release connection back to pool or close it."""
+        if _USE_DB_HELPER and hasattr(conn, '_compressor_pool'):
+            from db.db_helper import release_connection
+            release_connection(conn, conn._compressor_pool)
+        else:
+            if conn:
+                conn.close()
     
     def _ensure_table(self):
         """Create compressed_wisdom table if not exists."""
@@ -83,7 +107,7 @@ class SemanticCompressor:
             conn.commit()
             logging.info("[COMPRESSOR] 📚 compressed_wisdom table ready.")
         finally:
-            conn.close()
+            self._release_connection(conn)
     
     def compress_scars(self, min_repeats: int = 2) -> int:
         """
@@ -147,7 +171,7 @@ class SemanticCompressor:
             logging.error(f"[COMPRESSOR] Error compressing scars: {e}")
             return 0
         finally:
-            conn.close()
+            self._release_connection(conn)
     
     def _synthesize_scar_wisdom(self, failure_type: str, asset: str, lesson: str, count: int) -> str:
         """Use LLM to synthesize wisdom from failure pattern, or use fallback."""
@@ -251,7 +275,7 @@ Write a single concise sentence that captures the core lesson. Start with "AVOID
             logging.error(f"[COMPRESSOR] Error compressing experiences: {e}")
             return 0
         finally:
-            conn.close()
+            self._release_connection(conn)
     
     def _synthesize_experience_wisdom(self, condition: str, experiences: List, avg_pnl: float) -> str:
         """Synthesize wisdom from experience patterns."""
@@ -315,7 +339,7 @@ Write a single concise trading insight. Start with "IN {condition.upper()}:" fol
             
             return [dict(row) for row in cursor.fetchall()]
         finally:
-            conn.close()
+            self._release_connection(conn)
     
     def validate_wisdom(self, wisdom_id: int, outcome_matched: bool):
         """
@@ -341,7 +365,7 @@ Write a single concise trading insight. Start with "IN {condition.upper()}:" fol
             conn.commit()
             logging.debug(f"[COMPRESSOR] Validated wisdom #{wisdom_id}: {'✓' if outcome_matched else '✗'}")
         finally:
-            conn.close()
+            self._release_connection(conn)
     
     def run_compression_cycle(self) -> Dict[str, int]:
         """
@@ -386,7 +410,7 @@ Write a single concise trading insight. Start with "IN {condition.upper()}:" fol
             
             return stats
         finally:
-            conn.close()
+            self._release_connection(conn)
 
 
 # Convenience function for external use

@@ -1,6 +1,7 @@
 
 import os
 import json
+import logging
 from datetime import datetime
 
 class RiskEngine:
@@ -88,9 +89,14 @@ class RiskEngine:
             try:
                 c.execute("SELECT sum(balance) FROM stablecoin_buckets")
                 row = c.fetchone()
-                cash = row[0] if row and row[0] else 0.0
-            except sqlite3.Error:
-                cash = 0.0
+                if row is None or row[0] is None:
+                    logging.error("[RiskEngine] Treasury rows missing — no stablecoin buckets found")
+                    cash = 0.0  # Fail-closed: no trading if no treasury
+                else:
+                    cash = float(row[0])
+            except Exception as e:
+                logging.error(f"[RiskEngine] Cash query failed (assuming $0): {e}")
+                cash = 0.0  # Fail-closed: no trading if cash unknown
                 
             # 2. Assets (using value_usd which is updated by Sentinel/Master)
             c.execute("SELECT sum(value_usd) FROM assets WHERE quantity > 0")
