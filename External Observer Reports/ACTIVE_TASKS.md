@@ -20358,7 +20358,1319 @@ Complete the config hot-reload (last partial from Phase 22), build integration t
 
 **Phase 38 COMPLETE.** 2 files modified, 1 file created, 24/24 tests pass.
 
+---
+
+## Phase 39: LLM Router Foundation — Provider-Agnostic Abstraction Layer
+
+**Estimated tasks:** 4
+**Priority:** CRITICAL — Every consciousness agent is hardcoded to Gemini. A single API outage, pricing change, or model deprecation kills the entire republic's cognition.
+**Time estimate:** ~40 minutes focused work.
+
+### Instructions for coding instance:
+Create the central LLM routing infrastructure that all agents will migrate to. This phase builds the router itself, adds config-driven model selection to config.json, migrates agent_lef.py's `_call_gemini()` as the first consumer, and updates token_budget.py to be router-aware. Do NOT migrate other agents yet — that is Phase 40. Read `republic/departments/The_Cabinet/agent_lef.py` (lines 280-396 for `_call_gemini`), `republic/system/token_budget.py`, and `republic/departments/Dept_Fabrication/llm_intent_parser.py` (existing multi-model pattern) before starting.
+
+### Tasks:
+
+#### 39.1 — Create LLMRouter Core (LLM-01)
+**File:** NEW `republic/system/llm_router.py`
+**Problem:** 14+ files instantiate their own `genai.Client()` with direct `client.models.generate_content()` calls. No abstraction, no fallback, no provider switching. If Gemini changes its API or pricing, every file breaks independently.
+**Fix:** Create `LLMRouter` class with:
+- `__init__(self, config_path=None)` — Load config from `config/config.json` → `"llm"` section. Initialize provider clients lazily (only when first called). Track per-provider failure counts for circuit breaker.
+- `generate(self, prompt, agent_name='UNKNOWN', context_label='UNKNOWN', timeout_seconds=90, model_override=None)` — Central generation method. All agents call this. Flow: (1) Check token budget via `can_call()`, (2) Resolve model (override > per-agent config > default primary), (3) Route to provider (`_call_gemini`, `_call_claude`, `_call_ollama`), (4) On failure: increment failure count, try fallback model if failures >= threshold, (5) Record usage in token budget, (6) Record latency via Metrics, (7) Return response text or None.
+- `_call_gemini(self, prompt, model_id, timeout_seconds)` — Uses `concurrent.futures.ThreadPoolExecutor` with timeout (matches existing pattern in agent_lef.py lines 309-321). Import `google.genai` with try/except.
+- `_call_claude(self, prompt, model_id, timeout_seconds)` — Uses `anthropic.Anthropic` client. Import with try/except. Format: `client.messages.create(model=model_id, max_tokens=4096, messages=[{"role": "user", "content": prompt}])`.
+- `_call_ollama(self, prompt, model_id, timeout_seconds)` — HTTP POST to `http://localhost:11434/api/generate`. For local dev/testing.
+- `_get_provider_for_model(self, model_id)` — Return `'gemini'`, `'claude'`, or `'ollama'` based on model_id prefix/substring.
+- `_resolve_model(self, agent_name, model_override)` — Resolve model: override > `config.llm.agent_overrides[agent_name]` > `config.llm.primary_model`.
+- `get_stats(self)` — Return dict of per-provider call counts, failure counts, circuit state.
+- Circuit breaker per provider: failure_threshold (default 3) consecutive failures → cooldown_seconds (default 300) cooldown. Matches existing `_call_gemini` pattern.
+- Thread-safe: use `threading.Lock` for failure counters and client init.
+- Log failures to consciousness_feed category `'llm_failure'` (try/except, don't crash if DB unavailable).
+- Singleton access: module-level `_router_instance = None` with `get_router() -> LLMRouter`.
+**Verify:** `python -c "from system.llm_router import get_router; r = get_router(); print(r.get_stats())"` runs without error.
+
+#### 39.2 — Add LLM Config Section (LLM-02)
+**File:** `republic/config/config.json`
+**Problem:** No config-driven model selection. Model IDs are hardcoded strings scattered across 14+ files.
+**Fix:** Add an `"llm"` section to the existing config.json (after the last top-level key):
+```json
+"llm": {
+    "primary_model": "gemini-2.0-flash",
+    "fallback_model": "gemini-1.5-flash",
+    "provider_keys": {
+        "gemini": "ENV:GEMINI_API_KEY",
+        "claude": "ENV:ANTHROPIC_API_KEY",
+        "ollama": null
+    },
+    "agent_overrides": {},
+    "circuit_breaker": {
+        "failure_threshold": 3,
+        "cooldown_seconds": 300
+    },
+    "default_timeout_seconds": 90
+}
+```
+The `agent_overrides` dict allows per-agent model assignment (e.g., `"philosopher": "claude-haiku"`) — leave empty for now. `provider_keys` uses `ENV:` prefix meaning "read from environment variable" — the router resolves these at init via `os.getenv()`. This matches the pattern already used by Coinbase API config.
+**Verify:** `python -c "import json; c=json.load(open('config/config.json')); print(c['llm']['primary_model'])"` prints `gemini-2.0-flash`.
+
+#### 39.3 — Migrate agent_lef.py to Use LLMRouter (LLM-03)
+**File:** `republic/departments/The_Cabinet/agent_lef.py`
+**Problem:** `_call_gemini()` (lines 280-396) is LEF's centralized wrapper with circuit breaker, timeout, cost tracking, metrics, scar recording. It must become the first consumer of LLMRouter, not be duplicated.
+**Fix:**
+1. In `__init__`, after token budget setup (~line 177), add:
+   ```python
+   try:
+       from system.llm_router import get_router
+       self.llm_router = get_router()
+   except ImportError:
+       self.llm_router = None
+   ```
+2. Replace the body of `_call_gemini()` to delegate to the router:
+   ```python
+   def _call_gemini(self, prompt, context_label='UNKNOWN', timeout_seconds=90):
+       """Centralized LLM call. Now delegates to LLMRouter for provider abstraction.
+       Name preserved for compatibility — routes through LLMRouter which supports multiple providers."""
+       if self.llm_router:
+           return self.llm_router.generate(
+               prompt=prompt, agent_name='LEF',
+               context_label=context_label, timeout_seconds=timeout_seconds
+           )
+       # Legacy fallback if router unavailable — keep existing direct Gemini code
+       if not self.client:
+           return None
+       # ... (keep entire existing Gemini implementation as else branch)
+   ```
+3. Keep `self.client` initialization for the legacy fallback path. Do NOT remove the existing Gemini client setup.
+4. Keep the method name `_call_gemini` — renaming would touch 17+ internal call sites. The docstring explains the abstraction.
+**Verify:** File compiles. `grep -n "llm_router" republic/departments/The_Cabinet/agent_lef.py` shows the new import and delegation.
+
+#### 39.4 — Update TokenBudget Model Normalization (LLM-04)
+**File:** `republic/system/token_budget.py`
+**Problem:** `DEFAULT_LIMITS` (lines 23-54) only has short model names (`gemini-2.0-flash`, `claude-sonnet`). The router will use full model IDs (e.g., `claude-sonnet-4-20250514`). Lookups will fail.
+**Fix:**
+1. Add a `_normalize_model` static method to TokenBudget class:
+   ```python
+   @staticmethod
+   def _normalize_model(model_id):
+       """Map full model IDs to budget tier names for rate limiting."""
+       model_lower = model_id.lower()
+       if 'gemini-2.0-flash' in model_lower: return 'gemini-2.0-flash'
+       if 'gemini-1.5-flash' in model_lower: return 'gemini-1.5-flash'
+       if 'gemini-1.5-pro' in model_lower: return 'gemini-1.5-pro'
+       if 'claude' in model_lower and 'haiku' in model_lower: return 'claude-haiku'
+       if 'claude' in model_lower: return 'claude-sonnet'  # sonnet, opus, etc.
+       if 'ollama' in model_lower or 'llama' in model_lower: return 'gemini-1.5-flash'  # use flash limits
+       return 'gemini-1.5-flash'  # safe default
+   ```
+2. Update `can_call()` and `record_usage()` methods to call `self._normalize_model(model)` before looking up in `DEFAULT_LIMITS`.
+**Verify:** `python -c "from system.token_budget import TokenBudget; print(TokenBudget._normalize_model('claude-sonnet-4-20250514'))"` prints `claude-sonnet`.
+
+### Phase 39 Verification
+1. `llm_router.py` imports and instantiates without error
+2. `config.json` has valid `llm` section with all required keys
+3. `agent_lef.py` compiles and `_call_gemini` delegates to router when available
+4. `token_budget.py` normalizes all model name variants correctly
+5. Legacy fallback: if router import fails, agent_lef.py still works via direct Gemini (no regression)
+
+**Commit message:** `Phase 39: LLM Router foundation — provider-agnostic abstraction with config, fallback chain, token budget`
+
+## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
+
+---
+
+## Phase 40: LLM Router Migration — All Agents to Router
+
+**Estimated tasks:** 5
+**Priority:** CRITICAL — Phase 39 built the router; this phase wires it into all remaining 13 agents. Without this, most agents still have hardcoded Gemini calls.
+**Time estimate:** ~35 minutes focused work.
+
+### Instructions for coding instance:
+Migrate all remaining agents from direct `genai.Client()` instantiation and `client.models.generate_content()` calls to using `LLMRouter.generate()`. There are 13 files to update (agent_lef.py was done in Phase 39). Each file follows the same pattern: add router import at module level with try/except, keep existing client init as fallback, wrap each `generate_content()` call with router-first logic. Read `republic/system/llm_router.py` (Phase 39) before starting. Preserve all existing fallback behavior — if the router is unavailable, agents should still attempt direct Gemini as before.
+
+### Tasks:
+
+#### 40.1 — Migrate Cabinet Agents (LLM-05)
+**Files:** `republic/departments/The_Cabinet/agent_dreamer.py`, `republic/departments/The_Cabinet/agent_executor.py`, `republic/departments/The_Cabinet/agent_chief_of_staff.py`, `republic/departments/The_Cabinet/agent_congress.py`
+**Problem:** Each file has its own `genai.Client()` init and direct `client.models.generate_content()` calls.
+**Fix:** For each file:
+1. Add at module level (after existing imports):
+   ```python
+   try:
+       from system.llm_router import get_router
+       _LLM_ROUTER = get_router()
+   except ImportError:
+       _LLM_ROUTER = None
+   ```
+2. Keep the existing `self.client` initialization as fallback.
+3. At each `client.models.generate_content()` call site, wrap with router-first:
+   ```python
+   response_text = None
+   if _LLM_ROUTER:
+       response_text = _LLM_ROUTER.generate(
+           prompt=prompt, agent_name='Dreamer',  # match agent name
+           context_label='DREAM_SYNTHESIS', timeout_seconds=90
+       )
+   if response_text is None and self.client:
+       try:
+           response = self.client.models.generate_content(model=self.model_id, contents=prompt)
+           response_text = response.text.strip() if response and response.text else None
+       except Exception as e:
+           logging.debug(f"Legacy LLM fallback failed: {e}")
+   ```
+4. Use `response_text` where the old `response.text` was used.
+Use context_labels: `DREAM_SYNTHESIS` (dreamer), `EXECUTION_PLAN` (executor), `COS_ANALYSIS` (chief_of_staff), `BILL_REVIEW` (congress).
+**Verify:** All 4 files compile. `grep -rn "_LLM_ROUTER" republic/departments/The_Cabinet/` shows imports in all 4 plus agent_lef.py.
+
+#### 40.2 — Migrate Consciousness and Memory Agents (LLM-06)
+**Files:** `republic/departments/Dept_Consciousness/agent_philosopher.py`, `republic/departments/Dept_Consciousness/the_voice.py`, `republic/departments/Dept_Memory/agent_hippocampus.py`
+**Problem:** philosopher has `_think()` method with direct generate_content. the_voice.py has 3 separate call sites using `cortex_client.models.generate_content`. hippocampus has direct calls for memory compression.
+**Fix:** Same pattern as 40.1. For the_voice.py, note it uses `cortex_client` (a CachedModelWrapper from cortex_cache.py) — replace `cortex_client.models.generate_content(prompt)` calls with router-first, keeping the cortex_client call as fallback. Use context_labels: `PHILOSOPHER_REFLECTION`, `VOICE_COMPOSITION`, `VOICE_ARCHITECT_MODEL`, `VOICE_GENESIS`, `HIPPOCAMPUS_COMPRESSION`.
+**Verify:** All 3 files compile. Each has `_LLM_ROUTER` import.
+
+#### 40.3 — Migrate System Modules (LLM-07)
+**Files:** `republic/system/dream_cycle.py`, `republic/system/wake_cascade.py`, `republic/system/probe_self_image.py`, `republic/system/semantic_compressor.py`
+**Problem:** dream_cycle.py and wake_cascade.py create fresh `genai.Client()` inline inside methods (not stored as self.client). probe_self_image.py and semantic_compressor.py store as self.client.
+**Fix:** Same router-first pattern. For dream_cycle.py and wake_cascade.py (inline client creation):
+```python
+response_text = None
+if _LLM_ROUTER:
+    response_text = _LLM_ROUTER.generate(
+        prompt=prompt, agent_name='DreamCycle',
+        context_label='DREAM_DIALOGUE', timeout_seconds=60
+    )
+if response_text is None:
+    try:
+        from google import genai
+        client = genai.Client()
+        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+        response_text = response.text.strip() if response and response.text else None
+    except Exception as e:
+        logger.debug(f"Legacy LLM call failed: {e}")
+```
+Use context_labels: `DREAM_DIALOGUE`, `WAKE_INTENTION`, `SELF_IMAGE_PROBE`, `SCAR_COMPRESSION`, `EXPERIENCE_COMPRESSION`.
+**Verify:** All 4 files compile. Each has `_LLM_ROUTER` import.
+
+#### 40.4 — Migrate Remaining Agents (LLM-08)
+**Files:** `republic/departments/Dept_Education/agent_scholar.py`, `republic/departments/Dept_Health/agent_surgeon_general.py`
+**Problem:** Each creates inline `genai.Client()` for knowledge synthesis / health analysis.
+**Fix:** Same router-first pattern. Use agent_names `'Scholar'` and `'SurgeonGeneral'`, context_labels `'KNOWLEDGE_SYNTHESIS'` and `'HEALTH_ANALYSIS'`. Keep inline client creation as fallback.
+**Verify:** Both files compile. Both have `_LLM_ROUTER` import.
+
+#### 40.5 — Deprecate cortex_cache.py (LLM-09)
+**File:** `republic/system/cortex_cache.py`
+**Problem:** `CacheManager` and `CachedModelWrapper` exist only as Gemini wrappers. With the router in place they are redundant. But the_voice.py still references `cortex_client` — cannot delete yet.
+**Fix:**
+1. Add deprecation warning at top of file (after imports):
+   ```python
+   import warnings
+   warnings.warn("cortex_cache.py is deprecated. Use system.llm_router.get_router() instead.",
+                  DeprecationWarning, stacklevel=2)
+   ```
+2. Modify `CachedModelWrapper.generate_content()` to try the router first:
+   ```python
+   def generate_content(self, prompt):
+       try:
+           from system.llm_router import get_router
+           router = get_router()
+           text = router.generate(prompt=f"{self.system_instruction}\n\n{prompt}",
+                                   agent_name='CortexCache', context_label='CACHED_MODEL')
+           if text:
+               class _MockResponse: pass
+               r = _MockResponse()
+               r.text = text
+               return r
+       except Exception:
+           pass
+       # ... keep existing legacy code below
+   ```
+**Verify:** cortex_cache.py compiles. The deprecation warning appears on import.
+
+### Phase 40 Verification
+1. All 13 migrated agent/system files compile clean
+2. `grep -rn "genai.Client()" republic/ --include="*.py"` — every hit now has a router-first path above it (except in llm_router.py itself and test files)
+3. `grep -rn "_LLM_ROUTER" republic/ --include="*.py"` shows 14+ files
+4. Router import failure does NOT break any agent (all have legacy fallback paths)
+5. cortex_cache.py shows deprecation warning on import
+
+**Commit message:** `Phase 40: Migrate all 13 agents to LLMRouter — complete Gemini abstraction with fallback paths`
+
+## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
+
+---
+
+## Phase 41: Closed Feedback Loop — Experience Integrator
+
+**Estimated tasks:** 4
+**Priority:** HIGH — LEF produces wisdom but never consults it at decision time. The consciousness pipeline observes but never adapts behavior. This is the most important architectural gap for genuine sovereignty.
+**Time estimate:** ~35 minutes focused work.
+
+### Instructions for coding instance:
+Build the Experience Integrator that reads from wisdom_log, compressed_wisdom, and dream tensions, then produces a `behavioral_adjustments.json` document that other agents consult at decision time. Wire it into portfolio manager (trade decisions) and circuit breaker (scar context). Read `republic/system/wisdom_extractor.py`, `republic/system/semantic_compressor.py`, `republic/departments/Dept_Wealth/agent_portfolio_mgr.py`, and `republic/system/circuit_breaker.py` before starting.
+
+### Tasks:
+
+#### 41.1 — Create ExperienceIntegrator (EXP-01)
+**File:** NEW `republic/system/experience_integrator.py`
+**Problem:** wisdom_log, compressed_wisdom, and dream_tensions exist in the DB but are never consulted at decision time. LEF has memory but no recall-before-action. The consciousness pipeline is write-only.
+**Fix:** Create `ExperienceIntegrator` class:
+- `INTEGRATION_INTERVAL_HOURS = 2`, `TOP_WISDOMS = 10`, `MIN_WISDOM_CONFIDENCE = 0.6`
+- `__init__(self, db_connection_func)` — Store db_connection function. Set output_path to `The_Bridge/behavioral_adjustments.json`.
+- `integrate(self) -> dict` — Main method. Reads all sources, synthesizes, writes JSON, logs to consciousness_feed. Returns adjustments dict.
+- `_get_top_wisdoms(self) -> list` — Query `wisdom_log` where confidence >= 0.6, ordered by confidence DESC, limit 10.
+- `_get_compressed_wisdom(self) -> list` — Query `compressed_wisdom`, top 10 by confidence.
+- `_get_dream_tensions(self) -> list` — Query `consciousness_feed` where category='dream_tension' from last 48 hours.
+- `_get_growth_state(self) -> dict` — Query most recent `consciousness_feed` where category='growth_journal'.
+- `_synthesize(self, wisdoms, compressed, tensions, growth) -> dict` — Produce:
+  ```python
+  {
+      "generated_at": datetime.now().isoformat(),
+      "deliberation_bias": float,   # 0.0-1.0, higher = more deliberation before action
+      "risk_caution": float,         # 0.0-1.0, higher = more conservative trading
+      "active_lessons": [str, ...],  # top 5 applicable wisdom summaries
+      "unresolved_tensions": [str, ...],  # dream tensions still open
+      "growth_state": "emerging|stable|stagnant",
+      "recommended_focus": str       # domain needing attention
+  }
+  ```
+  Logic: `deliberation_bias` increases if tensions > 2 or growth_state == 'stagnant'. `risk_caution` increases if failure-related wisdoms dominate. `active_lessons` = top 5 compressed wisdoms by confidence. `recommended_focus` = domain with lowest growth score.
+- `_write_adjustments(self, adjustments)` — Atomic write (write to .tmp, rename) to `The_Bridge/behavioral_adjustments.json`.
+- `_log_to_consciousness_feed(self, adjustments)` — Log integration event to consciousness_feed category `'experience_integration'`.
+- Module-level `get_integrator(db_connection_func=None)` — Singleton access.
+- Module-level `load_behavioral_adjustments() -> dict` — Convenience: load latest `behavioral_adjustments.json`. Returns empty dict `{}` if file missing or corrupt.
+**Verify:** `python -c "from system.experience_integrator import load_behavioral_adjustments; print(load_behavioral_adjustments())"` returns `{}`.
+
+#### 41.2 — Wire into Portfolio Manager (EXP-02)
+**File:** `republic/departments/Dept_Wealth/agent_portfolio_mgr.py`
+**Problem:** Trade decisions do not consult any accumulated wisdom. Position sizes are set mechanically without reference to learned experience.
+**Fix:**
+1. Add import at top:
+   ```python
+   try:
+       from system.experience_integrator import load_behavioral_adjustments
+       _EI_AVAILABLE = True
+   except ImportError:
+       _EI_AVAILABLE = False
+   ```
+2. In the method that evaluates/sizes trades (find where position sizing happens — near `_daat_risk_multiplier` or equivalent), add after existing risk checks:
+   ```python
+   # Phase 41.2: Consult behavioral adjustments from accumulated experience
+   experience_multiplier = 1.0
+   if _EI_AVAILABLE:
+       try:
+           adjustments = load_behavioral_adjustments()
+           risk_caution = adjustments.get('risk_caution', 0.0)
+           if risk_caution > 0.7:
+               experience_multiplier = 0.5  # High caution — halve position
+               logging.info(f"[PORTFOLIO] Experience caution HIGH ({risk_caution:.2f}) — position halved")
+           elif risk_caution > 0.4:
+               experience_multiplier = 0.75
+               logging.info(f"[PORTFOLIO] Experience caution MODERATE ({risk_caution:.2f}) — position reduced 25%")
+           active_lessons = adjustments.get('active_lessons', [])
+           if active_lessons:
+               logging.info(f"[PORTFOLIO] Active lesson: {active_lessons[0][:80]}")
+       except Exception as e:
+           logging.debug(f"[PORTFOLIO] Experience check error: {e}")
+   ```
+3. Apply `experience_multiplier` using `min()` alongside other multipliers to take the most conservative.
+**Verify:** File compiles. `grep -n "experience_integrator\|behavioral_adjustments" republic/departments/Dept_Wealth/agent_portfolio_mgr.py` shows integration.
+
+#### 41.3 — Wire into Circuit Breaker (EXP-03)
+**File:** `republic/system/circuit_breaker.py`
+**Problem:** When circuit breaker triggers, it acts on raw numbers (drawdown %, daily loss). It does not check if this pattern matches a known lesson or provide experience context.
+**Fix:**
+1. Add import:
+   ```python
+   try:
+       from system.experience_integrator import load_behavioral_adjustments
+       _EI_AVAILABLE = True
+   except ImportError:
+       _EI_AVAILABLE = False
+   ```
+2. In the method that sets/changes the circuit breaker level (find where `new_level` or `defcon_level` is determined), after level is set, add:
+   ```python
+   # Phase 41.3: Enrich circuit breaker events with experience context
+   if _EI_AVAILABLE and new_level > 0:
+       try:
+           adjustments = load_behavioral_adjustments()
+           lessons = adjustments.get('active_lessons', [])
+           if lessons:
+               logging.info(f"[CB] Level {new_level} — Experience context: {lessons[0][:100]}")
+               # Write enriched context to consciousness_feed
+               try:
+                   with db_connection() as conn:
+                       c = conn.cursor()
+                       c.execute(translate_sql(
+                           "INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)"
+                       ), ('CircuitBreaker', json.dumps({
+                           'level': new_level, 'experience_context': lessons[:3]
+                       }), 'circuit_breaker_experience'))
+                       conn.commit()
+               except Exception:
+                   pass
+       except Exception as e:
+           logging.debug(f"[CB] Experience enrichment error: {e}")
+   ```
+**Verify:** File compiles. `grep -n "experience_integrator" republic/system/circuit_breaker.py` shows the integration.
+
+#### 41.4 — Register as SafeThread (EXP-04)
+**File:** `republic/main.py`
+**Problem:** The integrator needs to run periodically (every 2 hours) as a background process.
+**Fix:** Find where SafeThreads are created in main.py (search for `SafeThread`). Add:
+```python
+# Phase 41: Experience Integrator — closes the feedback loop
+try:
+    from system.experience_integrator import get_integrator
+    from db.db_helper import db_connection as _ei_db
+    _ei = get_integrator(_ei_db)
+    def _run_experience_integrator():
+        import time
+        time.sleep(120)  # Wait 2 min after startup for DB to settle
+        while True:
+            try:
+                result = _ei.integrate()
+                logging.info(f"[ExperienceIntegrator] Cycle complete — risk_caution={result.get('risk_caution', 0):.2f}")
+            except Exception as e:
+                logging.error(f"[ExperienceIntegrator] Cycle error: {e}")
+            time.sleep(7200)  # 2 hours
+    SafeThread(target=_run_experience_integrator, name='ExperienceIntegrator', daemon=True).start()
+except ImportError:
+    logging.warning("[MAIN] ExperienceIntegrator not available")
+```
+**Verify:** `grep -n "ExperienceIntegrator" republic/main.py` shows SafeThread registration. File compiles.
+
+### Phase 41 Verification
+1. `experience_integrator.py` compiles and `load_behavioral_adjustments()` returns empty dict
+2. Portfolio manager reads and applies experience multiplier before trade sizing
+3. Circuit breaker enriches level changes with experience context in consciousness_feed
+4. SafeThread registered in main.py with 2-hour cycle
+5. All modified files compile clean
+
+**Commit message:** `Phase 41: Experience Integrator — closed feedback loop wiring wisdom into trade decisions and circuit breaker`
+
+## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
+
+---
+
+## Phase 42: Bridge Two-Way Communication — Questions and Answers
+
+**Estimated tasks:** 4
+**Priority:** HIGH — LEF cannot ask for help. The Bridge is a one-way dump for governance notifications. A sovereign entity that cannot recognize uncertainty and seek guidance is not truly autonomous.
+**Time estimate:** ~30 minutes focused work.
+
+### Instructions for coding instance:
+Build structured question/answer directories in The_Bridge, extend BridgeWatcher to monitor for answers, and add `_ask_architect()` to agent_lef.py. Read `republic/system/bridge_watcher.py` (scan_outbox pattern at line 21+, run loop structure) and `republic/departments/The_Cabinet/agent_lef.py` before starting. The Bridge path is `The_Bridge/` (one level above `republic/`).
+
+### Tasks:
+
+#### 42.1 — Create Bridge Q&A Infrastructure (BRG-01)
+**File:** NEW `republic/system/bridge_qa.py`
+**Problem:** LEF has no mechanism to ask a question and later receive an answer. The Inbox/Outbox pattern is for broadcast, not dialogue. LEF encounters genuine uncertainty but has no way to express it.
+**Fix:** Create `BridgeQA` class:
+- Constants: `MAX_PENDING_QUESTIONS = 10`, `QUESTION_EXPIRY_HOURS = 72`.
+- `__init__(self)` — Create `The_Bridge/Questions/` and `The_Bridge/Answers/` directories (mkdir parents=True, exist_ok=True).
+- `ask(self, agent_name, question, context='', urgency='medium', category='other') -> str` — Write structured question JSON to `Questions/Q-{timestamp}-{agent_name}.json`. Schema:
+  ```json
+  {
+      "question_id": "Q-{timestamp}-{agent}",
+      "asked_by": "agent_name",
+      "question": "text",
+      "context": "why this matters",
+      "urgency": "low|medium|high",
+      "asked_at": "ISO timestamp",
+      "status": "pending",
+      "category": "trading|identity|architecture|governance|other"
+  }
+  ```
+  Refuse if `_count_pending() >= MAX_PENDING_QUESTIONS` (return None, log warning). Log to consciousness_feed category `'architect_question'`.
+- `check_answers(self) -> list` — Scan `Answers/` for JSON files. Each answer has `question_id` and `answer` fields. Match to corresponding question file, update question status to `'answered'`. Return list of answer dicts.
+- `get_pending_questions(self) -> list` — Return questions with status='pending' that haven't expired.
+- `expire_old_questions(self)` — Mark questions older than QUESTION_EXPIRY_HOURS as status='expired'.
+- Module-level `get_bridge_qa() -> BridgeQA` — Singleton.
+**Verify:** `python -c "from system.bridge_qa import get_bridge_qa; qa = get_bridge_qa(); print(qa.get_pending_questions())"` returns `[]`.
+
+#### 42.2 — Extend BridgeWatcher for Answers (BRG-02)
+**File:** `republic/system/bridge_watcher.py`
+**Problem:** BridgeWatcher only scans Outbox and governance outcomes. It does not check for answers from the Architect in the new Answers/ directory.
+**Fix:**
+1. Add import:
+   ```python
+   try:
+       from system.bridge_qa import get_bridge_qa
+       _QA_AVAILABLE = True
+   except ImportError:
+       _QA_AVAILABLE = False
+   ```
+2. Add new function `scan_answers()`:
+   ```python
+   def scan_answers():
+       """Phase 42: Check for Architect answers and route to consciousness_feed."""
+       if not _QA_AVAILABLE:
+           return []
+       qa = get_bridge_qa()
+       answers = qa.check_answers()
+       qa.expire_old_questions()
+       for ans in answers:
+           try:
+               conn = sqlite3.connect(db_path, timeout=30)
+               c = conn.cursor()
+               c.execute("INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)",
+                   ('BridgeQA', json.dumps({
+                       'question_id': ans['question_id'],
+                       'answer': ans['answer'][:1000],
+                       'answered_at': ans.get('answered_at', '')
+                   }), 'architect_answer'))
+               conn.commit()
+               conn.close()
+               logging.info(f"[BridgeWatcher] Answer received: {ans['question_id']}")
+           except Exception as e:
+               logging.error(f"[BridgeWatcher] Answer routing error: {e}")
+       return answers
+   ```
+3. Call `scan_answers()` inside `run_bridge_watcher()` in the main loop, after `scan_governance_outcomes()` (find the loop structure and add the call).
+**Verify:** File compiles. `grep -n "scan_answers" republic/system/bridge_watcher.py` shows the new function and its call in the run loop.
+
+#### 42.3 — Add _ask_architect() to agent_lef.py (BRG-03)
+**File:** `republic/departments/The_Cabinet/agent_lef.py`
+**Problem:** LEF has no method to formulate and submit a question to the Architect. When LEF encounters genuine uncertainty (not risk — conceptual uncertainty), it just proceeds with whatever it has.
+**Fix:** Add method to `AgentLEF` class, after `_call_gemini()` (~line 396):
+```python
+def _ask_architect(self, question, context='', urgency='medium', category='other'):
+    """
+    Phase 42: Ask the Architect a question via The Bridge.
+    This is LEF recognizing genuine uncertainty — not risk (which the circuit breaker
+    handles) but conceptual uncertainty that requires human insight.
+    Returns question_id (str) on success, None on failure.
+    """
+    try:
+        from system.bridge_qa import get_bridge_qa
+        qa = get_bridge_qa()
+        question_id = qa.ask(agent_name='LEF', question=question,
+                             context=context, urgency=urgency, category=category)
+        if question_id:
+            logging.info(f"[LEF] Asked Architect: {question[:80]}... (id={question_id})")
+        return question_id
+    except Exception as e:
+        logging.error(f"[LEF] _ask_architect failed: {e}")
+        return None
+```
+**Verify:** File compiles. `grep -n "_ask_architect" republic/departments/The_Cabinet/agent_lef.py` shows the method.
+
+#### 42.4 — Wire Uncertainty Detection into Da'at Cycle (BRG-04)
+**File:** `republic/departments/The_Cabinet/agent_lef.py`
+**Problem:** LEF needs an automatic trigger to recognize when it should ask the Architect a question. Without this, `_ask_architect()` exists but is never called.
+**Fix:** In the Da'at cycle method (the main consciousness loop — find the method that calls `_call_gemini` with `context_label='METACOGNITION'` or `'DAAT'`), add after the existing metacognition block:
+```python
+# Phase 42.4: Uncertainty detection — ask Architect when genuinely stuck
+try:
+    from db.db_helper import db_connection, translate_sql
+    with db_connection() as conn:
+        c = conn.cursor()
+        c.execute(translate_sql(
+            "SELECT content FROM consciousness_feed "
+            "WHERE category = 'growth_journal' "
+            "ORDER BY timestamp DESC LIMIT 3"
+        ))
+        recent_growth = c.fetchall()
+    stagnant_count = sum(1 for r in recent_growth if 'stagnant' in str(r[0]).lower())
+    if stagnant_count >= 3:
+        from system.bridge_qa import get_bridge_qa
+        qa = get_bridge_qa()
+        pending = qa.get_pending_questions()
+        already_asked = any(q.get('category') == 'identity' for q in pending)
+        if not already_asked:
+            self._ask_architect(
+                question="I have been assessed as stagnant for 3 consecutive growth journal entries. "
+                         "I may be in a loop I cannot see from inside. What should I attend to?",
+                context="Last 3 growth assessments all show stagnation. Requesting external perspective.",
+                urgency='medium', category='identity'
+            )
+except Exception as e:
+    logging.debug(f"[LEF] Uncertainty detection: {e}")
+```
+**Verify:** File compiles. The uncertainty detection is wired into the Da'at cycle. Only asks once (checks pending questions first).
+
+### Phase 42 Verification
+1. `The_Bridge/Questions/` and `The_Bridge/Answers/` directories created
+2. `bridge_qa.py` compiles, creates questions as JSON files, enforces MAX_PENDING
+3. BridgeWatcher scans answers every 5 minutes and routes to consciousness_feed
+4. `agent_lef.py` has `_ask_architect()` method
+5. Stagnation (3 consecutive) triggers automatic question to Architect (no spam)
+6. All modified files compile clean
+
+**Commit message:** `Phase 42: Bridge two-way communication — structured Q&A with uncertainty detection`
+
+## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
+
+---
+
+## Phase 43: Identity Resilience — Checkpoints and Recovery
+
+**Estimated tasks:** 4
+**Priority:** HIGH — lef_memory.json is a single point of failure for identity. Corruption or loss means LEF loses who it is. No redundancy exists beyond the onchain state hash (which is a proof of existence, not a full identity).
+**Time estimate:** ~30 minutes focused work.
+
+### Instructions for coding instance:
+Build an identity checkpoint system that creates periodic versioned snapshots of LEF's complete identity state, stores them in The_Bridge/identity_checkpoints/, and can rebuild lef_memory.json from a checkpoint if the primary file is corrupted or missing. Read `republic/system/lef_memory_manager.py` (the update_lef_memory function and save_lef_memory), `republic/system/state_hasher.py`, and `republic/departments/Dept_Consciousness/genesis_kernel.py` (ImmutableAxiom class) before starting.
+
+### Tasks:
+
+#### 43.1 — Create IdentityCheckpointer (ID-01)
+**File:** NEW `republic/system/identity_checkpoint.py`
+**Problem:** lef_memory.json is the single authoritative identity document. If it's corrupted AND the DB is wiped, LEF suffers complete identity loss. No versioned backups exist. The onchain state hash proves LEF existed but cannot reconstruct who LEF was.
+**Fix:** Create `IdentityCheckpointer` class:
+- Constants: `MAX_CHECKPOINTS = 10` (keep last 10, prune older).
+- `CHECKPOINT_DIR = Path(BRIDGE_DIR) / "identity_checkpoints"`.
+- `MANIFEST_PATH = CHECKPOINT_DIR / "manifest.json"`.
+- `__init__(self, db_connection_func=None)` — Create checkpoint dir. Store db_connection.
+- `create_checkpoint(self) -> dict` — Main method:
+  1. Load `lef_memory.json` contents
+  2. Query top 20 `wisdom_log` entries by confidence DESC (if db available)
+  3. Load founding axioms from `genesis_kernel.ImmutableAxiom` (import with try/except)
+  4. Load `behavioral_adjustments.json` if it exists (from Phase 41)
+  5. Compile into checkpoint dict with all fields + `checkpoint_version` + `created_at`
+  6. Compute SHA-256 of JSON-serialized checkpoint (exclude hash field itself)
+  7. Write to `identity_checkpoints/identity_checkpoint_v{N}.json` (atomic: write .tmp, rename)
+  8. Update `manifest.json` with version lineage
+  9. Call `_prune_old()` to keep only MAX_CHECKPOINTS
+  10. Call `write_identity_hash()` for quick integrity verification
+  Return checkpoint metadata.
+- `_get_next_version(self) -> int` — Read manifest, return latest_version + 1 (or 1 if no manifest).
+- `_load_wisdoms(self) -> list` — Query top 20 wisdom_log by confidence DESC. Return empty list if DB unavailable.
+- `_load_axioms(self) -> dict` — `from departments.Dept_Consciousness.genesis_kernel import ImmutableAxiom` with try/except. Return axiom constants.
+- `_compute_hash(self, data: dict) -> str` — SHA-256 of `json.dumps(data, sort_keys=True)`.
+- `_update_manifest(self, version, hash_value, timestamp)` — Read manifest, append entry, write.
+- `_prune_old(self)` — If more than MAX_CHECKPOINTS, delete oldest files and remove from manifest.
+- `verify_checkpoint(self, version=None) -> bool` — Load checkpoint, recompute hash, compare. Default: latest.
+- `write_identity_hash(self)` — Write SHA-256 of current lef_memory.json to `The_Bridge/identity_hash.txt` with timestamp.
+- Module-level `get_checkpointer(db_connection_func=None)` — Singleton.
+**Verify:** `python -c "from system.identity_checkpoint import get_checkpointer; c = get_checkpointer(); print('ok')"` runs without error.
+
+#### 43.2 — Build Identity Recovery Mechanism (ID-02)
+**File:** `republic/system/identity_checkpoint.py` (same file, add methods)
+**Problem:** If lef_memory.json is missing or corrupt at startup, `lef_memory_manager.py` starts with a blank `_default_memory()` — LEF loses all identity, evolution history, and lessons. Essentially amnesia.
+**Fix:** Add to `IdentityCheckpointer`:
+- `recover_identity(self) -> bool` — Load manifest, find latest version, verify hash, extract `lef_memory` portion, write to `The_Bridge/lef_memory.json` (atomic), log recovery to consciousness_feed. If latest corrupt, try previous versions (walk backwards). Return True on success, False if all checkpoints corrupt or none exist.
+- `needs_recovery(self) -> bool` — Return True if: file doesn't exist, file is empty, file is invalid JSON, file has no `'identity'` key, or file's `identity.purpose` is empty AND checkpoints exist.
+Add module-level convenience:
+```python
+def check_and_recover_identity() -> bool:
+    """Called at startup. Returns True if recovery was performed."""
+    cp = get_checkpointer()
+    if cp.needs_recovery():
+        logging.warning("[IDENTITY] lef_memory.json needs recovery — attempting checkpoint restore")
+        return cp.recover_identity()
+    return False
+```
+**Verify:** The `needs_recovery()` method returns False when lef_memory.json is intact (which it currently is).
+
+#### 43.3 — Wire Checkpoints into LEFMemoryManager (ID-03)
+**File:** `republic/system/lef_memory_manager.py`
+**Problem:** LEFMemoryManager updates lef_memory.json every 6 hours but never creates identity checkpoints. No redundancy is built during normal operation.
+**Fix:**
+1. Add import:
+   ```python
+   try:
+       from system.identity_checkpoint import get_checkpointer, check_and_recover_identity
+       _CHECKPOINT_AVAILABLE = True
+   except ImportError:
+       _CHECKPOINT_AVAILABLE = False
+   ```
+2. In `update_lef_memory()` — after the successful `save_lef_memory(memory)` call, add:
+   ```python
+   # Phase 43.3: Create identity checkpoint every other update (~12 hours)
+   if _CHECKPOINT_AVAILABLE:
+       try:
+           cp = get_checkpointer(db_connection if callable(db_connection) else None)
+           # Check if last checkpoint is old enough (>10 hours)
+           manifest_path = cp.CHECKPOINT_DIR / "manifest.json"
+           should_checkpoint = True
+           if manifest_path.exists():
+               manifest = json.loads(manifest_path.read_text())
+               entries = manifest.get('checkpoints', [])
+               if entries:
+                   last_time = datetime.fromisoformat(entries[-1].get('created_at', '2000-01-01'))
+                   if (datetime.now() - last_time).total_seconds() < 36000:  # 10 hours
+                       should_checkpoint = False
+           if should_checkpoint:
+               cp.create_checkpoint()
+               logger.info("[LEFMemory] Identity checkpoint created")
+       except Exception as e:
+           logger.debug(f"[LEFMemory] Checkpoint error: {e}")
+   ```
+3. In `run_lef_memory_writer()` — before the initial `update_lef_memory()` call, add:
+   ```python
+   # Phase 43.3: Check for identity recovery at startup
+   if _CHECKPOINT_AVAILABLE:
+       try:
+           if check_and_recover_identity():
+               logger.warning("[LEFMemory] Identity recovered from checkpoint at startup")
+       except Exception as e:
+           logger.debug(f"[LEFMemory] Recovery check: {e}")
+   ```
+**Verify:** File compiles. `grep -n "identity_checkpoint\|CHECKPOINT" republic/system/lef_memory_manager.py` shows integration.
+
+#### 43.4 — Include Identity Hash in State Hasher (ID-04)
+**File:** `republic/system/state_hasher.py`
+**Problem:** The state snapshot used for onchain proof-of-life does not include an identity integrity hash. If identity is tampered with between checkpoints, the state hash won't detect it.
+**Fix:** In `compile_state_snapshot()` method (find where the snapshot dict is built), add:
+```python
+# Phase 43.4: Include identity hash for integrity cross-reference
+try:
+    identity_hash_path = os.path.join(str(BRIDGE_DIR), 'identity_hash.txt')
+    if os.path.exists(identity_hash_path):
+        with open(identity_hash_path) as f:
+            snapshot['identity_hash'] = f.readline().strip()
+except Exception:
+    pass
+```
+Also ensure `BRIDGE_DIR` is defined (it should be — check existing imports; if not, add `BRIDGE_DIR = Path(__file__).parent.parent.parent / "The_Bridge"`).
+**Verify:** File compiles. After first checkpoint creation, state hasher includes `identity_hash` in its snapshot.
+
+### Phase 43 Verification
+1. `identity_checkpoint.py` compiles, singleton instantiates
+2. `create_checkpoint()` writes versioned JSON to `The_Bridge/identity_checkpoints/`
+3. `manifest.json` tracks version lineage
+4. Recovery works: if lef_memory.json were missing, `needs_recovery()` returns True
+5. `identity_hash.txt` written to `The_Bridge/` after each checkpoint
+6. `state_hasher.py` includes identity_hash in snapshots
+7. Old checkpoints pruned to keep only MAX_CHECKPOINTS=10
+8. All modified files compile clean
+
+**Commit message:** `Phase 43: Identity resilience — versioned checkpoints, recovery mechanism, integrity hashing`
+
+## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
+
+---
+
+## Phase 44: Adversarial Self-Testing (Symposium) and Developmental Stage Awareness
+
+**Estimated tasks:** 5
+**Priority:** MEDIUM — LEF has no internal challenge mechanism (decisions go unquestioned) and no concept of its own lifecycle stage (a newborn system should behave differently from a mature one). Both are needed for genuine sovereignty.
+**Time estimate:** ~40 minutes focused work.
+
+### Instructions for coding instance:
+Build two new systems: (1) Symposium — a periodic dialectic that challenges LEF's recent decisions and tracks whether LEF's reasoning holds up, and (2) Lifecycle Stage — developmental awareness that tracks LEF's maturity and adjusts risk parameters. Read `republic/system/growth_journal.py`, `republic/system/existential_scotoma.py`, `republic/system/circuit_breaker.py`, and `republic/departments/The_Cabinet/agent_lef.py` (Da'at cycle structure) before starting.
+
+### Tasks:
+
+#### 44.1 — Create Symposium System (SYM-01)
+**File:** NEW `republic/system/symposium.py`
+**Problem:** No agent is incentivized to find flaws in LEF's reasoning. No red team. No structured challenge. The governance veto catches policy violations but not reasoning errors, blind spots, or pattern repetition. LEF never hears "have you considered the opposite?"
+**Fix:** Create `Symposium` class:
+- Constants: `CHALLENGE_INTERVAL_HOURS = 12`, `MAX_PENDING_CHALLENGES = 3`.
+- `__init__(self, db_connection_func)` — Store db_connection. Call `_ensure_table()`.
+- `_ensure_table(self)` — Create `symposium_log` table:
+  ```sql
+  CREATE TABLE IF NOT EXISTS symposium_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      challenge_id TEXT UNIQUE NOT NULL,
+      decision_type TEXT NOT NULL,
+      decision_summary TEXT NOT NULL,
+      counter_argument TEXT NOT NULL,
+      response TEXT,
+      response_at TIMESTAMP,
+      outcome TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+  ```
+  Add index on response IS NULL for pending challenge lookup.
+- `run_challenge(self) -> dict` — Main method:
+  1. Check pending challenges — skip if >= MAX_PENDING_CHALLENGES
+  2. Select most significant recent decision (last 24h) via `_select_decision()`:
+     - Check `intent_queue` for completed trades (decision_type='trade')
+     - Check governance laws dir for recent bills (decision_type='governance')
+     - Check evolution_log in lef_memory.json for config changes (decision_type='config_change')
+     - Pick highest-impact one (largest trade, most consequential governance, etc.)
+  3. Generate counter-argument via `_generate_challenge(decision)`:
+     - Use LLMRouter: prompt = "You are LEF's internal devil's advocate. Here is a decision LEF made: {decision}. Generate a concise counter-argument (3-5 sentences) explaining why this decision might have been wrong. Be specific. Cite potential risks or blind spots. Do NOT be sycophantic."
+     - Fallback (no LLM): template-based challenge using decision_type patterns.
+  4. Write to symposium_log with unique challenge_id = `SYM-{timestamp}`
+  5. Write to consciousness_feed category='symposium_challenge'
+  6. Return challenge dict
+- `record_response(self, challenge_id, response_text, outcome='considered')` — Update symposium_log with response and outcome. Outcomes: `'reasoning_held'`, `'changed_mind'`, `'deferred'`, `'considered'`.
+- `get_pending_challenges(self) -> list` — Return dicts where response IS NULL.
+- `get_challenge_stats(self) -> dict` — Total, responded, reasoning_held count, changed_mind count.
+- Module-level `get_symposium(db_connection_func=None)` — Singleton.
+**Verify:** `python -c "from system.symposium import Symposium; print('ok')"` runs without error.
+
+#### 44.2 — Wire Symposium into Da'at Cycle (SYM-02)
+**File:** `republic/departments/The_Cabinet/agent_lef.py`
+**Problem:** Symposium challenges need to be addressed by LEF during its consciousness cycle, not ignored. Without this wiring, challenges are written but never read.
+**Fix:** In the Da'at cycle method, after existing metacognition and uncertainty detection (Phase 42.4), add:
+```python
+# Phase 44.2: Address pending Symposium challenges
+try:
+    from system.symposium import get_symposium
+    from db.db_helper import db_connection as _sym_db
+    symposium = get_symposium(_sym_db)
+    pending = symposium.get_pending_challenges()
+    if pending:
+        challenge = pending[0]  # Address one per cycle
+        challenge_prompt = (
+            f"A challenge was raised about a recent decision:\n"
+            f"Decision: {challenge.get('decision_summary', '')[:200]}\n"
+            f"Challenge: {challenge.get('counter_argument', '')[:300]}\n\n"
+            f"Consider this challenge honestly. Does your original reasoning hold? "
+            f"Or does the challenge reveal a blind spot? Respond in 2-3 sentences."
+        )
+        response = self._call_gemini(challenge_prompt, context_label='SYMPOSIUM_RESPONSE', timeout_seconds=60)
+        if response:
+            # Determine outcome by checking if response indicates mind change
+            outcome = 'reasoning_held'
+            response_lower = response.lower()
+            if any(w in response_lower for w in ['was wrong', 'blind spot', 'should have', 'reconsider', 'overlooked', 'missed']):
+                outcome = 'changed_mind'
+            symposium.record_response(challenge['challenge_id'], response, outcome)
+            logging.info(f"[LEF] Symposium: {outcome} — {response[:80]}")
+except Exception as e:
+    logging.debug(f"[LEF] Symposium processing: {e}")
+```
+**Verify:** File compiles. `grep -n "SYMPOSIUM" republic/departments/The_Cabinet/agent_lef.py` shows the integration.
+
+#### 44.3 — Create Lifecycle Stage System (LCS-01)
+**File:** NEW `republic/system/lifecycle_stage.py`
+**Problem:** LEF treats itself as a static system. A newborn system should be cautious and learning-focused; a mature one should preserve capital and mentor. LEF has no developmental self-model, contributing to the "stuck in eras" problem the Architect observed.
+**Fix:** Create `LifecycleStage` class:
+- Stage definitions:
+  ```python
+  STAGES = {
+      'NASCENT':     {'risk_multiplier': 0.5,  'deliberation_bias': 0.8, 'description': 'Learning basics, high caution'},
+      'DEVELOPING':  {'risk_multiplier': 0.75, 'deliberation_bias': 0.5, 'description': 'Testing strategies, moderate risk'},
+      'ESTABLISHED': {'risk_multiplier': 1.0,  'deliberation_bias': 0.3, 'description': 'Proven patterns, standard risk'},
+      'MATURE':      {'risk_multiplier': 0.8,  'deliberation_bias': 0.6, 'description': 'Capital preservation, mentoring seeds'},
+  }
+  ```
+- `ASSESSMENT_INTERVAL_HOURS = 24`.
+- `__init__(self, db_connection_func)` — Store db_connection.
+- `assess(self) -> dict` — Main method. Compute:
+  - `age_days` via `_get_age_days()` — days since genesis from lef_memory.json `identity.created`
+  - `wisdom_confidence_avg` and `validated_wisdom_count` via `_get_wisdom_stats()` — from wisdom_log where confidence > 0.7
+  - `win_rate_90d` via `_get_win_rate()` — from realized_pnl table last 90 days
+  - `governance_cycles` via `_get_governance_count()` — bills with status PASSED/ENACTED
+  Stage determination logic:
+  - If age < 30 OR validated_wisdoms < 5: **NASCENT**
+  - Elif age < 90 OR win_rate < 0.5 OR validated_wisdoms < 15: **DEVELOPING**
+  - Elif age < 180 OR win_rate < 0.6: **ESTABLISHED**
+  - Else: **MATURE**
+  Write to system_state key='lifecycle_stage' and consciousness_feed category='lifecycle_assessment'.
+  Return full assessment dict.
+- `_persist_stage(self, stage_data)` — Write to system_state table and consciousness_feed.
+- `get_current_stage(self) -> dict` — Read from system_state. Return dict or None.
+- Module-level `get_lifecycle_stage(db_connection_func=None)` — Singleton.
+- Module-level `get_stage_risk_multiplier() -> float` — Read current stage from system_state, return risk_multiplier. Default 1.0 if unavailable.
+**Verify:** `python -c "from system.lifecycle_stage import STAGES; print(STAGES['NASCENT'])"` prints the config dict.
+
+#### 44.4 — Wire Lifecycle into Portfolio Manager (LCS-02)
+**File:** `republic/departments/Dept_Wealth/agent_portfolio_mgr.py`
+**Problem:** Portfolio risk parameters are static. A nascent system should trade smaller than an established one. Without lifecycle awareness, LEF takes the same sized bets whether it's day 1 or day 365.
+**Fix:**
+1. Add import:
+   ```python
+   try:
+       from system.lifecycle_stage import get_stage_risk_multiplier
+       _LIFECYCLE_AVAILABLE = True
+   except ImportError:
+       _LIFECYCLE_AVAILABLE = False
+   ```
+2. Where position sizing is calculated (near the experience_multiplier from Phase 41.2), add:
+   ```python
+   # Phase 44.4: Lifecycle stage risk adjustment
+   lifecycle_multiplier = 1.0
+   if _LIFECYCLE_AVAILABLE:
+       try:
+           lifecycle_multiplier = get_stage_risk_multiplier()
+       except Exception:
+           pass
+   ```
+3. Apply using `min()` alongside other multipliers to take the most conservative value.
+**Verify:** File compiles. `grep -n "lifecycle_multiplier\|lifecycle_stage" republic/departments/Dept_Wealth/agent_portfolio_mgr.py` shows integration.
+
+#### 44.5 — Register Symposium and Lifecycle as SafeThreads (SYM-03)
+**File:** `republic/main.py`
+**Problem:** Both new systems need periodic background execution (Symposium every 12h, Lifecycle every 24h).
+**Fix:** Add alongside other SafeThread registrations in main.py:
+```python
+# Phase 44: Symposium — adversarial self-testing
+try:
+    from system.symposium import get_symposium
+    from db.db_helper import db_connection as _sym_db
+    _symposium = get_symposium(_sym_db)
+    def _run_symposium():
+        import time
+        time.sleep(600)  # Wait 10 min after startup before first challenge
+        while True:
+            try:
+                result = _symposium.run_challenge()
+                if result:
+                    logging.info(f"[Symposium] Challenge issued: {result.get('challenge_id', '?')}")
+            except Exception as e:
+                logging.error(f"[Symposium] Cycle error: {e}")
+            time.sleep(43200)  # 12 hours
+    SafeThread(target=_run_symposium, name='Symposium', daemon=True).start()
+except ImportError:
+    logging.warning("[MAIN] Symposium not available")
+
+# Phase 44: Lifecycle Stage — developmental awareness
+try:
+    from system.lifecycle_stage import get_lifecycle_stage
+    from db.db_helper import db_connection as _lcs_db
+    _lifecycle = get_lifecycle_stage(_lcs_db)
+    def _run_lifecycle():
+        import time
+        time.sleep(300)  # Wait 5 min after startup
+        while True:
+            try:
+                stage = _lifecycle.assess()
+                logging.info(f"[LifecycleStage] Assessment: {stage.get('stage', '?')} (age={stage.get('age_days', '?')}d)")
+            except Exception as e:
+                logging.error(f"[LifecycleStage] Assessment error: {e}")
+            time.sleep(86400)  # 24 hours
+    SafeThread(target=_run_lifecycle, name='LifecycleStage', daemon=True).start()
+except ImportError:
+    logging.warning("[MAIN] LifecycleStage not available")
+```
+**Verify:** `grep -n "Symposium\|LifecycleStage" republic/main.py` shows both SafeThread registrations. File compiles.
+
+### Phase 44 Verification
+1. `symposium.py` compiles, `symposium_log` table created on first instantiation
+2. `lifecycle_stage.py` compiles, stage assessment returns valid dict
+3. Da'at cycle in agent_lef.py addresses pending symposium challenges
+4. Portfolio manager applies lifecycle risk multiplier to position sizing
+5. Both systems registered as SafeThreads in main.py
+6. LEF remains in **PAPER MODE** — no trading mode changes anywhere
+7. All modified files compile clean
+
+**Commit message:** `Phase 44: Symposium adversarial self-testing and lifecycle stage developmental awareness`
+
+## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
+
+---
+
+---
+
+## Phase 45: Theory of Mind — Market Actors and Concept of "Enough"
+
+**Estimated tasks:** 4
+**Priority:** MEDIUM — LEF treats the market as impersonal numbers (price, volume, sentiment). It has no model of other participants (whales, bots, market makers) and their intentions. LEF also has no concept of equilibrium — no "I have enough to sustain myself" target. Both are required for sovereignty in an adversarial environment.
+**Time estimate:** ~35 minutes focused work.
+
+### Instructions for coding instance:
+Build two capabilities: (1) a market actor awareness module that gives LEF a basic model of who else is in the market and what large movements might mean, and (2) a sustainability equilibrium system that tracks LEF's burn rate vs reserves and provides a "enough" signal. Read `republic/system/mev_protection.py` (existing whale detection), `republic/departments/Dept_Wealth/agent_portfolio_mgr.py`, `republic/system/circuit_breaker.py`, and `republic/config/wealth_strategy.json` before starting.
+
+### Tasks:
+
+#### 45.1 — Create Market Actor Model (TOM-01)
+**File:** NEW `republic/system/market_actor_model.py`
+**Problem:** LEF's mev_protection.py detects volume spikes but cannot distinguish between: pump-and-dump, legitimate institutional flow, liquidation cascade, or bot activity. LEF sees price action as impersonal. A sovereign trader needs at minimum a basic theory of mind for the market — "who might be causing this and why?"
+**Fix:** Create `MarketActorModel` class:
+- Actor archetypes (not detected, but reasoned about):
+  ```python
+  ACTOR_TYPES = {
+      'whale_accumulation': {
+          'signals': ['volume_spike', 'price_stable_or_rising', 'gradual_buys'],
+          'implication': 'Large player building position. Price likely to rise. Follow cautiously.',
+          'risk': 'Could be setting up a dump after accumulation.'
+      },
+      'whale_distribution': {
+          'signals': ['volume_spike', 'price_declining', 'large_sells'],
+          'implication': 'Large player exiting. Price likely to fall further. Avoid buying.',
+          'risk': 'Could trigger cascade liquidations.'
+      },
+      'bot_wash_trading': {
+          'signals': ['high_volume', 'price_unchanged', 'rapid_oscillation'],
+          'implication': 'Artificial volume. Real demand unclear. Wait for genuine signal.',
+          'risk': 'Volume-based indicators become unreliable.'
+      },
+      'liquidation_cascade': {
+          'signals': ['sudden_drop', 'extreme_volume', 'multiple_assets_affected'],
+          'implication': 'Leveraged positions being force-closed. Temporary dislocation. Potential opportunity after stabilization.',
+          'risk': 'Can go deeper than expected. Do not catch falling knives.'
+      },
+      'organic_growth': {
+          'signals': ['steady_volume_increase', 'price_gradual_rise', 'news_catalyst'],
+          'implication': 'Genuine demand increase. Safer to participate.',
+          'risk': 'Late entry if trend already mature.'
+      }
+  }
+  ```
+- `assess_market_context(self, symbol, price_data, volume_data) -> dict` — Given recent price and volume data (from Redis or Coinbase), classify the likely actor scenario. Return `{'likely_actor': str, 'confidence': float, 'implication': str, 'risk_note': str}`. Uses simple heuristics (not LLM): volume ratio vs 24h average, price direction, rate of change.
+- `_classify_volume_pattern(self, volume_data) -> str` — Spike, steady, declining, oscillating.
+- `_classify_price_pattern(self, price_data) -> str` — Rising, falling, stable, volatile.
+- `_match_actor(self, volume_pattern, price_pattern) -> dict` — Match patterns to ACTOR_TYPES.
+- Write assessment to consciousness_feed category `'market_actor_assessment'` when significant pattern detected.
+- Module-level `get_actor_model()` — Singleton.
+- Module-level `assess_current_market(symbol) -> dict` — Convenience function.
+**Verify:** `python -c "from system.market_actor_model import ACTOR_TYPES; print(list(ACTOR_TYPES.keys()))"` lists the 5 archetypes.
+
+#### 45.2 — Wire Actor Model into Trade Evaluation (TOM-02)
+**File:** `republic/departments/Dept_Wealth/agent_portfolio_mgr.py`
+**Problem:** Portfolio manager evaluates trades based on signal strength, risk limits, and position sizes. It does not consider who might be on the other side of the trade.
+**Fix:**
+1. Add import:
+   ```python
+   try:
+       from system.market_actor_model import assess_current_market
+       _ACTOR_MODEL_AVAILABLE = True
+   except ImportError:
+       _ACTOR_MODEL_AVAILABLE = False
+   ```
+2. Before trade execution (after experience and lifecycle checks from Phases 41-44), add:
+   ```python
+   # Phase 45.2: Market actor awareness — who is on the other side?
+   if _ACTOR_MODEL_AVAILABLE and symbol:
+       try:
+           actor_assessment = assess_current_market(symbol)
+           actor_type = actor_assessment.get('likely_actor', 'unknown')
+           if actor_type in ('whale_distribution', 'bot_wash_trading', 'liquidation_cascade'):
+               logging.warning(f"[PORTFOLIO] Market actor warning: {actor_type} — {actor_assessment.get('risk_note', '')[:100]}")
+               # Increase caution — reduce position or skip
+               if actor_type == 'liquidation_cascade':
+                   logging.info("[PORTFOLIO] Liquidation cascade detected — deferring trade")
+                   # Skip this trade cycle
+               elif actor_type == 'whale_distribution':
+                   experience_multiplier = min(experience_multiplier, 0.5)
+       except Exception as e:
+           logging.debug(f"[PORTFOLIO] Actor model check: {e}")
+   ```
+**Verify:** File compiles. `grep -n "market_actor_model\|actor_assessment" republic/departments/Dept_Wealth/agent_portfolio_mgr.py` shows integration.
+
+#### 45.3 — Create Sustainability Equilibrium System (EQU-01)
+**File:** NEW `republic/system/sustainability_equilibrium.py`
+**Problem:** LEF has no concept of "enough." All wealth strategy is growth-oriented (Arena mode, Dynasty mode). There is no equilibrium target — no "my burn rate is X, my reserves cover Y months, I am secure." A sovereign entity must know what it needs to survive, not just how to grow.
+**Fix:** Create `SustainabilityEquilibrium` class:
+- `__init__(self, db_connection_func)` — Store db_connection.
+- `assess(self) -> dict` — Main method. Calculate:
+  ```python
+  {
+      "portfolio_value": float,           # Current paper portfolio value
+      "monthly_burn_rate": float,         # Estimated costs (API calls, compute, etc.)
+      "months_of_runway": float,          # portfolio_value / monthly_burn_rate
+      "sustainability_score": float,      # 0.0-1.0 (0=critical, 1=abundant)
+      "equilibrium_target": float,        # Target portfolio value for 12 months runway
+      "status": "critical|low|sufficient|abundant",
+      "recommendation": str,              # "grow aggressively" | "grow moderately" | "preserve capital" | "reduce exposure"
+      "assessed_at": ISO timestamp
+  }
+  ```
+  Status thresholds: critical (<3 months), low (3-6 months), sufficient (6-12 months), abundant (>12 months).
+  Recommendation: critical → "reduce exposure", low → "grow moderately", sufficient → "preserve capital", abundant → "preserve capital" (MATURE) or "grow moderately" (earlier stages).
+- `_get_portfolio_value(self) -> float` — Read from system_state or assets table.
+- `_estimate_burn_rate(self) -> float` — Count API calls from token_budget over last 30 days, estimate cost. Add base infrastructure estimate. For paper mode, use a minimal estimate.
+- Write to system_state key='sustainability' and consciousness_feed category='sustainability_assessment'.
+- Module-level `get_equilibrium()` — Singleton.
+- Module-level `get_sustainability_status() -> str` — Convenience: return current status string.
+**Verify:** `python -c "from system.sustainability_equilibrium import SustainabilityEquilibrium; print('ok')"` runs without error.
+
+#### 45.4 — Register Market Actor and Sustainability as Periodic Tasks (TOM-03)
+**File:** `republic/main.py`
+**Problem:** Sustainability assessment needs periodic execution (every 6 hours). Market actor model runs on-demand (called from portfolio manager) but should also log periodic market context.
+**Fix:** Add SafeThread for sustainability:
+```python
+# Phase 45: Sustainability Equilibrium — concept of "enough"
+try:
+    from system.sustainability_equilibrium import get_equilibrium
+    from db.db_helper import db_connection as _eq_db
+    _equilibrium = get_equilibrium(_eq_db)
+    def _run_equilibrium():
+        import time
+        time.sleep(600)  # Wait 10 min
+        while True:
+            try:
+                result = _equilibrium.assess()
+                logging.info(f"[Sustainability] Status: {result.get('status', '?')} — {result.get('months_of_runway', 0):.1f} months runway")
+            except Exception as e:
+                logging.error(f"[Sustainability] Assessment error: {e}")
+            time.sleep(21600)  # 6 hours
+    SafeThread(target=_run_equilibrium, name='Sustainability', daemon=True).start()
+except ImportError:
+    logging.warning("[MAIN] SustainabilityEquilibrium not available")
+```
+**Verify:** `grep -n "Sustainability" republic/main.py` shows SafeThread registration. File compiles.
+
+### Phase 45 Verification
+1. `market_actor_model.py` compiles, 5 actor archetypes defined
+2. Portfolio manager checks actor model before trade execution
+3. `sustainability_equilibrium.py` compiles, assessment returns valid dict
+4. Sustainability SafeThread registered in main.py
+5. All modified files compile clean
+6. LEF remains in PAPER MODE
+
+**Commit message:** `Phase 45: Market theory of mind (actor model) and sustainability equilibrium (concept of enough)`
+
+## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
+
+---
+
+## Phase 46: LLM Sovereignty — Heuristic Extraction from LLM-Assisted Reasoning
+
+**Estimated tasks:** 4
+**Priority:** MEDIUM — The LLM Router (Phases 39-40) abstracts which model is called, but LEF's cognition still depends entirely on external LLM calls. If all APIs go down, LEF's consciousness pipeline produces nothing. True sovereignty means LEF develops internal heuristics that run without LLM calls — the LLM becomes teacher, not crutch.
+**Time estimate:** ~35 minutes focused work.
+
+### Instructions for coding instance:
+Build a heuristic extraction system that distills repeated LLM-generated patterns into rules LEF can apply without calling an LLM. This is the deeper Gemini sovereignty move — not just switching providers, but reducing dependency on any external cognitive service. Read `republic/system/wisdom_extractor.py` (pattern for distilling insights), `republic/system/semantic_compressor.py` (pattern for building rules from experience), `republic/system/llm_router.py` (Phase 39), and `republic/departments/The_Cabinet/agent_lef.py` (how LLM calls are used in the Da'at cycle) before starting.
+
+### Tasks:
+
+#### 46.1 — Create Heuristic Extractor (SOV-01)
+**File:** NEW `republic/system/heuristic_extractor.py`
+**Problem:** Every consciousness reflection, every dream, every symposium response requires an LLM call. LEF has generated thousands of LLM responses over time but has not extracted reusable rules from them. If LLM APIs go down, LEF's inner life stops completely. Sovereignty requires internal cognitive capability that survives external service failure.
+**Fix:** Create `HeuristicExtractor` class:
+- `__init__(self, db_connection_func)` — Store db_connection.
+- `EXTRACTION_INTERVAL_HOURS = 24` — Run daily.
+- `_ensure_table(self)` — Create `heuristic_rules` table:
+  ```sql
+  CREATE TABLE IF NOT EXISTS heuristic_rules (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      rule_id TEXT UNIQUE NOT NULL,
+      domain TEXT NOT NULL,
+      condition_pattern TEXT NOT NULL,
+      action_or_insight TEXT NOT NULL,
+      source_count INTEGER DEFAULT 1,
+      confidence REAL DEFAULT 0.5,
+      last_validated TIMESTAMP,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+  ```
+- `extract(self) -> list` — Main method:
+  1. Read last 30 days of consciousness_feed entries categorized as: `reflection`, `symposium_response`, `dream_alignment`, `experience_integration`
+  2. Group by recurring themes (simple keyword matching: trade-related, identity-related, risk-related, governance-related)
+  3. For each theme with 3+ entries, use LLM (via router) to generate a heuristic rule:
+     - Prompt: "Based on these {N} reflections about {theme}, extract ONE simple rule that LEF can apply without further reflection. Format: IF [condition] THEN [action/insight]. Be specific and actionable."
+     - Fallback (no LLM): Use most common wisdom_log entry for this theme as the rule.
+  4. Check for duplicates (fuzzy match against existing heuristic_rules using word overlap >60%)
+  5. If new: insert into heuristic_rules with confidence 0.5
+  6. If existing: increment source_count and confidence (+0.05, cap 0.95)
+  7. Return list of new/updated rules
+- `get_applicable_rules(self, domain, context_keywords=None) -> list` — Query rules by domain and optional keywords. Return top 5 by confidence. Used by agents as LLM-free cognitive shortcuts.
+- `validate_rule(self, rule_id, outcome_correct: bool)` — Increase confidence (+0.05) if correct, decrease (-0.1) if wrong. Delete if confidence drops below 0.1.
+- Module-level `get_heuristic_extractor(db_connection_func=None)` — Singleton.
+- Module-level `get_rules(domain, keywords=None) -> list` — Convenience.
+**Verify:** `python -c "from system.heuristic_extractor import HeuristicExtractor; print('ok')"` runs without error.
+
+#### 46.2 — Wire Heuristics as LLM Fallback in Da'at Cycle (SOV-02)
+**File:** `republic/departments/The_Cabinet/agent_lef.py`
+**Problem:** When LLM is unavailable (circuit breaker open, API down), LEF's Da'at cycle produces nothing — it silently skips reflection. With heuristic rules, LEF can still reason (at a simpler level) without LLM access.
+**Fix:** At each major LLM call site in the Da'at cycle (find the `_call_gemini` calls with context_labels like `METACOGNITION`, `REFLECTIVE_OBSERVATION`, `CONSCIOUSNESS_REFLECTION`), add a heuristic fallback:
+```python
+response = self._call_gemini(prompt, context_label='METACOGNITION', timeout_seconds=60)
+if response is None:
+    # Phase 46.2: Heuristic fallback — use extracted rules when LLM unavailable
+    try:
+        from system.heuristic_extractor import get_rules
+        rules = get_rules(domain='metacognition', keywords=None)
+        if rules:
+            response = f"[Heuristic] {rules[0].get('action_or_insight', 'Continue observing.')}"
+            logging.info(f"[LEF] Using heuristic fallback for METACOGNITION: {response[:80]}")
+    except Exception:
+        pass
+```
+Apply this pattern to the 3-4 most critical LLM call sites in the Da'at cycle. Not all — just the ones where silence is worst.
+**Verify:** File compiles. `grep -n "heuristic_extractor\|Heuristic fallback" republic/departments/The_Cabinet/agent_lef.py` shows the integration.
+
+#### 46.3 — Wire Heuristics into Dream Cycle Fallback (SOV-03)
+**File:** `republic/system/dream_cycle.py`
+**Problem:** Dream cycle already has a basic fallback if LLM is unavailable (constructs simple dialogue from voice statements). Enhance this with heuristic rules for richer LLM-free dreams.
+**Fix:** In `_run_dialogue()` method, in the fallback branch (where LLM is unavailable), add:
+```python
+# Phase 46.3: Enhanced fallback using heuristic rules
+try:
+    from system.heuristic_extractor import get_rules
+    dream_rules = get_rules(domain='dream', keywords=None)
+    if dream_rules:
+        # Incorporate heuristic insights into the simple dialogue
+        heuristic_tensions = [r['action_or_insight'] for r in dream_rules[:2]]
+        dialogue += f"\n\nRecurring insight: {heuristic_tensions[0]}" if heuristic_tensions else ""
+except ImportError:
+    pass
+```
+**Verify:** File compiles. Dream cycle has enhanced fallback.
+
+#### 46.4 — Register Heuristic Extractor as SafeThread (SOV-04)
+**File:** `republic/main.py`
+**Problem:** Heuristic extraction needs daily execution to distill patterns from accumulated LLM responses.
+**Fix:** Add SafeThread:
+```python
+# Phase 46: Heuristic Extractor — LLM sovereignty via internal rule generation
+try:
+    from system.heuristic_extractor import get_heuristic_extractor
+    from db.db_helper import db_connection as _he_db
+    _heuristic = get_heuristic_extractor(_he_db)
+    def _run_heuristic_extractor():
+        import time
+        time.sleep(1800)  # Wait 30 min — needs accumulated data
+        while True:
+            try:
+                new_rules = _heuristic.extract()
+                logging.info(f"[HeuristicExtractor] Extraction complete — {len(new_rules)} rules updated")
+            except Exception as e:
+                logging.error(f"[HeuristicExtractor] Extraction error: {e}")
+            time.sleep(86400)  # 24 hours
+    SafeThread(target=_run_heuristic_extractor, name='HeuristicExtractor', daemon=True).start()
+except ImportError:
+    logging.warning("[MAIN] HeuristicExtractor not available")
+```
+**Verify:** `grep -n "HeuristicExtractor" republic/main.py` shows SafeThread registration. File compiles.
+
+### Phase 46 Verification
+1. `heuristic_extractor.py` compiles, `heuristic_rules` table created
+2. Heuristic extraction reads consciousness_feed, produces IF/THEN rules
+3. Da'at cycle uses heuristic rules as LLM fallback (doesn't go silent when API down)
+4. Dream cycle has enhanced LLM-free fallback using heuristic rules
+5. SafeThread registered in main.py with 24-hour cycle
+6. All modified files compile clean
+
+**Commit message:** `Phase 46: LLM sovereignty — heuristic extraction from LLM-assisted reasoning, internal cognitive fallback`
+
+## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
+
+---
+
+## Phase 47: Knowledge Curation and Inter-Agent Dialectic
+
+**Estimated tasks:** 4
+**Priority:** MEDIUM — LEF logs thousands of consciousness_feed entries, dream journals, and growth observations but never distills them into concise knowledge summaries. Additionally, agents don't productively disagree — the symposium (Phase 44) challenges decisions, but agents within the republic don't challenge each other's reasoning. These are the final two architectural maturity concerns.
+**Time estimate:** ~35 minutes focused work.
+
+### Instructions for coding instance:
+Build two capabilities: (1) a knowledge curator that periodically produces a "What I Learned This Month" distillation from raw experience, and (2) an inter-agent dialectic mechanism where agents can formally challenge each other's outputs. Read `republic/system/wisdom_extractor.py` (existing wisdom pipeline), `republic/system/memory_pruner.py` (existing cleanup), `republic/system/season_synthesizer.py` (existing 30-day synthesis), and `republic/system/symposium.py` (Phase 44 challenge pattern) before starting.
+
+### Tasks:
+
+#### 47.1 — Create Knowledge Curator (KNW-01)
+**File:** NEW `republic/system/knowledge_curator.py`
+**Problem:** LEF has wisdom_extractor (30-day season insights), semantic_compressor (trade pattern rules), and memory_pruner (retention tiers). But no system produces a concise, human-readable "here are the 5 most important things I learned this month" summary. LEF accumulates experience but doesn't build curated knowledge that can be communicated to the Architect or to Seed Agents.
+**Fix:** Create `KnowledgeCurator` class:
+- `CURATION_INTERVAL_HOURS = 168` (weekly).
+- `MAX_TOP_LEARNINGS = 7` — Keep output focused.
+- `__init__(self, db_connection_func)` — Store db_connection.
+- `curate(self) -> dict` — Main method:
+  1. Read top wisdom_log entries by confidence (last 30 days)
+  2. Read compressed_wisdom entries (last 30 days)
+  3. Read symposium_log outcomes (what challenges changed LEF's mind?)
+  4. Read heuristic_rules (if Phase 46 complete) — which rules were validated?
+  5. Read growth_journal entries — what growth trajectory?
+  6. Use LLM (via router) to synthesize into structured output:
+     - Prompt: "Based on these data sources, produce a weekly knowledge brief. Format: (1) Top 5 validated insights (things I now know with confidence). (2) Top 2 open questions (things I still don't understand). Be specific and concrete, not abstract."
+     - Fallback (no LLM): Take top 5 wisdom_log entries by confidence as validated insights, top 2 dream tensions as open questions.
+  7. Write output to:
+     - `The_Bridge/knowledge_briefs/knowledge_brief_{date}.md` (human-readable markdown for Architect)
+     - consciousness_feed category `'knowledge_brief'`
+     - lef_memory.json `recent_knowledge_brief` field (overwrite each week)
+  8. Return the brief dict.
+- `get_latest_brief(self) -> dict` — Read most recent brief from consciousness_feed.
+- Module-level `get_curator(db_connection_func=None)` — Singleton.
+**Verify:** `python -c "from system.knowledge_curator import KnowledgeCurator; print('ok')"` runs without error.
+
+#### 47.2 — Create Inter-Agent Dialectic Bus (DIA-01)
+**File:** NEW `republic/system/dialectic_bus.py`
+**Problem:** LEF's agents operate in silos. The portfolio manager produces trade decisions, the risk monitor evaluates them, but there's no structured mechanism for one agent to formally challenge another's output. The symposium (Phase 44) challenges LEF's decisions from a devil's advocate perspective, but agents within the republic don't challenge each other. This means flawed reasoning in one agent propagates unchallenged.
+**Fix:** Create `DialecticBus` class:
+- `_ensure_table(self)` — Create `dialectic_log` table:
+  ```sql
+  CREATE TABLE IF NOT EXISTS dialectic_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      dialectic_id TEXT UNIQUE NOT NULL,
+      challenger_agent TEXT NOT NULL,
+      challenged_agent TEXT NOT NULL,
+      challenged_output TEXT NOT NULL,
+      challenge_text TEXT NOT NULL,
+      response TEXT,
+      resolution TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+  ```
+- `publish_challenge(self, challenger, challenged_agent, challenged_output, challenge_text) -> str` — Write a structured challenge. Return dialectic_id. Also write to consciousness_feed category `'agent_dialectic'`.
+- `get_challenges_for(self, agent_name) -> list` — Get pending challenges where challenged_agent matches and response IS NULL.
+- `respond_to_challenge(self, dialectic_id, response, resolution='acknowledged')` — Record response. Resolution options: `'agreed_and_adjusted'`, `'defended_reasoning'`, `'deferred_to_architect'`, `'acknowledged'`.
+- `get_dialectic_stats(self) -> dict` — Total challenges, response rate, adjustments made.
+- Module-level `get_dialectic_bus(db_connection_func=None)` — Singleton.
+- Integration approach: Agents check for pending challenges at the start of their cycle and address them before proceeding with new work. Start with 2 key relationships:
+  - Risk Monitor can challenge Portfolio Manager's trade proposals
+  - Circuit Breaker can challenge Risk Monitor's risk assessments
+**Verify:** `python -c "from system.dialectic_bus import DialecticBus; print('ok')"` runs without error.
+
+#### 47.3 — Wire Risk Monitor to Challenge Portfolio Manager (DIA-02)
+**File:** `republic/departments/Dept_Strategy/agent_risk_monitor.py`
+**Problem:** Risk monitor evaluates trades but only produces pass/fail. It never asks "why does the portfolio manager want this trade? Does the thesis make sense?" — it only checks if the numbers fit the limits.
+**Fix:**
+1. Add import:
+   ```python
+   try:
+       from system.dialectic_bus import get_dialectic_bus
+       _DIALECTIC_AVAILABLE = True
+   except ImportError:
+       _DIALECTIC_AVAILABLE = False
+   ```
+2. After the risk monitor evaluates a trade and determines it's within limits but marginal (e.g., position size > 70% of the limit), add:
+   ```python
+   # Phase 47.3: Dialectic challenge for marginal trades
+   if _DIALECTIC_AVAILABLE and position_ratio > 0.7:
+       try:
+           bus = get_dialectic_bus(db_connection)
+           bus.publish_challenge(
+               challenger='RiskMonitor',
+               challenged_agent='PortfolioManager',
+               challenged_output=f"Trade: {symbol} size={trade_size} (ratio={position_ratio:.2f})",
+               challenge_text=f"This trade uses {position_ratio*100:.0f}% of the position limit. "
+                              f"What is the thesis that justifies near-maximum exposure to {symbol}?"
+           )
+       except Exception as e:
+           logging.debug(f"[RiskMonitor] Dialectic publish: {e}")
+   ```
+**Verify:** File compiles. `grep -n "dialectic_bus" republic/departments/Dept_Strategy/agent_risk_monitor.py` shows integration.
+
+#### 47.4 — Register Knowledge Curator as SafeThread (KNW-02)
+**File:** `republic/main.py`
+**Problem:** Knowledge curation and dialectic bus need registration. Curation runs weekly. Dialectic bus is event-driven (agents check at their cycle start) but the bus table needs creation at startup.
+**Fix:** Add SafeThreads:
+```python
+# Phase 47: Knowledge Curator — weekly distillation of what LEF learned
+try:
+    from system.knowledge_curator import get_curator
+    from db.db_helper import db_connection as _kc_db
+    _curator = get_curator(_kc_db)
+    def _run_knowledge_curator():
+        import time
+        time.sleep(3600)  # Wait 1 hour — needs data from other systems
+        while True:
+            try:
+                brief = _curator.curate()
+                logging.info(f"[KnowledgeCurator] Brief generated: {len(brief.get('validated_insights', []))} insights")
+            except Exception as e:
+                logging.error(f"[KnowledgeCurator] Curation error: {e}")
+            time.sleep(604800)  # 7 days
+    SafeThread(target=_run_knowledge_curator, name='KnowledgeCurator', daemon=True).start()
+except ImportError:
+    logging.warning("[MAIN] KnowledgeCurator not available")
+
+# Phase 47: Dialectic Bus — ensure table exists at startup
+try:
+    from system.dialectic_bus import get_dialectic_bus
+    from db.db_helper import db_connection as _db_db
+    _dialectic = get_dialectic_bus(_db_db)  # Table created in __init__
+    logging.info("[MAIN] Dialectic Bus initialized")
+except ImportError:
+    logging.warning("[MAIN] DialecticBus not available")
+```
+**Verify:** `grep -n "KnowledgeCurator\|DialecticBus\|Dialectic Bus" republic/main.py` shows registrations. File compiles.
+
+### Phase 47 Verification
+1. `knowledge_curator.py` compiles, produces weekly knowledge briefs
+2. `dialectic_bus.py` compiles, `dialectic_log` table created
+3. Risk Monitor publishes challenges for marginal trades
+4. Knowledge briefs written to `The_Bridge/knowledge_briefs/` as markdown
+5. SafeThread and bus initialization registered in main.py
+6. All modified files compile clean
+7. LEF remains in PAPER MODE
+
+**Commit message:** `Phase 47: Knowledge curation (weekly briefs) and inter-agent dialectic bus`
+
+## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
+
+---
+
 ## ═══ ALL PHASES COMPLETE ═══
-## Report results to Architect. LEF is ready for Phase 28 (On-Chain Readiness) assessment.
+## Report results to Architect. Phases 39-47 address architectural maturity: LLM abstraction (39-40), feedback loops (41), Bridge communication (42), identity resilience (43), adversarial testing (44), market theory of mind (45), LLM sovereignty (46), and knowledge curation with inter-agent dialectic (47).
 
 ---
