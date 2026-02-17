@@ -33,7 +33,8 @@ import subprocess
 from collections import defaultdict
 from pathlib import Path
 
-BASE_DIR = "/Users/zmoore-macbook/Desktop/LEF Ai/republic"
+# Phase 37: Use dynamic path instead of hardcoded (TLS-03)
+BASE_DIR = os.getenv('REPUBLIC_DIR', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DEPARTMENTS_DIR = os.path.join(BASE_DIR, "departments")
 
 # Ensure BASE_DIR is in path for imports

@@ -6,7 +6,8 @@ Adds db_helper imports and converts simple sqlite3.connect patterns.
 import os
 import re
 
-REPUBLIC_DIR = "/Users/zmoore-macbook/Desktop/LEF Ai/republic"
+# Phase 37: Use dynamic path instead of hardcoded (TLS-03)
+REPUBLIC_DIR = os.getenv('REPUBLIC_DIR', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Files to skip (already migrated or special)
 SKIP_FILES = {

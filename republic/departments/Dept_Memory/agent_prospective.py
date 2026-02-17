@@ -205,10 +205,143 @@ class AgentProspective:
         except sqlite3.Error: 
             pass
     
+    # =========================================================================
+    # Phase 37: PRICE and EVENT Trigger Handlers (LRN-10)
+    # =========================================================================
+
+    def on_price_change(self, data: dict):
+        """
+        Handle price change events from Redis.
+        Checks if any PRICE-conditioned tasks should fire.
+
+        Args:
+            data: {'symbol': str, 'price': float, 'change_pct': float}
+        """
+        symbol = data.get('symbol', '')
+        price = data.get('price', 0)
+
+        with db_connection(self.db_path) as conn:
+            c = conn.cursor()
+            c.execute("""
+                SELECT id, condition_value, task_type, task_payload
+                FROM scheduled_tasks
+                WHERE status = 'PENDING' AND condition_type = 'PRICE'
+            """)
+            tasks = c.fetchall()
+
+            for task_id, cond_value, task_type, payload in tasks:
+                try:
+                    cond = json.loads(cond_value) if cond_value else {}
+                    target_symbol = cond.get('symbol', '')
+                    target_price = cond.get('price', 0)
+                    direction = cond.get('direction', 'above')
+
+                    if target_symbol.upper() != symbol.upper():
+                        continue
+
+                    triggered = False
+                    if direction == 'above' and price >= target_price:
+                        triggered = True
+                    elif direction == 'below' and price <= target_price:
+                        triggered = True
+
+                    if triggered:
+                        result = self._execute_task(task_type, json.loads(payload))
+                        c.execute("""
+                            UPDATE scheduled_tasks
+                            SET status = 'COMPLETED', executed_at = ?, result = ?
+                            WHERE id = ?
+                        """, (datetime.now().isoformat(), json.dumps(result), task_id))
+                        print(f"[{self.name}] PRICE trigger fired: {symbol} {direction} ${target_price}")
+
+                except Exception as e:
+                    print(f"[{self.name}] Price trigger error for task {task_id}: {e}")
+
+            conn.commit()
+
+    def on_event(self, data: dict):
+        """
+        Handle event triggers from Redis.
+        Checks if any EVENT-conditioned tasks should fire.
+
+        Args:
+            data: {'event_type': str, 'source': str, 'details': str}
+        """
+        event_type = data.get('event_type', '').upper()
+
+        with db_connection(self.db_path) as conn:
+            c = conn.cursor()
+            c.execute("""
+                SELECT id, condition_value, task_type, task_payload
+                FROM scheduled_tasks
+                WHERE status = 'PENDING' AND condition_type = 'EVENT'
+            """)
+            tasks = c.fetchall()
+
+            for task_id, cond_value, task_type, payload in tasks:
+                try:
+                    cond = json.loads(cond_value) if cond_value else {}
+                    target_event = cond.get('event_type', '').upper()
+
+                    if target_event and target_event == event_type:
+                        result = self._execute_task(task_type, json.loads(payload))
+                        c.execute("""
+                            UPDATE scheduled_tasks
+                            SET status = 'COMPLETED', executed_at = ?, result = ?
+                            WHERE id = ?
+                        """, (datetime.now().isoformat(), json.dumps(result), task_id))
+                        print(f"[{self.name}] EVENT trigger fired: {event_type}")
+
+                except Exception as e:
+                    print(f"[{self.name}] Event trigger error for task {task_id}: {e}")
+
+            conn.commit()
+
+    def _subscribe_to_triggers(self):
+        """
+        Phase 37: Subscribe to Redis 'price_change' and 'event_trigger' channels.
+        Calls on_price_change() and on_event() handlers.
+        """
+        try:
+            import redis
+            import threading
+
+            r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+            r.ping()
+
+            def _listener():
+                pubsub = r.pubsub()
+                pubsub.subscribe('price_change', 'event_trigger')
+                print(f"[{self.name}] Subscribed to price_change + event_trigger channels")
+
+                for message in pubsub.listen():
+                    if message['type'] != 'message':
+                        continue
+                    try:
+                        data = json.loads(message['data'])
+                        channel = message['channel']
+                        if isinstance(channel, bytes):
+                            channel = channel.decode('utf-8')
+
+                        if channel == 'price_change':
+                            self.on_price_change(data)
+                        elif channel == 'event_trigger':
+                            self.on_event(data)
+                    except Exception as e:
+                        print(f"[{self.name}] Trigger message error: {e}")
+
+            thread = threading.Thread(target=_listener, daemon=True, name="Prospective-Triggers")
+            thread.start()
+        except Exception as e:
+            print(f"[{self.name}] Redis trigger subscription failed: {e}")
+
     def run(self):
         """Main loop - check for due tasks."""
-        print(f"[{self.name}] 📋 Prospective Memory Online.")
-        
+        print(f"[{self.name}] Prospective Memory Online.")
+
+        # Phase 37: Start listening for PRICE/EVENT triggers (LRN-10)
+        self._subscribe_to_triggers()
+
         while True:
             self._heartbeat()
             self.check_and_execute()

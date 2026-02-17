@@ -4,6 +4,9 @@ import json
 import logging
 from datetime import datetime
 
+logger = logging.getLogger("LEF.RiskEngine")
+
+
 class RiskEngine:
     def __init__(self, db_path=None):
         if db_path:
@@ -19,6 +22,14 @@ class RiskEngine:
         self.STARTING_CAPITAL = 10000.0
         self.PROFIT_TARGET_THRESHOLD = 15000.0 # Start harvesting above $15k
         self.MAX_DRAWDOWN_THRESHOLD = 8000.0   # Stop trading below $8k
+
+        # Phase 37: Model loading for trade evaluation (TLS-09/TLS-10)
+        self._model = None
+        self._model_version = None
+        self._model_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            'models', 'risk_v1'
+        )
 
     def _get_pool(self):
         """Lazy-load the connection pool."""
@@ -150,11 +161,137 @@ class RiskEngine:
         finally:
             self._release_conn(conn, pool)
 
+    # =========================================================================
+    # Phase 37: Trade Evaluation Gate (TLS-09)
+    # =========================================================================
+
+    def evaluate_trade(self, trade: dict) -> dict:
+        """
+        Phase 37: Evaluate a trade before execution.
+        Called by trade executor. Returns approval or BLOCKED status.
+
+        Args:
+            trade: dict with 'symbol', 'side' (BUY/SELL), 'quantity', 'price_usd'
+
+        Returns:
+            {'approved': bool, 'reason': str, 'risk_level': str}
+        """
+        symbol = trade.get('symbol', 'UNKNOWN')
+        side = trade.get('side', 'BUY')
+        price_usd = trade.get('price_usd', 0)
+
+        # 1. Check portfolio health first
+        health = self.evaluate_portfolio_health()
+        if health['action'] == 'DEFENSIVE_HALT' and side == 'BUY':
+            return {
+                'approved': False,
+                'reason': f"Portfolio in CRITICAL drawdown ({health['reason']}). All buys halted.",
+                'risk_level': 'CRITICAL'
+            }
+
+        # 2. Single-trade size limit (max 10% of equity)
+        equity = health.get('equity', 0)
+        if equity > 0 and price_usd > equity * 0.10:
+            return {
+                'approved': False,
+                'reason': f"Trade size ${price_usd:.2f} exceeds 10% of equity ${equity:.2f}.",
+                'risk_level': 'HIGH'
+            }
+
+        # 3. Model-based risk check (if model loaded)
+        if self._model is not None:
+            try:
+                prediction = self._predict_risk(trade)
+                if prediction and prediction.get('risk_crash', 0) > 0.7:
+                    return {
+                        'approved': False,
+                        'reason': f"Model predicts {prediction['risk_crash']:.0%} crash probability for {symbol}.",
+                        'risk_level': 'HIGH'
+                    }
+            except Exception as e:
+                logger.warning(f"[RiskEngine] Model prediction failed: {e}")
+
+        return {
+            'approved': True,
+            'reason': f"Trade approved. Portfolio {health['status']}.",
+            'risk_level': 'LOW'
+        }
+
+    def _predict_risk(self, trade: dict) -> dict:
+        """Use loaded model to predict crash risk. Returns None if no model."""
+        if self._model is None:
+            return None
+        try:
+            # Model expects features: Close, volatility_24h, drawdown_24h, vol_shock
+            import pandas as pd
+            features = pd.DataFrame([{
+                'Close': trade.get('price_usd', 0),
+                'volatility_24h': trade.get('volatility', 0.02),
+                'drawdown_24h': trade.get('drawdown', 0),
+                'vol_shock': trade.get('vol_shock', 1.0),
+            }])
+            prediction = self._model.predict_proba(features)
+            # prediction is a DataFrame with probability of each class
+            crash_prob = float(prediction.iloc[0].get(1, 0))
+            return {'risk_crash': crash_prob}
+        except Exception as e:
+            logger.warning(f"[RiskEngine] Prediction error: {e}")
+            return None
+
+    # =========================================================================
+    # Phase 37: Model Loading & Hot-Reload (TLS-10)
+    # =========================================================================
+
+    def load_model(self):
+        """Load the trained risk model from disk."""
+        if not os.path.exists(self._model_path):
+            logger.info("[RiskEngine] No risk model found — operating without ML predictions")
+            return False
+        try:
+            from autogluon.tabular import TabularPredictor
+            self._model = TabularPredictor.load(self._model_path)
+            self._model_version = datetime.now().isoformat()
+            logger.info(f"[RiskEngine] Risk model loaded from {self._model_path}")
+            return True
+        except ImportError:
+            logger.warning("[RiskEngine] AutoGluon not installed — model predictions disabled")
+            return False
+        except Exception as e:
+            logger.error(f"[RiskEngine] Model load failed: {e}")
+            return False
+
+    def watch_for_model_updates(self):
+        """
+        Phase 37: Subscribe to Redis for model update notifications (TLS-10).
+        When train_risk_model publishes a new version, reload the model.
+        """
+        try:
+            import redis
+            import threading
+
+            r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+            r.ping()
+
+            def _watcher():
+                pubsub = r.pubsub()
+                pubsub.subscribe('risk_model_updated')
+                logger.info("[RiskEngine] Watching for model updates on Redis")
+                for message in pubsub.listen():
+                    if message['type'] == 'message':
+                        logger.info(f"[RiskEngine] Model update signal received: {message['data']}")
+                        self.load_model()
+
+            thread = threading.Thread(target=_watcher, daemon=True, name="RiskEngine-ModelWatcher")
+            thread.start()
+        except Exception as e:
+            logger.warning(f"[RiskEngine] Cannot watch for model updates: {e}")
+
+
 if __name__ == "__main__":
     engine = RiskEngine()
     health = engine.evaluate_portfolio_health()
     print(json.dumps(health, indent=2))
-    
+
     if health['action'] == "FORCE_HARVEST":
         print("\n[SUGGESTED TRADES]")
         from pprint import pprint

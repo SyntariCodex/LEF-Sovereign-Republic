@@ -20222,6 +20222,49 @@ Fix remaining Phase 27 tool reliability issues: hardcoded DB paths, seed_wealth 
 
 **Commit message:** `Phase 37: Fix tooling paths, wire risk engine and training pipeline`
 
+### Phase 37 Report-Back
+
+#### 37.1 — Remove Hardcoded DB Paths ✅ DONE
+- `tools/clear_agents.py`: Replaced `DB_PATH = os.path.abspath("fulcrum/republic.db")` with `os.getenv('DB_PATH', ...)`. Replaced bare `sqlite3.connect` with `db_connection` context manager.
+- `tools/structural_integrity_audit.py`: Replaced hardcoded `BASE_DIR = "/Users/zmoore-macbook/Desktop/LEF Ai/republic"` with `os.getenv('REPUBLIC_DIR', os.path.dirname(...))`.
+- `tools/migrate_db_connections.py`: Replaced hardcoded `REPUBLIC_DIR` with `os.getenv('REPUBLIC_DIR', os.path.dirname(...))`.
+- All three files compile clean.
+
+#### 37.2 — Fix seed_wealth.py Connection Leak ✅ DONE
+- Removed bare `import sqlite3`. Added `db_connection` import with fallback context manager.
+- All DB ops wrapped in `with db_connection(DB_PATH) as conn:`. No leaked connections.
+- Uses `os.getenv('DB_PATH', ...)` for dynamic path resolution.
+- File compiles clean.
+
+#### 37.3 — Wire risk/engine.py to Trade Queue ✅ DONE
+- Added `evaluate_trade(trade)` method to `RiskEngine`. Checks:
+  1. Portfolio health — blocks BUY during DEFENSIVE_HALT (CRITICAL drawdown).
+  2. Single-trade size limit — blocks if trade > 10% of equity.
+  3. Model-based risk — blocks if crash probability > 70%.
+- Returns `{'approved': bool, 'reason': str, 'risk_level': str}`.
+- Added `_predict_risk()` using loaded AutoGluon model.
+- File compiles clean.
+
+#### 37.4 — Wire train_risk_model.py Output to Risk Engine ✅ DONE
+- `train_risk_model.py`: After training, publishes to Redis `risk_model_updated` channel with `model_path`, `trained_at`, `performance`. Also sets `risk_model:latest_version` key.
+- `risk/engine.py`: Added `load_model()` (loads from disk with AutoGluon) and `watch_for_model_updates()` (subscribes to Redis channel, auto-reloads on signal).
+- Both files compile clean.
+
+#### 37.5 — Improve Token Estimation ✅ DONE
+- `memory_retriever.py`: Added tiktoken initialization in `__init__` with try/except.
+- `_estimate_tokens()` now tries tiktoken first, falls back to word-based (~1 token per 0.75 words), final fallback chars/4.
+- Added `TOKEN_BUFFER = 1.10` (10% safety margin).
+- File compiles clean.
+
+#### 37.6 — Implement Prospective PRICE/EVENT Triggers ✅ DONE
+- `agent_prospective.py`: Added `on_price_change(data)` — checks PRICE-conditioned tasks against received price data (symbol, direction, target_price).
+- Added `on_event(data)` — checks EVENT-conditioned tasks against received event_type.
+- Added `_subscribe_to_triggers()` — subscribes to Redis `price_change` and `event_trigger` channels in daemon thread.
+- `run()` now calls `_subscribe_to_triggers()` before main loop.
+- File compiles clean.
+
+**Phase 37 COMPLETE.** All 8 files modified, all compile clean.
+
 ## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
 
 ---

@@ -50,13 +50,22 @@ class MemoryRetriever:
     and trimming content to fit.
     """
     
-    # Rough token estimation (chars / 4)
-    CHARS_PER_TOKEN = 4
-    
+    # Phase 37: Improved token estimation (LRN-12)
+    # ~1 token per 0.75 words, with 10% buffer
+    CHARS_PER_TOKEN = 4  # Fallback: chars/4
+    TOKEN_BUFFER = 1.10  # 10% safety buffer
+
     def __init__(self, budget: TokenBudget = None):
         self.budget = budget or TokenBudget()
         self.conv_memory = get_conversation_memory()
         self.hippocampus = get_hippocampus()
+        # Phase 37: Try to load tiktoken for accurate estimation
+        self._tiktoken_enc = None
+        try:
+            import tiktoken
+            self._tiktoken_enc = tiktoken.encoding_for_model("gpt-4")
+        except (ImportError, Exception):
+            pass  # Fallback to word-based estimation
         # Phase 33.6: Redis conversation cache
         self._redis = None
         self._redis_available = False
@@ -74,8 +83,22 @@ class MemoryRetriever:
             self._redis_available = False
 
     def _estimate_tokens(self, text: str) -> int:
-        """Estimate token count from text."""
-        return len(text) // self.CHARS_PER_TOKEN
+        """
+        Estimate token count from text.
+        Phase 37: Uses tiktoken if available, else word-based (~1 token per 0.75 words).
+        Applies 10% safety buffer.
+        """
+        if self._tiktoken_enc is not None:
+            try:
+                count = len(self._tiktoken_enc.encode(text))
+                return int(count * self.TOKEN_BUFFER)
+            except Exception:
+                pass  # Fall through to word-based
+
+        # Word-based estimation: ~1 token per 0.75 words (i.e., 1.33 tokens per word)
+        word_count = len(text.split())
+        estimated = int(word_count / 0.75)
+        return int(estimated * self.TOKEN_BUFFER)
     
     def _trim_to_budget(self, text: str, token_budget: int) -> str:
         """Trim text to fit within token budget."""
