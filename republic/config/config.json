@@ -1,7 +1,7 @@
 {
   "coinbase": {
-    "api_key": "organizations/684880cc-80b2-433b-9b77-894f406e6468/apiKeys/681e6b72-5658-449f-9900-68edc22375e3",
-    "api_secret": "REDACTED_KEY\n",
+    "api_key": "ENV:COINBASE_API_KEY",
+    "api_secret": "ENV:COINBASE_API_SECRET",
     "sandbox": true,
     "rate_limit_per_hour": 9000,
     "max_error_streak": 5,
@@ -24,7 +24,6 @@
     "channel": "fulcrum_signals"
   },
   "thresholds": {
-    "ultimal_buy_sentiment_max": 15,
     "ultimal_buy_alignment_min": 90,
     "ultimal_sell_sentiment_min": 85,
     "ultimal_sell_alignment_max": 15,
@@ -34,9 +33,7 @@
     "medium_trade_threshold_usd": 1000,
     "auto_execute_delay_minutes": 0,
     "buy_signal_confidence": 0.8,
-    "sell_signal_confidence": 0.8,
-    "rda_gap_threshold": 0.35,
-    "teleonomy_dynasty_threshold": 0.7
+    "sell_signal_confidence": 0.8
   },
   "agents": {
     "sentinel_scan_interval": 10,
@@ -70,5 +67,26 @@
       "paper_to_micro": "60 days paper trading + positive backtest",
       "micro_to_scaled": "30 days micro + positive P&L + Architect approval"
     }
+  },
+  "_removed_phase_16": {
+    "_note": "Keys removed in Phase 16 — never used in production",
+    "ultimal_buy_sentiment_max": 15,
+    "rda_gap_threshold": 0.35,
+    "teleonomy_dynasty_threshold": 0.7
+  },
+  "llm": {
+    "primary_model": "gemini-2.0-flash",
+    "fallback_model": "gemini-1.5-flash",
+    "provider_keys": {
+      "gemini": "ENV:GEMINI_API_KEY",
+      "claude": "ENV:ANTHROPIC_API_KEY",
+      "ollama": null
+    },
+    "agent_overrides": {},
+    "circuit_breaker": {
+      "failure_threshold": 3,
+      "cooldown_seconds": 300
+    },
+    "default_timeout_seconds": 90
   }
 }

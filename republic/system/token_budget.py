@@ -111,11 +111,30 @@ class TokenBudget:
         except Exception as e:
             print(f"[TokenBudget] Schema error: {e}")
     
+    @staticmethod
+    def _normalize_model(model_id: str) -> str:
+        """Phase 39: Map full model IDs to budget tier names for rate limiting."""
+        m = model_id.lower()
+        if 'gemini-2.0-flash' in m:
+            return 'gemini-2.0-flash'
+        if 'gemini-1.5-flash' in m:
+            return 'gemini-1.5-flash'
+        if 'gemini-1.5-pro' in m:
+            return 'gemini-1.5-pro'
+        if 'claude' in m and 'haiku' in m:
+            return 'claude-haiku'
+        if 'claude' in m:
+            return 'claude-sonnet'  # sonnet, opus, etc.
+        if 'ollama' in m or 'llama' in m:
+            return 'gemini-1.5-flash'  # use flash limits for local models
+        return 'gemini-1.5-flash'  # safe default
+
     def can_call(self, model: str, agent_name: str) -> bool:
         """
         Check if an agent can make a call to a specific model.
         Returns False if rate limit is exhausted.
         """
+        model = self._normalize_model(model)  # Phase 39: normalize full IDs
         limits = self.DEFAULT_LIMITS.get(model, self.DEFAULT_LIMITS['gemini-1.5-flash'])
         
         with self._lock:
@@ -149,6 +168,7 @@ class TokenBudget:
         """
         Record a completed API call for rate-limiting.
         """
+        model = self._normalize_model(model)  # Phase 39: normalize full IDs
         with self._lock:
             try:
                 conn, pool = self._get_conn()

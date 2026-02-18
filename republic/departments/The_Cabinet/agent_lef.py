@@ -179,6 +179,13 @@ class AgentLEF:
         except ImportError:
             self.token_budget = None
 
+        # Phase 39: LLMRouter — provider-agnostic abstraction
+        try:
+            from system.llm_router import get_router
+            self.llm_router = get_router()
+        except ImportError:
+            self.llm_router = None
+
         # SCHEMA RESTORATION (Memory Fix)
         self._ensure_memory_schema()
 
@@ -281,10 +288,8 @@ class AgentLEF:
     def _call_gemini(self, prompt, context_label='UNKNOWN', timeout_seconds=90):
         """
         Phase 18.3b: Centralized Gemini API call with timeout protection.
-
-        Every generate_content() call in LEF MUST go through this wrapper.
-        Without this, a single rate-limited or hung API call kills the entire
-        Da'at cycle thread — invisible to SafeThread (no exception thrown).
+        Phase 39: Now delegates to LLMRouter for provider abstraction.
+        Name preserved for compatibility — 17+ internal call sites unchanged.
 
         Args:
             prompt: The prompt string to send
@@ -294,6 +299,16 @@ class AgentLEF:
         Returns:
             response text (str) on success, None on timeout/failure
         """
+        # Phase 39: Delegate to LLMRouter when available
+        if self.llm_router:
+            try:
+                return self.llm_router.generate(
+                    prompt=prompt, agent_name='LEF',
+                    context_label=context_label, timeout_seconds=timeout_seconds
+                )
+            except Exception as _router_err:
+                logging.warning(f"[LEF] LLMRouter failed, falling back to direct: {_router_err}")
+
         if not self.client:
             logging.warning(f"[LEF] _call_gemini({context_label}): No client available")
             return None
