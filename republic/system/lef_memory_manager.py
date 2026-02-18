@@ -18,6 +18,13 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
+# Phase 43.3: Identity checkpoint integration
+try:
+    from system.identity_checkpoint import get_checkpointer, check_and_recover_identity
+    _CHECKPOINT_AVAILABLE = True
+except ImportError:
+    _CHECKPOINT_AVAILABLE = False
+
 BASE_DIR = Path(__file__).parent.parent  # republic/
 BRIDGE_DIR = BASE_DIR.parent / "The_Bridge"
 LEF_MEMORY_PATH = BRIDGE_DIR / "lef_memory.json"
@@ -26,6 +33,30 @@ logger = logging.getLogger("LEF.MemoryManager")
 
 MAX_EVOLUTION_LOG_ENTRIES = 50
 MAX_LESSONS = 50
+
+
+def _normalize_text(text):
+    """Phase 18.8a: Normalize text for semantic comparison."""
+    import re
+    text = text.lower().strip()
+    text = re.sub(r'[^\w\s]', '', text)  # Strip punctuation
+    text = re.sub(r'\s+', ' ', text)      # Collapse whitespace
+    return text
+
+
+def _word_overlap(text_a, text_b):
+    """
+    Phase 18.8a: Calculate word-level overlap ratio between two texts.
+    Returns float 0.0 to 1.0. If > 0.6, texts are semantically similar enough
+    to be considered duplicates.
+    """
+    words_a = set(_normalize_text(text_a).split())
+    words_b = set(_normalize_text(text_b).split())
+    if not words_a or not words_b:
+        return 0.0
+    intersection = words_a & words_b
+    smaller = min(len(words_a), len(words_b))
+    return len(intersection) / smaller if smaller > 0 else 0.0
 
 
 def load_lef_memory() -> dict:
@@ -40,12 +71,23 @@ def load_lef_memory() -> dict:
 
 
 def save_lef_memory(data: dict):
-    """Persist LEF's identity document to disk."""
+    """Persist LEF's identity document to disk. Uses atomic write (Phase 21.1e)."""
+    import tempfile
     try:
         LEF_MEMORY_PATH.parent.mkdir(parents=True, exist_ok=True)
-        with open(LEF_MEMORY_PATH, 'w') as f:
-            json.dump(data, f, indent=2)
-        logger.info("[LEFMemory] Identity document persisted")
+        dir_name = str(LEF_MEMORY_PATH.parent)
+        fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix='.tmp')
+        try:
+            with os.fdopen(fd, 'w') as f:
+                json.dump(data, f, indent=2)
+            os.replace(tmp_path, str(LEF_MEMORY_PATH))
+        except Exception:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise
+        logger.info("[LEFMemory] Identity document persisted (atomic)")
     except Exception as e:
         logger.error(f"[LEFMemory] Failed to save: {e}")
 
@@ -328,30 +370,58 @@ def update_lef_memory(db_path=None):
             current_state[key] = value
 
     # Append evolution entry (if meaningful)
+    # Phase 18.8a: Dedup guard — prevent identical or near-identical entries
     evolution_entry = summary.get("evolution_entry")
     if evolution_entry:
         evolution_log = memory.setdefault("evolution_log", [])
-        evolution_log.append(evolution_entry)
-        # Cap at MAX entries, prune oldest
-        if len(evolution_log) > MAX_EVOLUTION_LOG_ENTRIES:
-            memory["evolution_log"] = evolution_log[-MAX_EVOLUTION_LOG_ENTRIES:]
 
-    # Append new lessons (deduplicate by lesson text)
+        # Check for duplicate: same config_key + same new_value = same change
+        is_duplicate = False
+        entry_key = evolution_entry.get('config_key', '')
+        entry_val = str(evolution_entry.get('new_value', ''))
+        entry_desc = evolution_entry.get('change_description', '')
+
+        for existing in evolution_log[-20:]:  # Check last 20 entries only
+            if (existing.get('config_key', '') == entry_key and
+                    str(existing.get('new_value', '')) == entry_val):
+                is_duplicate = True
+                logger.info(f"[LEFMemory] 🔄 Dedup: Skipping duplicate evolution entry: {entry_desc}")
+                break
+
+        if not is_duplicate:
+            evolution_log.append(evolution_entry)
+            # Cap at MAX entries, prune oldest
+            if len(evolution_log) > MAX_EVOLUTION_LOG_ENTRIES:
+                memory["evolution_log"] = evolution_log[-MAX_EVOLUTION_LOG_ENTRIES:]
+
+    # Append new lessons (Phase 18.8a: semantic dedup — >60% word overlap = duplicate)
     new_lessons = summary.get("new_lessons", [])
     if new_lessons:
         existing_lessons = memory.setdefault("learned_lessons", [])
-        existing_texts = set()
-        for l in existing_lessons:
-            if isinstance(l, dict):
-                existing_texts.add(l.get("lesson", ""))
-            elif isinstance(l, str):
-                existing_texts.add(l)
 
         for lesson in new_lessons:
             lesson_text = lesson.get("lesson", "") if isinstance(lesson, dict) else str(lesson)
-            if lesson_text and lesson_text not in existing_texts:
+            if not lesson_text:
+                continue
+
+            # Check for semantic duplicate against all existing lessons
+            is_duplicate = False
+            for i, existing in enumerate(existing_lessons):
+                existing_text = existing.get("lesson", "") if isinstance(existing, dict) else str(existing)
+                overlap = _word_overlap(lesson_text, existing_text)
+                if overlap > 0.6:
+                    # Duplicate — update timestamp on existing instead of appending
+                    if isinstance(existing, dict):
+                        existing_lessons[i]["learned_at"] = datetime.now().isoformat()
+                    logger.info(
+                        f"[LEFMemory] 🔄 Lesson dedup: '{lesson_text[:60]}...' "
+                        f"overlaps {overlap:.0%} with existing. Updated timestamp."
+                    )
+                    is_duplicate = True
+                    break
+
+            if not is_duplicate:
                 existing_lessons.append(lesson)
-                existing_texts.add(lesson_text)
 
         # Cap lessons
         if len(existing_lessons) > MAX_LESSONS:
@@ -359,6 +429,24 @@ def update_lef_memory(db_path=None):
 
     # Save
     save_lef_memory(memory)
+
+    # Phase 43.3: Create identity checkpoint every ~12 hours
+    if _CHECKPOINT_AVAILABLE:
+        try:
+            cp = get_checkpointer()
+            should_checkpoint = True
+            if cp.MANIFEST_PATH.exists():
+                manifest = json.loads(cp.MANIFEST_PATH.read_text())
+                entries = manifest.get('checkpoints', [])
+                if entries:
+                    last_time = datetime.fromisoformat(entries[-1].get('created_at', '2000-01-01'))
+                    if (datetime.now() - last_time).total_seconds() < 36000:  # 10 hours
+                        should_checkpoint = False
+            if should_checkpoint:
+                cp.create_checkpoint()
+                logger.info("[LEFMemory] Identity checkpoint created")
+        except Exception as e:
+            logger.debug(f"[LEFMemory] Checkpoint error: {e}")
 
     logger.info(
         f"[LEFMemory] Updated — state: {current_state.get('consciousness_status', 'n/a')}, "
@@ -374,6 +462,14 @@ def run_lef_memory_writer(interval_seconds=21600):
     Also runs once at startup to capture initial state.
     """
     logger.info("[LEFMemory] Identity persistence online (updating every 6 hours)")
+
+    # Phase 43.3: Check for identity recovery at startup
+    if _CHECKPOINT_AVAILABLE:
+        try:
+            if check_and_recover_identity():
+                logger.warning("[LEFMemory] Identity recovered from checkpoint at startup")
+        except Exception as e:
+            logger.debug(f"[LEFMemory] Recovery check: {e}")
 
     # Initial update at startup
     try:

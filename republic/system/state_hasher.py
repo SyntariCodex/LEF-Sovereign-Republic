@@ -192,6 +192,15 @@ class StateHasher:
             if conn:
                 conn.close()
 
+        # Phase 43.4: Include identity hash for integrity cross-reference
+        try:
+            identity_hash_path = os.path.join(str(BRIDGE_DIR), 'identity_hash.txt')
+            if os.path.exists(identity_hash_path):
+                with open(identity_hash_path) as f:
+                    snapshot['identity_hash'] = f.readline().strip()
+        except Exception:
+            pass
+
         return snapshot
 
     def hash_state(self, snapshot: dict) -> str:
