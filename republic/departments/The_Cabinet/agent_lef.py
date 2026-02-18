@@ -1171,6 +1171,28 @@ Respond with ONLY the lesson text, no explanation."""
         except Exception as e:
             print(f"[LEF] Lived experience read failed (non-fatal): {e}")
 
+        # Phase 38.75d: Check if any metabolized reflexes are being questioned
+        metabolic_alerts = ""
+        try:
+            from db.db_helper import db_connection as _dbc, translate_sql as _tsql
+            with _dbc() as _alert_conn:
+                _alert_c = _alert_conn.cursor()
+                _alert_c.execute(_tsql(
+                    "SELECT content FROM consciousness_feed "
+                    "WHERE category = 'metabolic_integrity_alert' "
+                    "AND timestamp > NOW() - INTERVAL '24 HOURS' "
+                    "ORDER BY timestamp DESC LIMIT 3"
+                ))
+                _alerts = _alert_c.fetchall()
+                if _alerts:
+                    _alert_texts = "\n".join([
+                        json.loads(a[0]).get('action_needed', '') if isinstance(a[0], str) else ''
+                        for a in _alerts
+                    ])
+                    metabolic_alerts = f"\n[REFLEX QUESTIONED — Needs Conscious Attention]\n{_alert_texts}\n"
+        except Exception:
+            pass
+
         # Phase 38.5a: Fetch distilled wisdom from SemanticCompressor
         distilled_wisdom = "[No compressed wisdom yet — compressor accumulating data]"
         try:
@@ -1186,6 +1208,31 @@ Respond with ONLY the lesson text, no explanation."""
         except Exception:
             pass
 
+        # Phase 38.75c: Metabolic awareness — know what has been embodied
+        metabolic_awareness = ""
+        try:
+            from system.semantic_compressor import SemanticCompressor as _SC2
+            _sc2 = _SC2()
+            _conn2 = _sc2._get_connection()
+            try:
+                _metabolized = _conn2.execute("""
+                    SELECT metabolized_target, summary, confidence
+                    FROM compressed_wisdom
+                    WHERE metabolized = TRUE
+                    ORDER BY metabolized_at DESC
+                    LIMIT 5
+                """).fetchall()
+                if _metabolized:
+                    _items = "\n".join([
+                        f"- {row[0]}: {str(row[1])[:80]} (conf: {row[2]:.2f})"
+                        for row in _metabolized
+                    ])
+                    metabolic_awareness = f"\n[EMBODIED — What I No Longer Need to Think About]\n{_items}\n"
+            finally:
+                _sc2._release_connection(_conn2)
+        except Exception:
+            pass
+
         return {
             "recent_thoughts": recent_thoughts,
             "cash": cash,
@@ -1197,6 +1244,8 @@ Respond with ONLY the lesson text, no explanation."""
             "scars": scars_context,
             "lived_experience": lived_experience,
             "distilled_wisdom": distilled_wisdom,
+            "metabolic_awareness": metabolic_awareness,
+            "metabolic_alerts": metabolic_alerts,
             "time": datetime.now().strftime("%H:%M")
         }
 
@@ -1257,9 +1306,10 @@ Respond with ONLY the lesson text, no explanation."""
             [LIVED EXPERIENCE — What the Republic is Experiencing]
             {self._format_lived_experience(context.get('lived_experience', {}))}
 
+            {context.get('metabolic_alerts', '')}
             [DISTILLED WISDOM — What I Have Named]
             {context.get('distilled_wisdom', '[No compressed wisdom yet — compressor accumulating data]')}
-
+            {context.get('metabolic_awareness', '')}
             [EXTERNAL CONTEXT — The Broader Ecosystem]
             {self._load_project_context()}
 

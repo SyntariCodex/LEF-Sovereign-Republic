@@ -38,13 +38,18 @@ except ImportError:
 class SemanticCompressor:
     """
     MemGPT-style memory compression for LEF.
-    
+
     Compresses episodic memories into semantic wisdom:
     - book_of_scars → FAILURE_LESSON
     - memory_experiences → MARKET_PATTERN
     - agent_logs (insights) → BEHAVIOR_INSIGHT
     """
-    
+
+    # Phase 38.75a: Metabolic threshold constants
+    METABOLIC_CONFIDENCE_THRESHOLD = 0.85  # Proven through repeated validation
+    METABOLIC_VALIDATION_MINIMUM = 5       # At least 5 real-world validations
+    DE_METABOLIZE_THRESHOLD = 0.70         # If confidence drops below this, re-surface to consciousness
+
     def __init__(self, db_path: str = None):
         if db_path is None:
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -101,9 +106,17 @@ class SemanticCompressor:
                 )
             """)
             conn.execute("""
-                CREATE INDEX IF NOT EXISTS idx_wisdom_type 
+                CREATE INDEX IF NOT EXISTS idx_wisdom_type
                 ON compressed_wisdom(wisdom_type)
             """)
+            # Phase 38.75a: Add metabolic columns (safe ALTER — check existence first)
+            existing_cols = [row[1] for row in conn.execute("PRAGMA table_info(compressed_wisdom)").fetchall()]
+            if 'metabolized' not in existing_cols:
+                conn.execute("ALTER TABLE compressed_wisdom ADD COLUMN metabolized BOOLEAN DEFAULT FALSE")
+            if 'metabolized_at' not in existing_cols:
+                conn.execute("ALTER TABLE compressed_wisdom ADD COLUMN metabolized_at TIMESTAMP")
+            if 'metabolized_target' not in existing_cols:
+                conn.execute("ALTER TABLE compressed_wisdom ADD COLUMN metabolized_target TEXT")
             conn.commit()
             logging.info("[COMPRESSOR] 📚 compressed_wisdom table ready.")
         finally:
@@ -331,6 +344,7 @@ Write a single concise trading insight. Start with "IN {condition.upper()}:" fol
                     SELECT wisdom_type, summary, confidence, times_validated, created_at
                     FROM compressed_wisdom
                     WHERE wisdom_type = ?
+                    AND (metabolized = FALSE OR metabolized IS NULL)
                     ORDER BY confidence DESC, created_at DESC
                     LIMIT ?
                 """, (wisdom_type, limit))
@@ -338,14 +352,15 @@ Write a single concise trading insight. Start with "IN {condition.upper()}:" fol
                 cursor = conn.execute("""
                     SELECT wisdom_type, summary, confidence, times_validated, created_at
                     FROM compressed_wisdom
+                    WHERE (metabolized = FALSE OR metabolized IS NULL)
                     ORDER BY confidence DESC, created_at DESC
                     LIMIT ?
                 """, (limit,))
-            
+
             return [dict(row) for row in cursor.fetchall()]
         finally:
             self._release_connection(conn)
-    
+
     def validate_wisdom(self, wisdom_id: int, outcome_matched: bool):
         """
         Update wisdom confidence based on real-world validation.
@@ -371,7 +386,65 @@ Write a single concise trading insight. Start with "IN {condition.upper()}:" fol
             logging.debug(f"[COMPRESSOR] Validated wisdom #{wisdom_id}: {'✓' if outcome_matched else '✗'}")
         finally:
             self._release_connection(conn)
-    
+
+    # Phase 38.75a: Metabolic check and mark methods
+
+    def check_metabolic_readiness(self) -> list:
+        """Find wisdoms ready to become metabolic — proven enough to embed in behavior."""
+        conn = self._get_connection()
+        try:
+            cursor = conn.execute("""
+                SELECT id, wisdom_type, summary, confidence, times_validated, source_ids
+                FROM compressed_wisdom
+                WHERE (metabolized = FALSE OR metabolized IS NULL)
+                AND confidence >= ?
+                AND times_validated >= ?
+                ORDER BY confidence DESC
+            """, (self.METABOLIC_CONFIDENCE_THRESHOLD, self.METABOLIC_VALIDATION_MINIMUM))
+            return [dict(row) for row in cursor.fetchall()]
+        finally:
+            self._release_connection(conn)
+
+    def check_de_metabolize(self) -> list:
+        """Find metabolized wisdoms whose confidence has dropped — re-surface to consciousness."""
+        conn = self._get_connection()
+        try:
+            cursor = conn.execute("""
+                SELECT id, wisdom_type, summary, confidence, metabolized_target
+                FROM compressed_wisdom
+                WHERE metabolized = TRUE
+                AND confidence < ?
+            """, (self.DE_METABOLIZE_THRESHOLD,))
+            return [dict(row) for row in cursor.fetchall()]
+        finally:
+            self._release_connection(conn)
+
+    def mark_metabolized(self, wisdom_id: int, target_key: str):
+        """Mark wisdom as metabolized — it has been embedded in behavior."""
+        conn = self._get_connection()
+        try:
+            conn.execute("""
+                UPDATE compressed_wisdom
+                SET metabolized = TRUE, metabolized_at = CURRENT_TIMESTAMP, metabolized_target = ?
+                WHERE id = ?
+            """, (target_key, wisdom_id))
+            conn.commit()
+        finally:
+            self._release_connection(conn)
+
+    def mark_de_metabolized(self, wisdom_id: int):
+        """Re-surface wisdom to consciousness — confidence dropped, needs re-examination."""
+        conn = self._get_connection()
+        try:
+            conn.execute("""
+                UPDATE compressed_wisdom
+                SET metabolized = FALSE, metabolized_at = NULL, metabolized_target = NULL
+                WHERE id = ?
+            """, (wisdom_id,))
+            conn.commit()
+        finally:
+            self._release_connection(conn)
+
     def run_compression_cycle(self) -> Dict[str, int]:
         """
         Run full compression pass on all memory sources.

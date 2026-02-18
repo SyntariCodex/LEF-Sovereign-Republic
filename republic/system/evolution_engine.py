@@ -68,6 +68,16 @@ class EvolutionEngine:
         },
     }
 
+    # Phase 38.75b: Bounded modification envelopes — safe ranges for metabolic parameter changes
+    METABOLIC_BOUNDS = {
+        'DYNASTY.take_profit_threshold': (0.1, 1.0),
+        'DYNASTY.stop_loss_threshold': (-0.30, -0.05),
+        'ARENA.take_profit_threshold': (0.01, 0.10),
+        'ARENA.stop_loss_threshold': (-0.05, -0.01),
+        'TRAILING_STOP.activation_threshold': (0.2, 0.6),
+        'TRAILING_STOP.pullback_pct': (0.05, 0.20),
+    }
+
     def __init__(self, db_path: str):
         self.db_path = db_path
         self.domain_observers = {}  # domain_name -> observer_callable
@@ -865,6 +875,127 @@ class EvolutionEngine:
         self._proposal_history.append(proposal)
         self._save_proposal_history()
 
+    def _log_metabolic_embedding(self, wisdom: dict, config_key: str, new_value):
+        """Phase 38.75b: Audit trail for metabolic embeddings via consciousness_feed."""
+        try:
+            from db.db_helper import db_connection
+            with db_connection(self.db_path) as conn:
+                conn.execute(
+                    "INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)",
+                    ('EvolutionEngine', json.dumps({
+                        'wisdom_id': wisdom.get('id'),
+                        'summary': str(wisdom.get('summary', ''))[:200],
+                        'confidence': wisdom.get('confidence'),
+                        'times_validated': wisdom.get('times_validated'),
+                        'config_key': config_key,
+                        'new_value': new_value,
+                        'note': 'This wisdom has been embodied — it now shapes behavior directly.'
+                    }), 'metabolic_embedding')
+                )
+                conn.commit()
+        except Exception as e:
+            logger.debug(f"[EVOLUTION] Metabolic log: {e}")
+
+    def _map_wisdom_to_parameter(self, wisdom: dict):
+        """Phase 38.75b: Translate wisdom summary into a concrete parameter modification.
+        Returns (config_key, new_value) or None. Intentionally conservative."""
+        summary_lower = str(wisdom.get('summary', '')).lower()
+
+        if any(w in summary_lower for w in ['stop loss', 'stop-loss', 'drawdown', 'cut losses']):
+            if 'heavy' in summary_lower:
+                return ('DYNASTY.stop_loss_threshold', -0.15)
+            elif 'moderate' in summary_lower:
+                return ('DYNASTY.stop_loss_threshold', -0.18)
+
+        if any(w in summary_lower for w in ['take profit', 'take-profit', 'sell too late', 'ladder']):
+            if 'heavy' in summary_lower:
+                return ('DYNASTY.take_profit_threshold', 0.35)
+            elif 'moderate' in summary_lower:
+                return ('DYNASTY.take_profit_threshold', 0.40)
+
+        if any(w in summary_lower for w in ['volume spike', 'wait', 'stabiliz']):
+            return ('TRAILING_STOP.activation_threshold', 0.45)
+
+        return None
+
+    def process_metabolic_embeddings(self) -> list:
+        """Phase 38.75b: Fast lane — translate high-confidence wisdom into direct behavior modification.
+        Uses existing ConfigWriter but bypasses slow governance. Only modifies parameters within
+        METABOLIC_BOUNDS. Still requires audit trail. Max 2 embeddings per cycle."""
+        try:
+            from system.semantic_compressor import SemanticCompressor
+            compressor = SemanticCompressor()
+
+            ready = compressor.check_metabolic_readiness()
+            if not ready:
+                return []
+
+            embedded = []
+            for wisdom in ready[:2]:  # Max 2 metabolic embeddings per cycle
+                target = self._map_wisdom_to_parameter(wisdom)
+                if target is None:
+                    continue
+
+                config_key, new_value = target
+
+                if config_key not in self.METABOLIC_BOUNDS:
+                    continue
+                min_val, max_val = self.METABOLIC_BOUNDS[config_key]
+                new_value = max(min_val, min(max_val, new_value))
+
+                if not self._config_writer:
+                    logger.warning("[EVOLUTION] ConfigWriter not available for metabolic embedding")
+                    continue
+                try:
+                    self._config_writer.safe_modify('config/wealth_strategy.json', config_key, new_value)
+                    compressor.mark_metabolized(wisdom['id'], config_key)
+                    self._log_metabolic_embedding(wisdom, config_key, new_value)
+                    logger.info(f"[EVOLUTION] Metabolic embedding: {config_key}={new_value} "
+                                f"(confidence={wisdom.get('confidence', 0):.2f}, "
+                                f"validated={wisdom.get('times_validated', 0)}x)")
+                    embedded.append({'wisdom_id': wisdom['id'], 'target': config_key, 'value': new_value})
+                except Exception as e:
+                    logger.error(f"[EVOLUTION] Metabolic embedding failed: {e}")
+
+            # Check for de-metabolization
+            degraded = compressor.check_de_metabolize()
+            for wisdom in degraded:
+                compressor.mark_de_metabolized(wisdom['id'])
+                # 38.75d: Write de-metabolization + integrity alert to consciousness_feed
+                try:
+                    from db.db_helper import db_connection
+                    with db_connection(self.db_path) as conn:
+                        conn.execute(
+                            "INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)",
+                            ('EvolutionEngine', json.dumps({
+                                'alert': 'REFLEX_QUESTIONED',
+                                'parameter': wisdom.get('metabolized_target'),
+                                'wisdom': str(wisdom.get('summary', ''))[:200],
+                                'current_confidence': wisdom.get('confidence'),
+                                'action_needed': (
+                                    'Review whether this behavioral parameter still serves LEF. '
+                                    'The wisdom that created this reflex has weakened. '
+                                    'Consider whether to revert, adjust, or re-validate.'
+                                )
+                            }), 'metabolic_integrity_alert')
+                        )
+                        conn.execute(
+                            "INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)",
+                            ('EvolutionEngine',
+                             f"Wisdom re-surfaced to consciousness (confidence dropped): "
+                             f"{str(wisdom.get('summary', ''))[:100]}",
+                             'de_metabolized')
+                        )
+                        conn.commit()
+                except Exception as e:
+                    logger.debug(f"[EVOLUTION] De-metabolization log: {e}")
+                logger.info(f"[EVOLUTION] De-metabolized: {str(wisdom.get('summary', ''))[:80]}")
+
+            return embedded
+        except Exception as e:
+            logger.error(f"[EVOLUTION] Metabolic processing error: {e}")
+            return []
+
     def detect_dormant_systems(self) -> list:
         """Phase 38.5d: Flag systems dormant >30 days (The Pruning Principle).
         Uses brainstem.get_status() to check last heartbeat per thread.
@@ -1014,6 +1145,11 @@ class EvolutionEngine:
             f"Enacted: {enacted}, Vetoed: {len(proposals) - enacted}, "
             f"Weekly total: {self.enacted_this_week + enacted} ==="
         )
+
+        # Phase 38.75b: Metabolic embedding — translate proven wisdom into behavior
+        metabolized = self.process_metabolic_embeddings()
+        if metabolized:
+            logger.info(f"[EVOLUTION] Metabolic: {len(metabolized)} wisdom(s) embedded in behavior")
 
 
 def run_evolution_engine(db_path: str = None, interval_seconds: int = 86400):
