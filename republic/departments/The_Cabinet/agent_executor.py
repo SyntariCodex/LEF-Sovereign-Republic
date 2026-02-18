@@ -12,6 +12,7 @@ import json
 import time
 import logging
 import redis
+import re
 from datetime import datetime
 
 # Load environment
@@ -66,6 +67,12 @@ INTENT_ROUTING = {
     'REFLECT': 'agent_philosopher',
 }
 
+try:
+    from system.llm_router import get_router as _get_llm_router
+    _LLM_ROUTER = _get_llm_router()
+except ImportError:
+    _LLM_ROUTER = None
+
 class AgentExecutor:
     """
     The Motor Cortex - transforms LEF's intentions into actions.
@@ -77,6 +84,15 @@ class AgentExecutor:
         self.client = None
         self.model_id = 'gemini-2.0-flash'
         self.redis = None
+
+        # Phase 9.H1a: Deduplication — track processed thought IDs
+        self._processed_thought_ids = set()
+        self._max_processed_cache = 1000
+
+        # Phase 9.H1a: Rate limiting — max Gemini calls per window
+        self._gemini_call_times = []
+        self._gemini_rate_limit = 5   # max calls per window
+        self._gemini_rate_window = 60  # seconds
         
         # Initialize Gemini for intent parsing
         try:
@@ -119,7 +135,15 @@ class AgentExecutor:
         """
         if not self.client:
             return None
-            
+
+        # Phase 9.H1a: Rate limiting — max 5 Gemini calls per 60s window
+        now = time.time()
+        self._gemini_call_times = [t for t in self._gemini_call_times if now - t < self._gemini_rate_window]
+        if len(self._gemini_call_times) >= self._gemini_rate_limit:
+            logging.warning("[EXECUTOR] Gemini rate limit reached, skipping parse this cycle")
+            return None
+        self._gemini_call_times.append(now)
+
         try:
             prompt = f"""Analyze this thought from an AI entity and extract any actionable intent.
 
@@ -142,14 +166,22 @@ Respond in JSON format:
 
 If no actionable intent, respond: {{"intent_type": "NONE"}}"""
 
-            response = self.client.models.generate_content(
-                model=self.model_id,
-                contents=prompt
-            )
-            result = response.text.strip()
+            response_text = None
+            if _LLM_ROUTER:
+                response_text = _LLM_ROUTER.generate(
+                    prompt=prompt, agent_name='Executor',
+                    context_label='EXECUTION_PLAN', timeout_seconds=90
+                )
+            if response_text is None and self.client:
+                try:
+                    response = self.client.models.generate_content(model=self.model_id, contents=prompt)
+                    response_text = response.text.strip() if response and response.text else None
+                except Exception as _e:
+                    import logging
+                    logging.debug(f"Legacy LLM fallback failed: {_e}")
+            result = response_text
             
             # Parse JSON from response
-            import re
             json_match = re.search(r'\{[^{}]+\}', result)
             if json_match:
                 parsed = json.loads(json_match.group())
@@ -321,6 +353,9 @@ If no actionable intent, respond: {{"intent_type": "NONE"}}"""
         """
         Scans LEF's monologue for new thoughts that haven't been processed.
         Extracts and queues actionable intents.
+
+        Phase 9.H1a: Fixed SQLite datetime → PostgreSQL NOW() - INTERVAL.
+        Added thought deduplication to prevent re-parsing same thoughts.
         """
         try:
             # Phase 6.75: Use context manager for proper connection lifecycle
@@ -328,20 +363,34 @@ If no actionable intent, respond: {{"intent_type": "NONE"}}"""
                 c = conn.cursor()
 
                 # Get thoughts not yet processed (no matching intent_queue entry)
+                # Phase 9.H1a: Fixed datetime('now', '-1 hour') → NOW() - INTERVAL '1 hour'
                 c.execute("""
                     SELECT m.id, m.thought
                     FROM lef_monologue m
                     LEFT JOIN intent_queue i ON m.id = i.source_thought_id
                     WHERE i.id IS NULL
-                      AND m.timestamp > datetime('now', '-1 hour')
+                      AND m.timestamp > NOW() - INTERVAL '1 hour'
                     ORDER BY m.id DESC
                     LIMIT 10
                 """)
 
                 new_thoughts = c.fetchall()
 
+            parsed_count = 0
             for thought_id, thought_text in new_thoughts:
+                # Phase 9.H1a: Skip already-processed thoughts (deduplication)
+                if thought_id in self._processed_thought_ids:
+                    continue
+
                 intent = self._parse_intent_from_thought(thought_text)
+
+                # Mark as processed regardless of intent result
+                self._processed_thought_ids.add(thought_id)
+
+                # Clear cache if it grows too large
+                if len(self._processed_thought_ids) > self._max_processed_cache:
+                    self._processed_thought_ids = set(list(self._processed_thought_ids)[-500:])
+
                 if intent and intent.get('intent_type'):
                     self._queue_intent(
                         thought_id,
@@ -349,9 +398,10 @@ If no actionable intent, respond: {{"intent_type": "NONE"}}"""
                         intent.get('intent_content', ''),
                         intent.get('priority', 5)
                     )
-            
+                    parsed_count += 1
+
             return len(new_thoughts)
-            
+
         except Exception as e:
             logging.error(f"[EXECUTOR] Thought scan failed: {e}")
             return 0
@@ -415,7 +465,7 @@ If no actionable intent, respond: {{"intent_type": "NONE"}}"""
             except Exception as e:
                 logging.error(f"[EXECUTOR] Cycle error: {e}")
             
-            time.sleep(30)  # Run every 30 seconds
+            time.sleep(60)  # Phase 9.H1a: Slowed from 30s to 60s — thoughts don't age out that fast
     
     def run_once(self):
         """

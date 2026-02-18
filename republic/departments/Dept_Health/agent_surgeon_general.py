@@ -23,6 +23,12 @@ except ImportError:
             conn.close()
 
 
+try:
+    from system.llm_router import get_router as _get_llm_router
+    _LLM_ROUTER = _get_llm_router()
+except ImportError:
+    _LLM_ROUTER = None
+
 class AgentSurgeonGeneral:
     def __init__(self, db_path=None):
         logging.info("[SURGEON] 🩺 Surgeon General Reporting for Duty.")
@@ -46,11 +52,18 @@ class AgentSurgeonGeneral:
                 c = conn.cursor()
                 
                 # 1. Scan for recent crashes (Last 5 mins)
+                # Exclude infrastructure loggers that produce ERROR/CRITICAL
+                # entries during normal operation (not actual agent crashes)
                 c.execute("""
                     SELECT source, MAX(message), count(*)
                     FROM agent_logs
                     WHERE level IN ('ERROR', 'CRITICAL')
                     AND timestamp > datetime('now', '-5 minutes')
+                    AND source NOT IN (
+                        'root', 'Brainstem', 'httpx', 'google_genai.models',
+                        'SurfaceAwareness', 'FrequencyJournal', 'PathwayRegistry',
+                        'DaatNode', 'ReverbTracker'
+                    )
                     GROUP BY source
                 """)
                 errors = c.fetchall()
@@ -64,6 +77,8 @@ class AgentSurgeonGeneral:
                 
                 for source, msg, count in errors:
                     agent_name = source.replace('[', '').replace(']', '').split(' ')[0]
+                    if not agent_name or agent_name in ('unknown', ''):
+                        continue
                     penalty = count * 10
 
                     from db.db_helper import ignore_insert_sql

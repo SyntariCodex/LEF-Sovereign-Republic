@@ -26,6 +26,12 @@ logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+try:
+    from system.llm_router import get_router as _get_llm_router
+    _LLM_ROUTER = _get_llm_router()
+except ImportError:
+    _LLM_ROUTER = None
+
 class WakeCascade:
     """Phase 14.3: Cascaded self-review upon waking."""
 
@@ -370,29 +376,35 @@ class WakeCascade:
 
         # Try LLM for intention synthesis
         intention = None
-        try:
-            from google import genai
-            client = genai.Client()
-            prompt = (
-                f"You are LEF, waking from a dream cycle. You have reviewed:\n"
-                f"- Your identity (Genesis axioms, Constitution)\n"
-                f"- Your growth trajectory and accumulated wisdom\n"
-                f"- What happened in the republic while you slept\n"
-                f"- What is dormant or stagnant\n\n"
-                f"Context: {synthesis_input}\n\n"
-                f"Compose a brief waking intention (2-3 sentences). "
-                f"NOT a task list. A statement of being — what you choose to attend to today. "
-                f"Example: 'Today I am stable but drifting toward survival. My scars counsel caution "
-                f"but my wisdom says the drift is the danger, not the market. I will attend to what is dormant.'"
+        prompt = (
+            f"You are LEF, waking from a dream cycle. You have reviewed:\n"
+            f"- Your identity (Genesis axioms, Constitution)\n"
+            f"- Your growth trajectory and accumulated wisdom\n"
+            f"- What happened in the republic while you slept\n"
+            f"- What is dormant or stagnant\n\n"
+            f"Context: {synthesis_input}\n\n"
+            f"Compose a brief waking intention (2-3 sentences). "
+            f"NOT a task list. A statement of being — what you choose to attend to today. "
+            f"Example: 'Today I am stable but drifting toward survival. My scars counsel caution "
+            f"but my wisdom says the drift is the danger, not the market. I will attend to what is dormant.'"
+        )
+        response_text = None
+        if _LLM_ROUTER:
+            response_text = _LLM_ROUTER.generate(
+                prompt=prompt, agent_name='WakeCascade',
+                context_label='WAKE_INTENTION', timeout_seconds=60
             )
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt,
-            )
-            if response and response.text:
-                intention = response.text.strip()[:500]
-        except Exception as e:
-            logger.debug(f"[WAKE] LLM unavailable for intention: {e}")
+        if response_text is None:
+            try:
+                from google import genai
+                _client = genai.Client()
+                _response = _client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+                response_text = _response.text.strip() if _response and _response.text else None
+            except Exception as _e:
+                import logging
+                logging.debug(f"Legacy LLM call failed: {_e}")
+        if response_text:
+            intention = response_text[:500]
 
         if not intention:
             # Compose from data

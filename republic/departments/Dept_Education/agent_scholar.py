@@ -57,6 +57,12 @@ MACRO_SOURCES = {}
 FINANCIAL_SOURCES = {}
 
 
+try:
+    from system.llm_router import get_router as _get_llm_router
+    _LLM_ROUTER = _get_llm_router()
+except ImportError:
+    _LLM_ROUTER = None
+
 class AgentScholar(IntentListenerMixin):
     def __init__(self, db_path=None):
         self.db_path = db_path or DB_PATH
@@ -655,12 +661,6 @@ class AgentScholar(IntentListenerMixin):
         # Try LLM-based extraction first (no DB connection held during HTTP/LLM call)
         llm_result = None
         try:
-            from google import genai
-            api_key = os.environ.get('GOOGLE_API_KEY') or os.environ.get('GEMINI_API_KEY')
-            if not api_key:
-                raise ValueError("No API key")
-            client = genai.Client(api_key=api_key)
-
             prompt = f"""Extract mental models from this text. A mental model is a framework for understanding something.
 
 Title: {title}
@@ -671,11 +671,25 @@ MODEL_NAME|DESCRIPTION|BULLISH_IMPLICATION|BEARISH_IMPLICATION
 
 If no mental model found, respond: NONE"""
 
-            response = client.models.generate_content(
-                model='gemini-2.0-flash',
-                contents=prompt
-            )
-            llm_result = response.text.strip()
+            response_text = None
+            if _LLM_ROUTER:
+                response_text = _LLM_ROUTER.generate(
+                    prompt=prompt, agent_name='Scholar',
+                    context_label='KNOWLEDGE_SYNTHESIS', timeout_seconds=60
+                )
+            if response_text is None:
+                try:
+                    from google import genai
+                    api_key = os.environ.get('GOOGLE_API_KEY') or os.environ.get('GEMINI_API_KEY')
+                    if not api_key:
+                        raise ValueError("No API key")
+                    _client = genai.Client(api_key=api_key)
+                    _response = _client.models.generate_content(model='gemini-2.0-flash', contents=prompt)
+                    response_text = _response.text.strip() if _response and _response.text else None
+                except Exception as _e:
+                    import logging
+                    logging.debug(f"Legacy LLM call failed: {_e}")
+            llm_result = response_text
         except Exception as e:
             logging.debug(f"[SCHOLAR] LLM model extraction failed, using heuristics: {e}")
 

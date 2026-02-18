@@ -23,6 +23,12 @@ CONFIG_PATH = os.path.join(BASE_DIR, 'config', 'config.json')
 # Load Env
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
+try:
+    from system.llm_router import get_router as _get_llm_router
+    _LLM_ROUTER = _get_llm_router()
+except ImportError:
+    _LLM_ROUTER = None
+
 def probe_mirror():
     # 1. Connect to Cortex
     api_key = os.getenv("GEMINI_API_KEY")
@@ -79,12 +85,12 @@ def probe_mirror():
 
     if not scar_text: scar_text = "None yet. I am young."
 
-    # Get Wisdom (Axioms) - Read file
-    axioms = ""
-    axiom_path = os.path.join(BASE_DIR, 'library', 'system_prompts', 'evolutionary_axioms.md')
-    if os.path.exists(axiom_path):
-        with open(axiom_path, 'r') as f:
-            axioms = f.read()
+    # Get Wisdom (Axioms) — Phase 18.1a: Use Genesis Kernel only
+    try:
+        from departments.Dept_Consciousness.genesis_kernel import ImmutableAxiom
+        axioms = f"Axiom: {ImmutableAxiom.AXIOM_0}. Prime Vector: {ImmutableAxiom.PRIME_VECTOR}."
+    except Exception:
+        axioms = "Being is the state in which all things exist."
 
     conn.close()
 
@@ -114,16 +120,25 @@ def probe_mirror():
     Describe yourself in vivid, artistic detail so the Architect can paint you.
     """
 
-    print("🔮 Probing the Mirror...")
-    response = client.models.generate_content(
-        model=model_id,
-        contents=prompt
-    )
+    print("Probing the Mirror...")
+    response_text = None
+    if _LLM_ROUTER:
+        response_text = _LLM_ROUTER.generate(
+            prompt=prompt, agent_name='SelfImage',
+            context_label='SELF_IMAGE_PROBE', timeout_seconds=90
+        )
+    if response_text is None and client:
+        try:
+            response = client.models.generate_content(model=model_id, contents=prompt)
+            response_text = response.text.strip() if response and response.text else None
+        except Exception as _e:
+            import logging
+            logging.debug(f"Legacy LLM fallback failed: {_e}")
     
     print("\n" + "="*40)
     print("LEF'S SELF-PORTRAIT")
     print("="*40 + "\n")
-    print(response.text)
+    print(response_text)
     print("\n" + "="*40)
 
 if __name__ == "__main__":

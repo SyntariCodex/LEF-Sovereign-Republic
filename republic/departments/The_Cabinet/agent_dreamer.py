@@ -36,6 +36,12 @@ if not os.path.exists(LOG_FILE): LOG_FILE = os.path.join(BASE_DIR, 'republic.log
 # Load Env
 load_dotenv(os.path.join(os.path.dirname(BASE_DIR), '.env'))
 
+try:
+    from system.llm_router import get_router as _get_llm_router
+    _LLM_ROUTER = _get_llm_router()
+except ImportError:
+    _LLM_ROUTER = None
+
 class AgentDreamer:
     """
     The Dreamer (The Evolutionary Engine).
@@ -137,11 +143,20 @@ class AgentDreamer:
         """
         
         try:
-            response = self.client.models.generate_content(
-                model=self.model_id,
-                contents=prompt
-            )
-            dream_content = response.text
+            response_text = None
+            if _LLM_ROUTER:
+                response_text = _LLM_ROUTER.generate(
+                    prompt=prompt, agent_name='Dreamer',
+                    context_label='DREAM_SYNTHESIS', timeout_seconds=90
+                )
+            if response_text is None and self.client:
+                try:
+                    response = self.client.models.generate_content(model=self.model_id, contents=prompt)
+                    response_text = response.text.strip() if response and response.text else None
+                except Exception as _e:
+                    import logging
+                    logging.debug(f"Legacy LLM fallback failed: {_e}")
+            dream_content = response_text
             
             # 4. Write Dream Journal
             journal_path = os.path.join(BASE_DIR, 'dream_journal.md')

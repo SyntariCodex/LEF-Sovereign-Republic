@@ -41,6 +41,12 @@ if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
+try:
+    from system.llm_router import get_router as _get_llm_router
+    _LLM_ROUTER = _get_llm_router()
+except ImportError:
+    _LLM_ROUTER = None
+
 class AgentChiefOfStaff:
     def __init__(self):
         logging.info("[CoS] 🦅 Chief of Staff Reporting.")

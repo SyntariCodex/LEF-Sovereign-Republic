@@ -25,6 +25,12 @@ logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+try:
+    from system.llm_router import get_router as _get_llm_router
+    _LLM_ROUTER = _get_llm_router()
+except ImportError:
+    _LLM_ROUTER = None
+
 class DreamCycle:
     """Phase 14.2: The Dream — internal dialogue between LEF's voices."""
 
@@ -205,18 +211,24 @@ class DreamCycle:
         """Movement 2: Use LLM to generate internal dialogue between voices."""
         prompt = self._construct_dream_prompt(voices)
 
-        # Try Gemini first (LEF's primary LLM)
-        try:
-            from google import genai
-            client = genai.Client()
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt,
+        # Try router first, then Gemini fallback
+        response_text = None
+        if _LLM_ROUTER:
+            response_text = _LLM_ROUTER.generate(
+                prompt=prompt, agent_name='DreamCycle',
+                context_label='DREAM_DIALOGUE', timeout_seconds=60
             )
-            if response and response.text:
-                return response.text.strip()
-        except Exception as e:
-            logger.debug(f"[DREAM] Gemini unavailable: {e}")
+        if response_text is None:
+            try:
+                from google import genai
+                _client = genai.Client()
+                _response = _client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+                response_text = _response.text.strip() if _response and _response.text else None
+            except Exception as _e:
+                import logging
+                logging.debug(f"Legacy LLM call failed: {_e}")
+        if response_text:
+            return response_text
 
         # Fallback: construct a simple dialogue from the voices
         return self._fallback_dialogue(voices)

@@ -58,6 +58,12 @@ if os.path.exists(brain_dir):
     # Try to find the latest brain session if needed, but for now base LEF_CANON.md is safer
     pass
 
+try:
+    from system.llm_router import get_router as _get_llm_router
+    _LLM_ROUTER = _get_llm_router()
+except ImportError:
+    _LLM_ROUTER = None
+
 class HouseOfBuilders:
     """
     The Lower House.

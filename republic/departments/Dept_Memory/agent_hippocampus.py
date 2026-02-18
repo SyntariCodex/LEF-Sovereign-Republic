@@ -48,6 +48,12 @@ except ImportError:
     GEMINI_AVAILABLE = False
 
 
+try:
+    from system.llm_router import get_router as _get_llm_router
+    _LLM_ROUTER = _get_llm_router()
+except ImportError:
+    _LLM_ROUTER = None
+
 class AgentHippocampus:
     """
     The Memory Manager — LEF's long-term memory agent.
@@ -173,13 +179,24 @@ Respond with ONLY valid JSON, no markdown:
 """
         
         try:
-            response = self.client.models.generate_content(
-                model=self.COMPRESSION_MODEL,
-                contents=prompt
-            )
+            response_text = None
+            if _LLM_ROUTER:
+                response_text = _LLM_ROUTER.generate(
+                    prompt=prompt, agent_name='Hippocampus',
+                    context_label='HIPPOCAMPUS_COMPRESSION', timeout_seconds=90
+                )
+            if response_text is None and self.client:
+                try:
+                    response = self.client.models.generate_content(model=self.COMPRESSION_MODEL, contents=prompt)
+                    response_text = response.text.strip() if response and response.text else None
+                except Exception as _e:
+                    import logging
+                    logging.debug(f"Legacy LLM fallback failed: {_e}")
             
             # Parse response
-            text = response.text.strip()
+            text = response_text.strip() if response_text else ''
+            if not text:
+                return self._simple_compress(messages)
             # Remove markdown code blocks if present
             if text.startswith("```"):
                 text = text.split("```")[1]

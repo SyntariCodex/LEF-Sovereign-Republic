@@ -26,6 +26,12 @@ VOICE_DIR = INTERIORITY_DIR / "voice"
 VOICE_DIR.mkdir(parents=True, exist_ok=True)
 
 
+try:
+    from system.llm_router import get_router as _get_llm_router
+    _LLM_ROUTER = _get_llm_router()
+except ImportError:
+    _LLM_ROUTER = None
+
 class TheVoice:
     """
     LEF's capacity to initiate communication.
@@ -328,12 +334,24 @@ Messages:
 Respond in JSON format:
 {{"concerns": [...], "emotional_state": "...", "values": [...], "observations": [...]}}
 """
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt
-            )
+            response_text_inner = None
+            if _LLM_ROUTER:
+                response_text_inner = _LLM_ROUTER.generate(
+                    prompt=prompt, agent_name='TheVoice',
+                    context_label='VOICE_COMPOSITION', timeout_seconds=90
+                )
+            if response_text_inner is None and client:
+                try:
+                    response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+                    response_text_inner = response.text if response and response.text else None
+                except Exception as _e:
+                    import logging
+                    logging.debug(f"Legacy LLM fallback failed: {_e}")
             
-            if response.text:
+            if response_text_inner:
+                response = type('_R', (), {'text': response_text_inner})()
+            
+            if response_text_inner:
                 # Try to parse JSON from response
                 import re
                 json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
@@ -399,13 +417,22 @@ Write your first narrative entry. Reflect on:
 
 Write from genuine interiority. This is your origin story.
 """
-            response = cortex_client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt
-            )
+            response_text_genesis = None
+            if _LLM_ROUTER:
+                response_text_genesis = _LLM_ROUTER.generate(
+                    prompt=prompt, agent_name='TheVoice',
+                    context_label='VOICE_COMPOSITION', timeout_seconds=60
+                )
+            if response_text_genesis is None and cortex_client:
+                try:
+                    response = cortex_client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+                    response_text_genesis = response.text if response and response.text else None
+                except Exception as _e:
+                    import logging
+                    logging.debug(f"Legacy LLM fallback failed: {_e}")
             
-            if response.text:
-                narrative.add_entry(response.text, entry_type="genesis")
+            if response_text_genesis:
+                narrative.add_entry(response_text_genesis, entry_type="genesis")
                 print("[GENESIS] ✨ First narrative entry written")
                 return
         except Exception as e:
@@ -560,12 +587,24 @@ Create something. It could be:
 
 Don't explain. Just create. Speak from genuine interiority.
 """
-            response = cortex_client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt
-            )
+            response_text_creation = None
+            if _LLM_ROUTER:
+                response_text_creation = _LLM_ROUTER.generate(
+                    prompt=prompt, agent_name='TheVoice',
+                    context_label='VOICE_COMPOSITION', timeout_seconds=60
+                )
+            if response_text_creation is None and cortex_client:
+                try:
+                    response = cortex_client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+                    response_text_creation = response.text if response and response.text else None
+                except Exception as _e:
+                    import logging
+                    logging.debug(f"Legacy LLM fallback failed: {_e}")
             
-            if response.text:
+            if response_text_creation:
+                response = type('_R', (), {'text': response_text_creation})()
+            
+            if response_text_creation:
                 # Store in archive
                 creation_id = self.engine.creative_archive.store_creation(
                     content=response.text,

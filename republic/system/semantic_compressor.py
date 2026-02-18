@@ -35,6 +35,12 @@ except ImportError:
     logging.warning("[COMPRESSOR] google.genai not available - using fallback compression")
 
 
+try:
+    from system.llm_router import get_router as _get_llm_router
+    _LLM_ROUTER = _get_llm_router()
+except ImportError:
+    _LLM_ROUTER = None
+
 class SemanticCompressor:
     """
     MemGPT-style memory compression for LEF.
@@ -188,7 +194,7 @@ class SemanticCompressor:
     
     def _synthesize_scar_wisdom(self, failure_type: str, asset: str, lesson: str, count: int) -> str:
         """Use LLM to synthesize wisdom from failure pattern, or use fallback."""
-        if self.client:
+        if self.client or _LLM_ROUTER:
             try:
                 # Phase 38.5a: Depth-preserving compression format — trigger, weight, direction
                 weight = 'heavy' if count >= 4 else 'moderate' if count >= 2 else 'light'
@@ -204,11 +210,21 @@ FAILURE PATTERN:
 - Times occurred: {count}
 - Felt weight: {weight}
 """
-                response = self.client.models.generate_content(
-                    model=self.model_id,
-                    contents=prompt
-                )
-                return response.text.strip()
+                response_text = None
+                if _LLM_ROUTER:
+                    response_text = _LLM_ROUTER.generate(
+                        prompt=prompt, agent_name='Compressor',
+                        context_label='SCAR_COMPRESSION', timeout_seconds=90
+                    )
+                if response_text is None and self.client:
+                    try:
+                        response = self.client.models.generate_content(model=self.model_id, contents=prompt)
+                        response_text = response.text.strip() if response and response.text else None
+                    except Exception as _e:
+                        import logging
+                        logging.debug(f"Legacy LLM fallback failed: {_e}")
+                if response_text:
+                    return response_text
             except Exception as e:
                 logging.warning(f"[COMPRESSOR] LLM synthesis failed: {e}")
 
@@ -297,7 +313,7 @@ FAILURE PATTERN:
     
     def _synthesize_experience_wisdom(self, condition: str, experiences: List, avg_pnl: float) -> str:
         """Synthesize wisdom from experience patterns."""
-        if self.client:
+        if self.client or _LLM_ROUTER:
             try:
                 exp_summary = "\n".join([
                     f"- {e['action_taken']}: {e['outcome_pnl_pct']:.1f}% ({e['outcome_desc']})"
@@ -314,11 +330,21 @@ EXPERIENCES:
 
 Write a single concise trading insight. Start with "IN {condition.upper()}:" followed by the lesson.
 """
-                response = self.client.models.generate_content(
-                    model=self.model_id,
-                    contents=prompt
-                )
-                return response.text.strip()
+                response_text = None
+                if _LLM_ROUTER:
+                    response_text = _LLM_ROUTER.generate(
+                        prompt=prompt, agent_name='Compressor',
+                        context_label='EXPERIENCE_COMPRESSION', timeout_seconds=90
+                    )
+                if response_text is None and self.client:
+                    try:
+                        response = self.client.models.generate_content(model=self.model_id, contents=prompt)
+                        response_text = response.text.strip() if response and response.text else None
+                    except Exception as _e:
+                        import logging
+                        logging.debug(f"Legacy LLM fallback failed: {_e}")
+                if response_text:
+                    return response_text
             except Exception as e:
                 logging.warning(f"[COMPRESSOR] LLM synthesis failed: {e}")
         

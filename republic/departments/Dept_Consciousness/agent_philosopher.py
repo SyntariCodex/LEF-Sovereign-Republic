@@ -45,6 +45,12 @@ except ImportError:
 
 from republic.utils.notifier import Notifier
 
+try:
+    from system.llm_router import get_router as _get_llm_router
+    _LLM_ROUTER = _get_llm_router()
+except ImportError:
+    _LLM_ROUTER = None
+
 class AgentPhilosopher(IntentListenerMixin):
     def __init__(self):
         super().__init__()
@@ -84,16 +90,54 @@ class AgentPhilosopher(IntentListenerMixin):
         logging.info(f"[PHILOSOPHER] 🧠 Received intent: {intent_type} - {intent_content[:100]}")
         
         if intent_type == 'REFLECT':
-            # Use the thinking engine
+            # Phase 15 — Task 15.4: Use reflection_seed from LEF's consciousness
             if self.client:
-                reflection = self._think(intent_content, context="MOTOR_CORTEX_REFLECTION")
-                
+                # Parse the JSON payload from intent_content
+                import json as _json
+                payload = {}
+                try:
+                    payload = _json.loads(intent_content) if intent_content else {}
+                except (_json.JSONDecodeError, TypeError):
+                    payload = {}
+
+                reflection_seed = payload.get('reflection_seed', '')
+
+                if reflection_seed:
+                    # Philosopher reflects on what LEF has actually been experiencing
+                    reflection = self._think(
+                        f"Reflect on these recent experiences from across the republic:\n\n"
+                        f"{reflection_seed}\n\n"
+                        f"What patterns do you notice? What tensions? What is worth sitting with?",
+                        context="REFLECT_PIPELINE"
+                    )
+                else:
+                    # Fallback — reflect on whatever is present
+                    reflection = self._think(
+                        intent_content or "What is present in this moment of awareness?",
+                        context="MOTOR_CORTEX_REFLECTION"
+                    )
+
+                # Phase 15: Write reflection to consciousness_feed so Da'at cycle sees it
+                if reflection:
+                    try:
+                        from db.db_helper import db_connection as _db_conn, translate_sql
+                        with _db_conn() as cf_conn:
+                            cf_c = cf_conn.cursor()
+                            cf_c.execute(translate_sql(
+                                "INSERT INTO consciousness_feed (agent_name, content, category, timestamp) "
+                                "VALUES (?, ?, 'reflection', NOW())"
+                            ), ('Philosopher', reflection[:2000]))
+                            cf_conn.commit()
+                    except Exception as cf_err:
+                        logging.warning(f"[PHILOSOPHER] consciousness_feed write failed: {cf_err}")
+
                 # Send feedback back to LEF
                 self.send_feedback(intent_id, 'INSIGHT', reflection[:500], {
                     'full_reflection': reflection,
-                    'topic': intent_content[:100]
+                    'topic': (reflection_seed or intent_content)[:100],
+                    'categories_seen': payload.get('categories_seen', [])
                 })
-                
+
                 return {'status': 'success', 'reflection': reflection}
             else:
                 return {'status': 'failed', 'error': 'No LLM client available'}
@@ -142,7 +186,7 @@ class AgentPhilosopher(IntentListenerMixin):
                 c.execute("""
                     SELECT id, source, title, summary, timestamp 
                     FROM knowledge_stream 
-                    WHERE (source IN ('INBOX_MESSAGE', 'INBOX_WEB_DEEP', 'LIBRARY_INDEX', 'GLADIATOR')) 
+                    WHERE (source IN ('INBOX_MESSAGE', 'INBOX_WEB_DEEP', 'LIBRARY_INDEX', 'GLADIATOR', 'MOTOR_CORTEX'))
                     AND timestamp > datetime('now', '-5 minutes')
                     ORDER BY id DESC
                 """)
@@ -239,11 +283,20 @@ class AgentPhilosopher(IntentListenerMixin):
 
 {user_dynamic}"""
             
-            response = self.client.models.generate_content(
-                model=self.model_id,
-                contents=full_prompt
-            )
-            return response.text
+            response_text = None
+            if _LLM_ROUTER:
+                response_text = _LLM_ROUTER.generate(
+                    prompt=full_prompt, agent_name='Philosopher',
+                    context_label='PHILOSOPHER_REFLECTION', timeout_seconds=90
+                )
+            if response_text is None and self.client:
+                try:
+                    response = self.client.models.generate_content(model=self.model_id, contents=full_prompt)
+                    response_text = response.text.strip() if response and response.text else None
+                except Exception as _e:
+                    import logging
+                    logging.debug(f"Legacy LLM fallback failed: {_e}")
+            return response_text
         except Exception as e:
             return f"[Thinking Error: {e}]"
 
