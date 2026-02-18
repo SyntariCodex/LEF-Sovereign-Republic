@@ -1248,6 +1248,29 @@ Respond with ONLY the lesson text, no explanation."""
         except Exception:
             pass
 
+        # Phase 41.2: Metabolic learning status
+        metabolic_status = ""
+        try:
+            from system.semantic_compressor import SemanticCompressor as _SC3
+            _sc3 = _SC3()
+            _active_wisdoms = _sc3.get_recent_wisdom()
+            _conn3 = _sc3._get_connection()
+            try:
+                _mc_row = _conn3.execute(
+                    "SELECT COUNT(*) FROM compressed_wisdom WHERE metabolized = TRUE"
+                ).fetchone()
+                _metabolized_count = _mc_row[0] if _mc_row else 0
+            finally:
+                _sc3._release_connection(_conn3)
+            _total = len(_active_wisdoms)
+            if _total > 0 or _metabolized_count > 0:
+                metabolic_status = (
+                    f"[METABOLIC STATUS: {_metabolized_count} embodied / "
+                    f"{_total} active / learning in progress]"
+                )
+        except Exception:
+            pass
+
         return {
             "recent_thoughts": recent_thoughts,
             "cash": cash,
@@ -1261,6 +1284,7 @@ Respond with ONLY the lesson text, no explanation."""
             "distilled_wisdom": distilled_wisdom,
             "metabolic_awareness": metabolic_awareness,
             "metabolic_alerts": metabolic_alerts,
+            "metabolic_status": metabolic_status,
             "time": datetime.now().strftime("%H:%M")
         }
 
@@ -1325,6 +1349,7 @@ Respond with ONLY the lesson text, no explanation."""
             [DISTILLED WISDOM — What I Have Named]
             {context.get('distilled_wisdom', '[No compressed wisdom yet — compressor accumulating data]')}
             {context.get('metabolic_awareness', '')}
+            {context.get('metabolic_status', '')}
             [EXTERNAL CONTEXT — The Broader Ecosystem]
             {self._load_project_context()}
 

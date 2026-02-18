@@ -60,6 +60,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 # FIX: BASE_DIR is 'republic/', so just 'republic.db'
 DB_PATH = os.getenv('DB_PATH', os.path.join(BASE_DIR, 'republic.db'))
 
+# Phase 41.1: Wisdom validation wiring
+try:
+    from system.semantic_compressor import SemanticCompressor
+    _COMPRESSOR_AVAILABLE = True
+except ImportError:
+    _COMPRESSOR_AVAILABLE = False
+
 class AgentPortfolioMgr(IntentListenerMixin):
     def __init__(self, db_path=None):
         self.db_path = db_path or DB_PATH
@@ -91,6 +98,98 @@ class AgentPortfolioMgr(IntentListenerMixin):
         # Motor Cortex Integration
         self.setup_intent_listener('agent_portfolio_mgr')
         self.start_listening()
+
+        # Phase 20.2a: Register as Wealth Da'at Node
+        self._wealth_daat = None
+        try:
+            from system.daat_node import DaatNode
+            self._wealth_daat = DaatNode(
+                node_id='wealth_daat',
+                lattice_position=(2, 1, 2),  # X2 (reflective), Body One (Y=1), Z2 (cross-domain)
+                scan_interval=60
+            )
+            logging.info("[PORTFOLIO] 💎 Wealth Da'at Node registered at (2, 1, 2)")
+        except Exception:
+            pass
+
+        # Phase 20.2c: Da'at signal state — consciousness-driven adjustments
+        self._daat_risk_multiplier = 1.0  # 1.0 = normal, <1.0 = more conservative
+        self._daat_risk_expires = 0  # Timestamp when adjustment expires
+        self._daat_halt_active = False  # consciousness-initiated halt
+
+    def _process_daat_signals(self):
+        """
+        Phase 20.2c: Consume signals from the Da'at mesh.
+
+        Signal categories handled:
+          - strategic_directive: consciousness suggests parameter adjustment
+          - risk_sentiment: consciousness signals risk concern → tighten tolerance
+          - existential_threat: Z3 signal → halt trading (consciousness-initiated)
+          - safety_state: CB/DEFCON changes (informational, logged to awareness)
+        """
+        if not self._wealth_daat:
+            return
+
+        signals = self._wealth_daat.consume_inbox()
+        if not signals:
+            return
+
+        for signal in signals:
+            try:
+                category = signal.get('category', '')
+                weight = signal.get('signal_weight', 0)
+                origin = signal.get('origin_node', 'unknown')
+
+                if category == 'existential_threat' and signal.get('z_position', 0) >= 3:
+                    # Z3 existential threat from consciousness → halt trading
+                    self._daat_halt_active = True
+                    self._daat_risk_expires = time.time() + 3600  # 1 hour halt
+                    logging.warning(
+                        f"[PORTFOLIO] 🛑 Da'at existential threat from {origin}: "
+                        f"trading halted for 1 hour"
+                    )
+
+                elif category == 'risk_sentiment' and weight > 0.7:
+                    # High-weight risk sentiment → tighten risk tolerance
+                    self._daat_risk_multiplier = max(0.3, 1.0 - weight)
+                    self._daat_risk_expires = time.time() + 1800  # 30 min effect
+                    logging.info(
+                        f"[PORTFOLIO] 📡 Da'at risk sentiment (w={weight:.2f}): "
+                        f"risk multiplier → {self._daat_risk_multiplier:.2f} for 30 min"
+                    )
+
+                elif category == 'strategic_directive':
+                    # Consciousness suggests parameter adjustment — log and apply soft guidance
+                    content = signal.get('content', '')
+                    directive = signal.get('directive', {})
+                    suggested_multiplier = directive.get('risk_multiplier')
+                    if suggested_multiplier and 0.1 <= suggested_multiplier <= 1.5:
+                        self._daat_risk_multiplier = suggested_multiplier
+                        self._daat_risk_expires = time.time() + 3600  # 1 hour
+                        logging.info(
+                            f"[PORTFOLIO] 📡 Da'at strategic directive from {origin}: "
+                            f"risk multiplier → {suggested_multiplier:.2f}. "
+                            f"Reason: {content[:100]}"
+                        )
+
+                elif category == 'safety_state':
+                    # Informational — CB/DEFCON change awareness
+                    event = signal.get('event', '')
+                    logging.info(
+                        f"[PORTFOLIO] 📡 Da'at safety signal: {event} from {origin} "
+                        f"(w={weight:.2f})"
+                    )
+
+            except Exception as e:
+                logging.debug(f"[PORTFOLIO] Da'at signal processing error: {e}")
+
+        # Expire temporary adjustments
+        if self._daat_risk_expires and time.time() > self._daat_risk_expires:
+            if self._daat_risk_multiplier != 1.0 or self._daat_halt_active:
+                logging.info("[PORTFOLIO] 📡 Da'at adjustments expired — returning to normal")
+            self._daat_risk_multiplier = 1.0
+            self._daat_halt_active = False
+            self._daat_risk_expires = 0
 
     def handle_intent(self, intent_data):
         """
@@ -129,9 +228,32 @@ class AgentPortfolioMgr(IntentListenerMixin):
         try:
             config_path = os.path.join(BASE_DIR, 'config', 'wealth_strategy.json')
             if os.path.exists(config_path):
+                old_risk_profile = self.strategy_config.get('RISK_PROFILE') if self.strategy_config else None
                 with open(config_path, 'r') as f:
                     self.strategy_config = json.load(f)
                 logging.info(f"[PORTFOLIO] 🧠 Strategy Loaded. Scalp Target: {self.strategy_config.get('scalp_take_profit', 0.15)*100}%")
+
+                # Phase 20.2a: Detect strategy shift → publish Da'at signal
+                new_risk_profile = self.strategy_config.get('RISK_PROFILE')
+                if old_risk_profile and new_risk_profile and old_risk_profile != new_risk_profile and self._wealth_daat:
+                    try:
+                        signal = {
+                            'source': 'wealth_daat',
+                            'event': 'strategy_shift',
+                            'old_profile': old_risk_profile,
+                            'new_profile': new_risk_profile,
+                            'category': 'strategy_shift',
+                            'signal_weight': 0.8,
+                            'x': 2, 'y': 1, 'z': 2,
+                            'z_position': 2,
+                            'content': f"Strategy shifted from {old_risk_profile} to {new_risk_profile}",
+                            'timestamp': time.time(),
+                        }
+                        self._wealth_daat.propagate(signal)
+                        self._wealth_daat.publish_to_mesh(signal)
+                        logging.info(f"[PORTFOLIO] 📡 Da'at signal: strategy shift {old_risk_profile} → {new_risk_profile}")
+                    except Exception:
+                        pass
             else:
                 logging.warning("[PORTFOLIO] ⚠️ Strategy Config Missing. Using Defaults.")
                 self.strategy_config = {
@@ -394,15 +516,58 @@ class AgentPortfolioMgr(IntentListenerMixin):
     def run(self):
         """Active Loop"""
         last_run = 0
+        last_valuation_check = 0
+        last_portfolio_snapshot = None  # Phase 20.2a: track portfolio value for Da'at signals
         while True:
             try:
                 self._heartbeat()
-                
+
+                # Phase 20.1a: Brainstem heartbeat — report liveness and status
+                try:
+                    from system.brainstem import brainstem_heartbeat
+                    brainstem_heartbeat("AgentPortfolioMgr", status="trading_cycle")
+                except Exception:
+                    pass
+
+                # Phase 20.2a: Portfolio valuation change check (every 15 min)
+                if self._wealth_daat and time.time() - last_valuation_check > 900:
+                    try:
+                        with db_connection(self.db_path) as conn:
+                            vc = conn.cursor()
+                            vc.execute("SELECT COALESCE(SUM(value_usd), 0) FROM assets WHERE value_usd > 0")
+                            current_val = float(vc.fetchone()[0] or 0)
+
+                        if last_portfolio_snapshot is not None and last_portfolio_snapshot > 0:
+                            change_pct = (current_val - last_portfolio_snapshot) / last_portfolio_snapshot
+                            if abs(change_pct) > 0.05:  # >5% change
+                                signal = {
+                                    'source': 'wealth_daat',
+                                    'event': 'portfolio_valuation_shift',
+                                    'change_pct': change_pct,
+                                    'current_value_usd': current_val,
+                                    'previous_value_usd': last_portfolio_snapshot,
+                                    'category': 'portfolio_health',
+                                    'signal_weight': 0.9,
+                                    'x': 2, 'y': 1, 'z': 3,  # Z3 = existential (>5% swing)
+                                    'z_position': 3,
+                                    'content': f"Portfolio value shifted {change_pct*100:.1f}%: ${last_portfolio_snapshot:.2f} → ${current_val:.2f}",
+                                    'timestamp': time.time(),
+                                }
+                                self._wealth_daat.propagate(signal)
+                                self._wealth_daat.publish_to_mesh(signal)
+                                logging.warning(f"[PORTFOLIO] 📡 Da'at signal: portfolio {change_pct*100:+.1f}% shift")
+                                last_portfolio_snapshot = current_val  # Reset after signal
+                        else:
+                            last_portfolio_snapshot = current_val
+                        last_valuation_check = time.time()
+                    except Exception:
+                        pass
+
                 # Run Logic Every 60 Seconds (Fast reaction to stop losses)
                 if time.time() - last_run > 60:
                     self.run_cycle()
                     last_run = time.time()
-                    
+
                 time.sleep(30) # Heartbeat every 30s
             except Exception as e:
                 logging.error(f"[PORTFOLIO] Loop Error: {e}")
@@ -414,7 +579,15 @@ class AgentPortfolioMgr(IntentListenerMixin):
         Also Executes Volatility Strategy (RSI).
         """
         self.load_config() # Hot Reload
-        
+
+        # Phase 20.2c: Process incoming Da'at signals from consciousness/safety
+        self._process_daat_signals()
+
+        # Phase 20.2c: Consciousness-initiated halt check
+        if self._daat_halt_active:
+            logging.warning("[PORTFOLIO] 🛑 Da'at consciousness halt active — skipping trade cycle")
+            return
+
         # 0A. APOPTOSIS CHECK (The Ouroboros Switch)
         self._check_apoptosis()
 
@@ -770,6 +943,79 @@ class AgentPortfolioMgr(IntentListenerMixin):
         Writes a specific order to the Trade Queue.
         Checks for duplicates to avoid spamming orders.
         """
+        # Phase 19.1e: Emergency stop check — generate NO new orders
+        try:
+            if self.r and self.r.get('system:emergency_stop') == 'true':
+                logging.warning(f"[PORTFOLIO] 🚨 EMERGENCY STOP — refusing to generate {action} {symbol}")
+                return
+        except Exception:
+            pass
+
+        # Phase 20.2c: Apply Da'at consciousness-driven risk multiplier
+        if action == 'BUY' and self._daat_risk_multiplier < 1.0:
+            original_usd = amount_usd
+            amount_usd = amount_usd * self._daat_risk_multiplier
+            reason = f"{reason} | DAAT_RISK:{self._daat_risk_multiplier:.2f}x"
+            logging.info(
+                f"[PORTFOLIO] 📡 Da'at risk multiplier applied: "
+                f"${original_usd:.2f} → ${amount_usd:.2f} ({self._daat_risk_multiplier:.2f}x)"
+            )
+
+        # Phase 20.3a: Position concentration check for BUY orders
+        if action == 'BUY':
+            conc_result = self._check_concentration(c, symbol, amount_usd, price)
+            if conc_result == 'BLOCK':
+                logging.warning(
+                    f"[PORTFOLIO] 🚫 CONCENTRATION BLOCK: {symbol} exceeds 40% of portfolio"
+                )
+                return
+            elif isinstance(conc_result, (int, float)) and conc_result < amount_usd:
+                reason = f"{reason} | CONC_CAP:30%"
+                logging.info(
+                    f"[PORTFOLIO] ⚠️ Concentration cap: {symbol} order reduced "
+                    f"${amount_usd:.2f} → ${conc_result:.2f} (30% limit)"
+                )
+                amount_usd = conc_result
+
+        # Phase 19.2b: Execution feedback — adjust for historical slippage/fill
+        try:
+            exec_profile = self._get_execution_profile(symbol)
+            if exec_profile:
+                avg_slip = exec_profile.get('avg_slippage', 0)
+                avg_fill = exec_profile.get('avg_fill_rate', 1.0)
+                avg_fees = exec_profile.get('avg_fees', 0)
+                # Adjust price for slippage buffer
+                if avg_slip > 0.3 and price and price > 0:
+                    price = price * (1 + avg_slip / 100)
+                    reason = f"{reason} | SLIPPAGE_ADJ:{avg_slip:.2f}%"
+                # Reduce size if fill rate is poor
+                if avg_fill < 0.8 and avg_fill > 0:
+                    amount_usd = amount_usd * avg_fill
+                    reason = f"{reason} | FILL_ADJ:{avg_fill:.0%}"
+                    logging.info(f"[PORTFOLIO] 📊 Execution profile for {symbol}: "
+                                 f"slip={avg_slip:.2f}%, fill={avg_fill:.0%}, fees=${avg_fees:.2f}")
+        except Exception:
+            pass
+
+        # Phase 19.2c: TradeAnalyst daily summary — check for flagged assets
+        if action == 'BUY':
+            try:
+                if self.r:
+                    import json as _json_ta
+                    ta_raw = self.r.get('analysis:daily_summary')
+                    if ta_raw:
+                        ta_summary = _json_ta.loads(ta_raw)
+                        flagged = ta_summary.get('flagged_assets', [])
+                        if symbol in flagged or symbol.replace('-USD', '') in flagged:
+                            amount_usd = amount_usd * 0.5
+                            reason = f"{reason} | TA_FLAGGED:underperforming"
+                            logging.info(
+                                f"[PORTFOLIO] 📉 TradeAnalyst flagged {symbol} — "
+                                f"reducing allocation 50%"
+                            )
+            except Exception:
+                pass
+
         # 0. SKILL LIBRARY RECALL (Phase 19 - Goku Mode)
         # Check if we have a proven skill for this asset
         skill_boost = self._recall_skill(c, symbol, strategy_tag)
@@ -808,6 +1054,7 @@ class AgentPortfolioMgr(IntentListenerMixin):
 
              # 0.65 SCAR RESONANCE (Phase 28 - Consciousness Evolution)
              # Memory that arises before action - pattern matching with awareness
+             # Phase 19.3a: Fail-SAFE — runtime errors BLOCK the trade
              if SCAR_RESONANCE_AVAILABLE:
                  try:
                      resonance_engine = get_resonance_engine()
@@ -829,27 +1076,62 @@ class AgentPortfolioMgr(IntentListenerMixin):
                              logging.warning(f"[PORTFOLIO] 🛑 SCAR VETO: High resonance with CRITICAL scar")
                              return
                  except Exception as e:
-                     logging.debug(f"[PORTFOLIO] Scar resonance check failed: {e}")
+                     # Phase 19.3a: FAIL-SAFE — if scar check crashes, BLOCK the trade
+                     logging.error(f"[PORTFOLIO] 🛑 SCAR RESONANCE FAILED (fail-safe BLOCK): {e}")
+                     return
              else:
                  # Fallback to legacy scar check
+                 # Phase 19.3b: Expanded depth — CRITICAL=block, HIGH=reduce 50%, MEDIUM (5+)=flag
                  try:
-                     c.execute("""
-                         SELECT failure_type, lesson, severity, times_repeated
-                         FROM book_of_scars
-                         WHERE asset = ?
-                         ORDER BY severity DESC, times_repeated DESC
-                         LIMIT 1
-                     """, (symbol,))
-                     scar = c.fetchone()
-                     if scar:
-                         severity = scar[2]
-                         if severity == 'CRITICAL':
-                             logging.warning(f"[PORTFOLIO] 💀 SCAR VETO: {symbol} has CRITICAL scar ({scar[0]} x{scar[3]})")
+                     from db.db_helper import db_connection as _dbc_scar, translate_sql as _ts_scar
+                     with _dbc_scar() as _conn_scar:
+                         _c_scar = _conn_scar.cursor()
+                         _c_scar.execute(_ts_scar("""
+                             SELECT failure_type, lesson, severity, times_repeated,
+                                    COALESCE(times_repeated, 1) as recurrence
+                             FROM book_of_scars
+                             WHERE asset = ?
+                             AND timestamp > NOW() - INTERVAL '30 days'
+                             ORDER BY severity DESC, times_repeated DESC
+                         """), (symbol,))
+                         scars = _c_scar.fetchall()
+
+                     if scars:
+                         critical_count = sum(1 for s in scars if s[2] == 'CRITICAL')
+                         high_count = sum(1 for s in scars if s[2] == 'HIGH')
+                         medium_count = sum(1 for s in scars if s[2] == 'MEDIUM')
+                         # Phase 19.3b: Recurrence boost — 10+ repeats = treat as one level higher
+                         high_from_recurrence = sum(1 for s in scars if s[2] == 'MEDIUM' and (s[3] or 1) >= 10)
+                         effective_high = high_count + high_from_recurrence
+
+                         if critical_count > 0:
+                             logging.warning(f"[PORTFOLIO] 💀 SCAR VETO: {symbol} has {critical_count} CRITICAL scars")
                              return
-                         elif severity == 'HIGH':
-                             logging.warning(f"[PORTFOLIO] ⚠️ SCAR WARNING: {symbol} has HIGH scar: {scar[1][:50]}...")
+                         elif effective_high > 0:
+                             amount_usd = amount_usd * 0.5
+                             reason = f"{reason} | SCAR_HIGH:{effective_high}_scars"
+                             logging.warning(f"[PORTFOLIO] ⚠️ SCAR REDUCTION: {symbol} has {effective_high} HIGH+ scars — 50% size")
+                         elif medium_count >= 5:
+                             logging.info(f"[PORTFOLIO] 📋 SCAR REVIEW: {symbol} has {medium_count} MEDIUM scars in 30d")
+                             try:
+                                 _c_scar2 = _conn_scar.cursor() if '_conn_scar' in dir() else c
+                                 from db.db_helper import db_connection as _dbc_sf, translate_sql as _ts_sf
+                                 with _dbc_sf() as _csf:
+                                     _csf.cursor().execute(_ts_sf(
+                                         "INSERT INTO consciousness_feed "
+                                         "(agent_name, content, category, signal_weight) "
+                                         "VALUES (?, ?, ?, ?)"
+                                     ), ("PortfolioMgr", json.dumps({
+                                         'event': 'medium_scar_accumulation',
+                                         'asset': symbol, 'count': medium_count,
+                                     }), "scar_awareness", 0.5))
+                                     _csf.commit()
+                             except Exception:
+                                 pass
                  except Exception as e:
-                     logging.debug(f"[PORTFOLIO] Scar check failed: {e}")
+                     # Phase 19.3a: FAIL-SAFE — scar check failure blocks trade
+                     logging.error(f"[PORTFOLIO] 🛑 SCAR CHECK FAILED (fail-safe BLOCK): {e}")
+                     return
 
              # 0.66 EMOTIONAL GATE (Phase 28 - Consciousness Evolution)
              # Mood-based position sizing adjustments
@@ -881,7 +1163,9 @@ class AgentPortfolioMgr(IntentListenerMixin):
                          logging.warning(f"[PORTFOLIO] ⚠️ EMOTIONAL CAUTION: {flag}")
                          
                  except Exception as e:
-                     logging.debug(f"[PORTFOLIO] Emotional gate check failed: {e}")
+                     # Phase 19.3a: FAIL-SAFE — if emotional gate crashes, BLOCK the trade
+                     logging.error(f"[PORTFOLIO] 🛑 EMOTIONAL GATE FAILED (fail-safe BLOCK): {e}")
+                     return
 
         # 0.7 COMPETITION INTELLIGENCE (Phase 19 - Goku Mode)
         # Consult Tactician for competitive landscape adjustments
@@ -1063,6 +1347,31 @@ class AgentPortfolioMgr(IntentListenerMixin):
                 """, (symbol, action, amount_qty, price, status, final_reason))
                 logging.info(f"[PORTFOLIO] ⚡ SIGNAL FIRED: {action} {symbol} @ ${price:.2f} ({final_reason})")
                 
+            # Phase 20.2a: Publish significant financial events to Wealth Da'at Node
+            if self._wealth_daat and action == 'BUY':
+                try:
+                    # Get portfolio value for significance check
+                    c.execute("SELECT COALESCE(SUM(value_usd), 0) FROM assets WHERE value_usd > 0")
+                    portfolio_val = float(c.fetchone()[0] or 0)
+                    order_pct = (amount_usd / portfolio_val * 100) if portfolio_val > 0 else 0
+
+                    if order_pct > 10:  # Large order (>10% of portfolio)
+                        signal = {
+                            'source': 'wealth_daat',
+                            'event': 'large_order',
+                            'asset': symbol,
+                            'amount_usd': amount_usd,
+                            'portfolio_pct': order_pct,
+                            'signal_weight': 0.7,
+                            'x': 2, 'y': 1, 'z': 2,
+                            'z_position': 2,
+                            'timestamp': time.time(),
+                        }
+                        self._wealth_daat.propagate(signal)
+                        self._wealth_daat.publish_to_mesh(signal)
+                except Exception:
+                    pass
+
         except Exception as e:
             logging.error(f"[PORTFOLIO] Order Gen Error: {e}")
 
@@ -1124,7 +1433,30 @@ class AgentPortfolioMgr(IntentListenerMixin):
                         """, (f"{asset} {scenario_tag}", context, "BUY_THEN_SELL", roi, memory_text))
                     
                     logging.info(f"[PORTFOLIO] 🧠 MEMORY FORMED: {memory_text}")
-                    
+
+                    # Phase 41.1: Validate compressed wisdom against trade outcome
+                    if _COMPRESSOR_AVAILABLE:
+                        try:
+                            _compressor = SemanticCompressor(self.db_path)
+                            _recent_wisdoms = _compressor.get_recent_wisdom()
+                            _symbol_lower = str(asset).lower() if asset else ''
+                            _outcome_reason = str(context).lower() if context else ''
+                            for _wisdom in _recent_wisdoms:
+                                _summary_lower = str(_wisdom.get('summary', '')).lower()
+                                if (_symbol_lower and _symbol_lower in _summary_lower) or any(
+                                    kw in _summary_lower for kw in ['stop_loss', 'take_profit', 'trailing']
+                                    if kw in _outcome_reason
+                                ):
+                                    _outcome_positive = (profit > 0)
+                                    _compressor.validate_wisdom(_wisdom.get('id', 0), _outcome_positive)
+                                    logging.info(
+                                        f"[PORTFOLIO] Validated wisdom #{_wisdom.get('id')}: "
+                                        f"{'confirmed' if _outcome_positive else 'contradicted'}"
+                                    )
+                                    break
+                        except Exception as _ve:
+                            logging.debug(f"[PORTFOLIO] Wisdom validation error: {_ve}")
+
                     # PHASE 19: SKILL LIBRARY AUTO-SAVE
                     # If this trade had high ROI (>10%) and identifiable strategy, save as skill
                     if roi > 10.0 and context and context != "Unknown Context":
@@ -1232,6 +1564,153 @@ class AgentPortfolioMgr(IntentListenerMixin):
                 
         except Exception as e:
             logging.error(f"[PORTFOLIO] Skill save error: {e}")
+
+    def _get_execution_profile(self, asset):
+        """
+        Phase 19.2b: Query execution_feedback for historical execution quality.
+
+        Returns dict with avg_slippage, avg_fill_rate, avg_fees or None if
+        insufficient data (< 3 trades in last 7 days).
+        """
+        try:
+            from db.db_helper import db_connection as _dbc, translate_sql as _ts
+            with _dbc() as conn:
+                c = conn.cursor()
+                c.execute(_ts(
+                    "SELECT AVG(slippage_pct), AVG(fill_rate), AVG(fees_usd), COUNT(*) "
+                    "FROM execution_feedback "
+                    "WHERE asset = ? AND created_at > NOW() - INTERVAL '7 days'"
+                ), (asset,))
+                row = c.fetchone()
+                if row and row[3] and int(row[3]) >= 3:
+                    return {
+                        'avg_slippage': float(row[0] or 0),
+                        'avg_fill_rate': float(row[1] or 1.0),
+                        'avg_fees': float(row[2] or 0),
+                        'trade_count': int(row[3]),
+                    }
+                return None
+        except Exception:
+            return None
+
+    def _check_concentration(self, c, symbol, amount_usd, price):
+        """
+        Phase 20.3a: Position Concentration Monitor.
+
+        Calculates current concentration for the target asset and enforces limits:
+          - >30% of portfolio: WARNING, reduce order to bring below 30%
+          - >40% of portfolio: BLOCK — no new BUY orders
+          - Stablecoins exempt (USDC, USDT, DAI, BUSD)
+
+        Also stores concentration snapshot in Redis for other agents.
+
+        Returns:
+            'BLOCK' — order should be rejected
+            float   — reduced amount_usd to stay under 30%
+            None    — no concentration issue
+        """
+        STABLECOINS = {'USDC', 'USDT', 'DAI', 'BUSD', 'USD'}
+        if symbol in STABLECOINS:
+            return None
+
+        try:
+            # Get total portfolio value
+            c.execute("SELECT COALESCE(SUM(value_usd), 0) FROM assets WHERE value_usd > 0")
+            portfolio_val = float(c.fetchone()[0] or 0)
+
+            # Add stablecoin bucket balances
+            try:
+                c.execute("SELECT COALESCE(SUM(balance), 0) FROM stablecoin_buckets")
+                stablecoin_val = float(c.fetchone()[0] or 0)
+                portfolio_val += stablecoin_val
+            except Exception:
+                pass
+
+            if portfolio_val <= 0:
+                return None
+
+            # Get current exposure for this asset
+            c.execute(
+                "SELECT COALESCE(SUM(value_usd), 0) FROM assets WHERE symbol = ? AND value_usd > 0",
+                (symbol,)
+            )
+            current_exposure = float(c.fetchone()[0] or 0)
+
+            # Projected exposure if this order goes through
+            projected_exposure = current_exposure + amount_usd
+            concentration_pct = projected_exposure / portfolio_val
+
+            # Store concentration snapshot in Redis
+            if self.r:
+                try:
+                    self.r.set(
+                        f"portfolio:concentration:{symbol}",
+                        json.dumps({
+                            'exposure_usd': current_exposure,
+                            'portfolio_total_usd': portfolio_val,
+                            'concentration_pct': current_exposure / portfolio_val if portfolio_val > 0 else 0,
+                            'updated': time.time(),
+                        }),
+                        ex=300  # 5 min TTL
+                    )
+                except Exception:
+                    pass
+
+            # Check limits
+            if concentration_pct > 0.40:
+                # BLOCK: over 40%
+                try:
+                    from db.db_helper import db_connection as _dbc, translate_sql as _ts
+                    with _dbc() as conn2:
+                        c2 = conn2.cursor()
+                        c2.execute(_ts(
+                            "INSERT INTO consciousness_feed "
+                            "(agent_name, content, category, signal_weight) "
+                            "VALUES (?, ?, ?, ?)"
+                        ), (
+                            "AgentPortfolioMgr",
+                            f"CONCENTRATION BLOCK: {symbol} at {concentration_pct:.1%} of portfolio "
+                            f"(current=${current_exposure:.2f}, proposed +${amount_usd:.2f}). "
+                            f"40% limit exceeded.",
+                            "metabolism_risk", 0.8
+                        ))
+                        conn2.commit()
+                except Exception:
+                    pass
+                return 'BLOCK'
+
+            elif concentration_pct > 0.30:
+                # WARNING: reduce to keep below 30%
+                max_additional = (0.30 * portfolio_val) - current_exposure
+                if max_additional <= 0:
+                    return 'BLOCK'  # Already at 30%+, can't add more
+                reduced_amount = max(1.0, min(amount_usd, max_additional))
+
+                # Log to consciousness_feed
+                try:
+                    from db.db_helper import db_connection as _dbc, translate_sql as _ts
+                    with _dbc() as conn2:
+                        c2 = conn2.cursor()
+                        c2.execute(_ts(
+                            "INSERT INTO consciousness_feed "
+                            "(agent_name, content, category, signal_weight) "
+                            "VALUES (?, ?, ?, ?)"
+                        ), (
+                            "AgentPortfolioMgr",
+                            f"CONCENTRATION WARNING: {symbol} at {current_exposure/portfolio_val:.1%} of portfolio. "
+                            f"Order reduced ${amount_usd:.2f} → ${reduced_amount:.2f} to stay under 30%.",
+                            "metabolism_risk", 0.6
+                        ))
+                        conn2.commit()
+                except Exception:
+                    pass
+                return reduced_amount
+
+            return None  # No concentration issue
+
+        except Exception as e:
+            logging.debug(f"[PORTFOLIO] Concentration check error: {e}")
+            return None
 
     def _recall_skill(self, c, symbol, strategy_tag=None):
         """
