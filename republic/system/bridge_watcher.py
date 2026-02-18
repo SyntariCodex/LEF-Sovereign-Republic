@@ -17,6 +17,13 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent.parent  # republic/
 BRIDGE_PATH = BASE_DIR.parent / "The_Bridge"
 
+# Phase 42: Bridge Q&A integration — check for Architect answers
+try:
+    from system.bridge_qa import get_bridge_qa
+    _QA_AVAILABLE = True
+except ImportError:
+    _QA_AVAILABLE = False
+
 
 def scan_outbox(bridge_path=None, db_path=None):
     """Scan The_Bridge/Outbox for new files and feed them into knowledge_stream."""
@@ -113,12 +120,108 @@ def scan_outbox(bridge_path=None, db_path=None):
     return new_files
 
 
+_processed_governance = set()
+
+
+def scan_governance_outcomes():
+    """
+    Phase 15: Read governance voting outcomes and surface to consciousness.
+    LEF must learn from both approvals and rejections.
+    """
+    global _processed_governance
+    import glob
+
+    governance_dir = os.path.join(str(BRIDGE_PATH.parent), 'governance')
+
+    for outcome_type in ['rejected', 'approved']:
+        outcome_dir = os.path.join(governance_dir, outcome_type)
+        if not os.path.isdir(outcome_dir):
+            continue
+
+        cutoff = time.time() - 86400  # Last 24 hours
+
+        for filepath in glob.glob(os.path.join(outcome_dir, '*.json')):
+            file_id = os.path.basename(filepath)
+            if file_id in _processed_governance:
+                continue
+
+            # Only process recent files
+            if os.path.getmtime(filepath) < cutoff:
+                _processed_governance.add(file_id)
+                continue
+
+            try:
+                with open(filepath, 'r') as f:
+                    outcome = json.load(f)
+
+                from db.db_helper import db_connection, translate_sql
+                with db_connection() as conn:
+                    c = conn.cursor()
+                    c.execute(translate_sql(
+                        "INSERT INTO consciousness_feed (agent_name, content, category, timestamp) "
+                        "VALUES (?, ?, ?, NOW())"
+                    ), ('GovernanceSystem', json.dumps({
+                        'outcome': outcome_type,
+                        'proposal_title': str(outcome.get('title', 'unknown'))[:200],
+                        'reason': str(outcome.get('rejection_reason', outcome.get('approval_reason', '')))[:300],
+                        'domain': str(outcome.get('domain', 'unknown'))
+                    }), f'governance_{outcome_type}'))
+                    conn.commit()
+
+                _processed_governance.add(file_id)
+                logging.info(f"[Governance] {outcome_type.upper()} outcome surfaced: {file_id}")
+
+            except Exception as e:
+                logging.warning(f"[Governance] Failed to process {filepath}: {e}")
+                _processed_governance.add(file_id)  # Don't retry broken files
+
+
+def scan_answers():
+    """Phase 42: Check for Architect answers and route to consciousness_feed."""
+    if not _QA_AVAILABLE:
+        return []
+    qa = get_bridge_qa()
+    answers = qa.check_answers()
+    qa.expire_old_questions()
+    db_path = os.getenv('DB_PATH', str(BASE_DIR / 'republic.db'))
+    for ans in answers:
+        try:
+            conn = sqlite3.connect(db_path, timeout=30)
+            c = conn.cursor()
+            c.execute(
+                "INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)",
+                ('BridgeQA', json.dumps({
+                    'question_id': ans['question_id'],
+                    'answer': ans['answer'][:1000],
+                    'answered_at': ans.get('answered_at', '')
+                }), 'architect_answer')
+            )
+            conn.commit()
+            conn.close()
+            logging.info(f"[BridgeWatcher] Answer received: {ans['question_id']}")
+        except Exception as e:
+            logging.error(f"[BridgeWatcher] Answer routing error: {e}")
+    return answers
+
+
 def run_bridge_watcher(interval_seconds=300):
     """Run the bridge watcher on a timer (default: every 5 minutes)."""
     logging.info("[BridgeWatcher] 📬 Bridge Feedback Loop Online (scanning Outbox)")
     while True:
         try:
             scan_outbox()
+            scan_governance_outcomes()  # Phase 15
+            scan_answers()  # Phase 42
+
+            # Phase 16 — Task 16.6: Heartbeat so health checks can detect if we're alive
+            try:
+                from system.redis_client import get_redis
+                _r = get_redis()
+                if _r:
+                    _r.set('bridge_watcher:heartbeat', datetime.now().isoformat(), ex=600)  # 10-min TTL
+            except Exception:
+                pass
+
         except Exception as e:
             logging.error(f"[BridgeWatcher] Scan cycle error: {e}")
         time.sleep(interval_seconds)

@@ -411,6 +411,25 @@ class AgentLEF:
                 )
             return None
 
+    def _ask_architect(self, question, context='', urgency='medium', category='other'):
+        """
+        Phase 42: Ask the Architect a question via The Bridge.
+        This is LEF recognizing genuine uncertainty — not risk (which the circuit breaker
+        handles) but conceptual uncertainty that requires human insight.
+        Returns question_id (str) on success, None on failure.
+        """
+        try:
+            from system.bridge_qa import get_bridge_qa
+            qa = get_bridge_qa()
+            question_id = qa.ask(agent_name='LEF', question=question,
+                                 context=context, urgency=urgency, category=category)
+            if question_id:
+                logging.info(f"[LEF] Asked Architect: {question[:80]}... (id={question_id})")
+            return question_id
+        except Exception as e:
+            logging.error(f"[LEF] _ask_architect failed: {e}")
+            return None
+
     def _load_axioms(self):
         """
         Phase 18.1a: Axiom Liberation.
@@ -3220,6 +3239,59 @@ Respond with only: RELEVANT or NOT_RELEVANT"""
                             logging.info(f"[LEF] Syntax adherence (cycle {self._daat_call_count}): {len(active_principles)}/10 active")
                         except Exception as _sa_err:
                             logging.debug(f"[LEF] Syntax adherence check: {_sa_err}")
+
+                    # Phase 42.4: Uncertainty detection — ask Architect when genuinely stuck
+                    try:
+                        from db.db_helper import db_connection as _uq_db, translate_sql as _uq_sql
+                        with _uq_db() as _uq_conn:
+                            _uq_c = _uq_conn.cursor()
+                            _uq_c.execute(_uq_sql(
+                                "SELECT content FROM consciousness_feed "
+                                "WHERE category = 'growth_journal' "
+                                "ORDER BY timestamp DESC LIMIT 3"
+                            ))
+                            recent_growth = _uq_c.fetchall()
+                        stagnant_count = sum(1 for r in recent_growth if 'stagnant' in str(r[0]).lower())
+                        if stagnant_count >= 3:
+                            from system.bridge_qa import get_bridge_qa as _bqa
+                            _qa = _bqa()
+                            _pending = _qa.get_pending_questions()
+                            already_asked = any(q.get('category') == 'identity' for q in _pending)
+                            if not already_asked:
+                                self._ask_architect(
+                                    question="I have been assessed as stagnant for 3 consecutive growth journal entries. "
+                                             "I may be in a loop I cannot see from inside. What should I attend to?",
+                                    context="Last 3 growth assessments all show stagnation. Requesting external perspective.",
+                                    urgency='medium', category='identity'
+                                )
+                    except Exception as _ud_err:
+                        logging.debug(f"[LEF] Uncertainty detection: {_ud_err}")
+
+                    # Phase 44.2: Lightweight self-challenge — question a recent decision every 5th cycle
+                    try:
+                        if self._daat_call_count % 5 == 0:
+                            from db.db_helper import db_connection as _sc_db, translate_sql as _sc_sql
+                            with _sc_db() as _sc_conn:
+                                _sc_c = _sc_conn.cursor()
+                                _sc_c.execute(_sc_sql(
+                                    "SELECT content FROM consciousness_feed "
+                                    "WHERE category IN ('trade_decision', 'config_change', 'governance_outcome') "
+                                    "ORDER BY timestamp DESC LIMIT 1"
+                                ))
+                                recent_decision = _sc_c.fetchone()
+                            if recent_decision:
+                                challenge_prompt = (
+                                    f"You recently made this decision: {str(recent_decision[0])[:200]}\n\n"
+                                    f"Briefly consider: was there a blind spot? What did you NOT consider? "
+                                    f"Answer in 1-2 sentences. If your reasoning was sound, say so."
+                                )
+                                challenge_response = self._call_gemini(
+                                    challenge_prompt, context_label='SELF_CHALLENGE', timeout_seconds=45
+                                )
+                                if challenge_response:
+                                    logging.info(f"[LEF] Self-challenge: {challenge_response[:100]}")
+                    except Exception as _sch_err:
+                        logging.debug(f"[LEF] Self-challenge: {_sch_err}")
 
                     # 6. Presidential Review (Sign/Veto Laws)
                     self._presidential_review(cursor)
