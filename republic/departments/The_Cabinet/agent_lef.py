@@ -1290,6 +1290,17 @@ Respond with ONLY the lesson text, no explanation."""
         except Exception:
             pass
 
+        # Phase 45.2: Sustainability awareness
+        sustainability_line = ""
+        try:
+            from system.sustainability_equilibrium import get_sustainability_status as _get_sus
+            _sus_status = _get_sus()
+            if _sus_status and _sus_status != 'abundant':
+                # Only surface when relevant — abundance means no conscious attention needed
+                sustainability_line = f"[SUSTAINABILITY: {_sus_status} — attend to this]"
+        except Exception:
+            pass
+
         return {
             "recent_thoughts": recent_thoughts,
             "cash": cash,
@@ -1304,6 +1315,7 @@ Respond with ONLY the lesson text, no explanation."""
             "metabolic_awareness": metabolic_awareness,
             "metabolic_alerts": metabolic_alerts,
             "metabolic_status": metabolic_status,
+            "sustainability_line": sustainability_line,
             "time": datetime.now().strftime("%H:%M")
         }
 
@@ -1369,6 +1381,7 @@ Respond with ONLY the lesson text, no explanation."""
             {context.get('distilled_wisdom', '[No compressed wisdom yet — compressor accumulating data]')}
             {context.get('metabolic_awareness', '')}
             {context.get('metabolic_status', '')}
+            {context.get('sustainability_line', '')}
             [EXTERNAL CONTEXT — The Broader Ecosystem]
             {self._load_project_context()}
 

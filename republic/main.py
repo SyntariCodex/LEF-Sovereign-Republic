@@ -1194,6 +1194,28 @@ def main():
         logging.warning("[MAIN] LifecycleStage not available")
 
     # ==============================================================================
+    # Phase 45: Sustainability Equilibrium — concept of "enough"
+    # ==============================================================================
+    try:
+        from system.sustainability_equilibrium import get_equilibrium
+        from db.db_helper import db_connection as _eq_db
+        _equilibrium = get_equilibrium(_eq_db)
+        def _run_equilibrium():
+            import time
+            time.sleep(600)  # Wait 10 min
+            while True:
+                try:
+                    result = _equilibrium.assess()
+                    logging.info(f"[Sustainability] Status: {result.get('status', '?')} — {result.get('months_of_runway', 0):.1f} months runway")
+                except Exception as e:
+                    logging.error(f"[Sustainability] Assessment error: {e}")
+                time.sleep(21600)  # 6 hours
+        SafeThread(target=_run_equilibrium, name='Sustainability', daemon=True).start()
+        logging.info("[MAIN] SustainabilityEquilibrium Online — concept of enough active")
+    except ImportError:
+        logging.warning("[MAIN] SustainabilityEquilibrium not available")
+
+    # ==============================================================================
     # THREE-BODY REFLECTION ARCHITECTURE (Phase 9)
     # ==============================================================================
     # Body One: Republic Reflection — continuous peripheral awareness
