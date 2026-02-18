@@ -1148,6 +1148,30 @@ def main():
     except Exception as e: logging.warning(f"[MAIN] EvolutionEngine Start Failed: {e}")
 
     # ==============================================================================
+    # Phase 38.5: Semantic Compressor — wisdom distillation from raw experience
+    # Activates a fully-built but dormant system. Runs daily after 2h startup delay.
+    # ==============================================================================
+    try:
+        from system.semantic_compressor import SemanticCompressor
+        _compressor = SemanticCompressor()
+        def _run_compression():
+            import time
+            time.sleep(7200)  # Wait 2 hours — needs accumulated experience data
+            while True:
+                try:
+                    result = _compressor.run_compression_cycle()
+                    logging.info(f"[SemanticCompressor] Cycle complete — scars:{result.get('scars_compressed', 0)}, experiences:{result.get('experiences_compressed', 0)}")
+                except Exception as e:
+                    logging.error(f"[SemanticCompressor] Cycle error: {e}")
+                time.sleep(86400)  # 24 hours — daily compression
+        t_compressor = SafeThread(target=_run_compression, name='SemanticCompressor', daemon=True)
+        t_compressor.start()
+        threads.append(t_compressor)
+        logging.info("[MAIN] SemanticCompressor Online — daily wisdom distillation active")
+    except ImportError:
+        logging.warning("[MAIN] SemanticCompressor not available")
+
+    # ==============================================================================
     # THREE-BODY REFLECTION ARCHITECTURE (Phase 9)
     # ==============================================================================
     # Body One: Republic Reflection — continuous peripheral awareness

@@ -865,6 +865,42 @@ class EvolutionEngine:
         self._proposal_history.append(proposal)
         self._save_proposal_history()
 
+    def detect_dormant_systems(self) -> list:
+        """Phase 38.5d: Flag systems dormant >30 days (The Pruning Principle).
+        Uses brainstem.get_status() to check last heartbeat per thread.
+        Returns list of dormant system dicts for logging and governance."""
+        dormant = []
+        THIRTY_DAYS_SECONDS = 2_592_000
+        try:
+            from system.brainstem import get_brainstem
+            bs = get_brainstem()
+            status = bs.get_status()
+            for thread_name, info in status.get('registered_threads', {}).items():
+                last_seen_ago = info.get('last_seen_ago', 0)
+                if last_seen_ago and last_seen_ago > THIRTY_DAYS_SECONDS:
+                    dormant.append({
+                        'system': thread_name,
+                        'days_dormant': int(last_seen_ago / 86400),
+                        'status': info.get('status', 'unknown')
+                    })
+        except Exception as e:
+            logger.debug(f"[EVOLUTION] Dormancy check: {e}")
+
+        if dormant:
+            logger.info(f"[EVOLUTION] Dormant systems detected: {[d['system'] for d in dormant]}")
+            try:
+                from db.db_helper import db_connection, translate_sql
+                with db_connection() as conn:
+                    c = conn.cursor()
+                    c.execute(translate_sql(
+                        "INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)"
+                    ), ('EvolutionEngine', json.dumps({'dormant_systems': dormant}), 'dormancy_detection'))
+                    conn.commit()
+            except Exception as e:
+                logger.debug(f"[EVOLUTION] Dormancy logging: {e}")
+
+        return dormant
+
     def run_evolution_cycle(self):
         """
         Full cycle: observe → reflect → propose → govern → enact.
@@ -872,6 +908,9 @@ class EvolutionEngine:
         """
         logger.info("[EVOLUTION] === Starting evolution cycle ===")
         self._update_velocity_counters()
+
+        # Phase 38.5d: Check for dormant systems (Pruning Principle)
+        self.detect_dormant_systems()
 
         # Check if evolution is enabled
         try:

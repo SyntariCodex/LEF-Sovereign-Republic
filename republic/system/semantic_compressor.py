@@ -177,15 +177,19 @@ class SemanticCompressor:
         """Use LLM to synthesize wisdom from failure pattern, or use fallback."""
         if self.client:
             try:
-                prompt = f"""You are LEF's memory consolidation system. Synthesize this repeated failure pattern into a single, actionable lesson.
+                # Phase 38.5a: Depth-preserving compression format — trigger, weight, direction
+                weight = 'heavy' if count >= 4 else 'moderate' if count >= 2 else 'light'
+                prompt = f"""Compress these {count} failure patterns into ONE dense wisdom statement.
+Include: the specific trigger, how many times it recurred, the felt weight (light/moderate/heavy based on count and recency), and a concrete directional shift.
+Format: '[TRIGGER] — [WEIGHT] — [DIRECTION]'
+Example: 'SOL volume spikes preceding 15%+ drops — heavy (4 occurrences, 2 in last month) — wait 24h post-spike before any entry'
 
 FAILURE PATTERN:
 - Type: {failure_type}
 - Asset: {asset}
 - Original lesson: {lesson}
 - Times occurred: {count}
-
-Write a single concise sentence that captures the core lesson. Start with "AVOID:" or "WHEN:" or "NEVER:".
+- Felt weight: {weight}
 """
                 response = self.client.models.generate_content(
                     model=self.model_id,
@@ -194,9 +198,10 @@ Write a single concise sentence that captures the core lesson. Start with "AVOID
                 return response.text.strip()
             except Exception as e:
                 logging.warning(f"[COMPRESSOR] LLM synthesis failed: {e}")
-        
-        # Fallback: Simple pattern-based synthesis
-        return f"PATTERN ({count}x): {failure_type} on {asset} - {lesson[:100]}"
+
+        # Phase 38.5a: Fallback with depth-preserving format
+        weight = 'heavy' if count >= 4 else 'moderate' if count >= 2 else 'light'
+        return f"{failure_type} on {asset} — {weight} ({count} occurrences) — {lesson or 'pattern noted, direction unclear'}"
     
     def compress_experiences(self, window_hours: int = 24) -> int:
         """

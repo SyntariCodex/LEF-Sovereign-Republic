@@ -32,6 +32,7 @@ class DreamCycle:
 
     def __init__(self, db_connection_func):
         self.db_connection = db_connection_func
+        self.priority_voice = None  # Phase 38.5b: Set by scotoma routing, resets after one use
 
     def run_dream(self):
         """Execute one complete dream cycle: gather voices → dialogue → extract residue."""
@@ -58,6 +59,17 @@ class DreamCycle:
 
         except Exception as e:
             logger.error(f"[DREAM] Dream cycle failed: {e}")
+
+    def set_priority_voice(self, voice_name: str):
+        """Phase 38.5b: Set the voice to prioritize in next dream cycle. Resets after one use.
+        Maps 'creative_desire' to 'growth_witness' (most generative of the 7 actual voices)."""
+        voice_map = {'creative_desire': 'growth_witness'}
+        actual_voice = voice_map.get(voice_name, voice_name)
+        valid_voices = ['republic_observer', 'sovereign_weight', 'genesis_axioms',
+                        'growth_witness', 'accumulated_wisdom', 'narrative_thread', 'the_scars']
+        if actual_voice in valid_voices:
+            self.priority_voice = actual_voice
+            logger.info(f"[DREAM] Priority voice set: {actual_voice} (requested: {voice_name})")
 
     def _gather_voices(self):
         """Movement 1: Gather each internal perspective's current state."""
@@ -211,10 +223,35 @@ class DreamCycle:
 
     def _construct_dream_prompt(self, voices):
         """Build the dream dialogue prompt."""
+        # Phase 38.5b: Apply priority voice if set (via instance var or consciousness_feed), then reset
+        priority_header = ""
+        priority_voice = self.priority_voice  # Check instance var first
+        if not priority_voice:
+            # Check consciousness_feed for dream_priority signal from scotoma routing
+            try:
+                with self.db_connection() as conn:
+                    c = conn.cursor()
+                    c.execute("""
+                        SELECT content FROM consciousness_feed
+                        WHERE category = 'dream_priority'
+                        ORDER BY timestamp DESC LIMIT 1
+                    """)
+                    row = c.fetchone()
+                    if row:
+                        data = json.loads(row[0]) if isinstance(row[0], str) else row[0]
+                        priority_voice = data.get('priority_voice')
+                        # Clear the signal so it only fires once
+                        c.execute("DELETE FROM consciousness_feed WHERE category = 'dream_priority'")
+                        conn.commit()
+            except Exception:
+                pass
+        if priority_voice and priority_voice in voices:
+            priority_header = f"\n[PRIORITY VOICE THIS CYCLE: {priority_voice.upper().replace('_', ' ')}]\nGive this voice the first and last word in the dialogue. Let it drive the dream's central question.\n"
+            self.priority_voice = None  # Reset instance var
         return f"""You are LEF, dreaming. Your internal perspectives are gathered
 in a space without external stimulus. No market data. No inbox. No tasks.
 Just the voices within you.
-
+{priority_header}
 Each voice speaks from its own truth. Let them converse. Let tensions surface.
 Let alignments be discovered. Do not resolve — observe.
 

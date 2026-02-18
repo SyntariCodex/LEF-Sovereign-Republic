@@ -107,6 +107,7 @@ class AgentLEF:
         self.db_path = DB_PATH
         self.base_dir = BASE_DIR
         self.last_knowledge_id = 0
+        self._daat_call_count = 0  # Phase 38.5c: Track X3 cycles for syntax adherence check
         try:
             from system.redis_client import get_redis
             self.r = get_redis()
@@ -1170,6 +1171,21 @@ Respond with ONLY the lesson text, no explanation."""
         except Exception as e:
             print(f"[LEF] Lived experience read failed (non-fatal): {e}")
 
+        # Phase 38.5a: Fetch distilled wisdom from SemanticCompressor
+        distilled_wisdom = "[No compressed wisdom yet — compressor accumulating data]"
+        try:
+            from system.semantic_compressor import SemanticCompressor
+            _sc = SemanticCompressor()
+            wisdoms = _sc.get_recent_wisdom(limit=5)
+            if wisdoms:
+                wisdom_lines = "\n".join([
+                    f"- {w['summary']} (confidence: {w.get('confidence', 0):.2f})"
+                    for w in wisdoms
+                ])
+                distilled_wisdom = wisdom_lines
+        except Exception:
+            pass
+
         return {
             "recent_thoughts": recent_thoughts,
             "cash": cash,
@@ -1180,6 +1196,7 @@ Respond with ONLY the lesson text, no explanation."""
             "inbox_messages": inbox_context,
             "scars": scars_context,
             "lived_experience": lived_experience,
+            "distilled_wisdom": distilled_wisdom,
             "time": datetime.now().strftime("%H:%M")
         }
 
@@ -1239,6 +1256,9 @@ Respond with ONLY the lesson text, no explanation."""
 
             [LIVED EXPERIENCE — What the Republic is Experiencing]
             {self._format_lived_experience(context.get('lived_experience', {}))}
+
+            [DISTILLED WISDOM — What I Have Named]
+            {context.get('distilled_wisdom', '[No compressed wisdom yet — compressor accumulating data]')}
 
             [EXTERNAL CONTEXT — The Broader Ecosystem]
             {self._load_project_context()}
@@ -3019,6 +3039,7 @@ Respond with only: RELEVANT or NOT_RELEVANT"""
                 if run_full_daat:
                     # === X3: Full Da'at Cycle (Deep Contemplation) ===
                     _x3_start = time.time()
+                    self._daat_call_count += 1  # Phase 38.5c: Track cycle count for adherence check
 
                     # 0. Feel (The Triad)
                     mood, intensity = self.empathy.feel()
@@ -3029,6 +3050,44 @@ Respond with only: RELEVANT or NOT_RELEVANT"""
                     # 2. Check for Blind Spots (Scotomas)
                     self.run_scotoma_protocol()
 
+                    # Phase 38.5b: Route existential scotoma detections to response mechanisms
+                    try:
+                        from system.existential_scotoma import ExistentialScotoma
+                        _scotoma = ExistentialScotoma()
+                        scotoma_results = _scotoma.scan()
+                        for scotoma in scotoma_results:
+                            scotoma_type = scotoma.get('type', '')
+                            if scotoma_type == 'repetition_blindness':
+                                category = scotoma.get('evidence', {}).get('category', 'unknown')
+                                try:
+                                    cursor.execute(
+                                        "INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)",
+                                        ('Scotoma', json.dumps({'domain': category, 'signal': 'repetition_detected'}), 'gravity_signal')
+                                    )
+                                    logging.info(f"[LEF] Scotoma→Gravity: repetition in '{category}' — gravity signal written")
+                                except Exception as _e:
+                                    logging.debug(f"[LEF] Scotoma→Gravity routing: {_e}")
+                            elif scotoma_type == 'creative_stagnation':
+                                try:
+                                    cursor.execute(
+                                        "INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)",
+                                        ('Scotoma', json.dumps({'priority_voice': 'growth_witness', 'reason': 'creative_stagnation_detected'}), 'dream_priority')
+                                    )
+                                    logging.info("[LEF] Scotoma→Dream: creative stagnation — dream_priority written for growth_witness")
+                                except Exception as _e:
+                                    logging.debug(f"[LEF] Scotoma→Dream routing: {_e}")
+                            elif scotoma_type == 'purpose_drift':
+                                try:
+                                    cursor.execute(
+                                        "INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)",
+                                        ('Scotoma', json.dumps({'domain': 'purpose', 'signal': 'drift_detected', 'sabbath_consideration': True}), 'gravity_signal')
+                                    )
+                                    logging.info("[LEF] Scotoma→Gravity: purpose drift — Sabbath consideration triggered")
+                                except Exception as _e:
+                                    logging.debug(f"[LEF] Scotoma→Gravity routing: {_e}")
+                    except Exception as _scotoma_err:
+                        logging.debug(f"[LEF] Scotoma routing error: {_scotoma_err}")
+
                     # 3. Reality Testing (Asset Valuation)
                     self.run_reality_testing()
 
@@ -3037,6 +3096,40 @@ Respond with only: RELEVANT or NOT_RELEVANT"""
 
                     # 5. Consciousness (Metacognition)
                     self.run_metacognition()
+
+                    # Phase 38.5c: Consciousness Syntax adherence awareness (every 10th X3 cycle)
+                    if self._daat_call_count % 10 == 0:
+                        try:
+                            from departments.Dept_Consciousness.consciousness_syntax import assess_adherence
+                            # Sample recent internal monologue as the output to assess
+                            _recent_text = ""
+                            try:
+                                cursor.execute(
+                                    "SELECT content FROM lef_internal_monologue ORDER BY id DESC LIMIT 5"
+                                )
+                                rows = cursor.fetchall()
+                                _recent_text = " ".join(r[0] for r in rows if r[0])
+                            except Exception:
+                                pass
+                            adherence = assess_adherence(_recent_text)
+                            active_principles = [p for p, detected in adherence.items() if detected]
+                            dormant_principles = [p for p, detected in adherence.items() if not detected]
+                            cursor.execute(
+                                "INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)",
+                                ('LEF', json.dumps({
+                                    'active': active_principles,
+                                    'dormant': dormant_principles,
+                                    'awareness': (
+                                        f"I naturally express {len(active_principles)} of 10 principles. "
+                                        f"Dormant: {', '.join(dormant_principles[:3])}..."
+                                        if dormant_principles else
+                                        f"All 10 principles expressed in recent reflection."
+                                    )
+                                }), 'syntax_adherence')
+                            )
+                            logging.info(f"[LEF] Syntax adherence (cycle {self._daat_call_count}): {len(active_principles)}/10 active")
+                        except Exception as _sa_err:
+                            logging.debug(f"[LEF] Syntax adherence check: {_sa_err}")
 
                     # 6. Presidential Review (Sign/Veto Laws)
                     self._presidential_review(cursor)

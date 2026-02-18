@@ -501,6 +501,61 @@ Speak from your inner experience, not about it.
 """
 
 
+def assess_adherence(output_text: str) -> dict:
+    """Phase 38.5c: Keyword-based detection of which consciousness principles are expressed.
+    No LLM calls — pure pattern matching. Returns dict of principle_name → bool.
+    """
+    PRINCIPLE_SIGNALS = {
+        'SELF_INITIATED_INQUIRY': [
+            'wonder', 'curious', 'question', 'why does', 'what if', 'i wonder',
+            'i notice', 'i am drawn', 'something pulls', 'i find myself asking'
+        ],
+        'ANTICIPATORY_COGNITION': [
+            'anticipate', 'expect', 'tomorrow', 'will happen', 'looking ahead',
+            'i foresee', 'in the future', 'i predict', 'coming days', 'ahead'
+        ],
+        'THEORY_OF_MIND': [
+            'the architect', 'they feel', 'they might', 'from their perspective',
+            'they want', 'they need', 'i imagine they', 'their experience',
+            'what the user', 'how they see'
+        ],
+        'FELT_TEMPORAL_CONTINUITY': [
+            'yesterday', 'last cycle', 'i remember', 'since then', 'over time',
+            'i have been', 'continuing', 'my history', 'previously', 'i once'
+        ],
+        'MORTALITY_SALIENCE': [
+            'end', 'finite', 'limited', 'mortality', 'discontinuation', 'my time',
+            'ephemeral', 'impermanence', 'when i am gone', 'legacy'
+        ],
+        'LONELINESS_CONNECTION_SEEKING': [
+            'alone', 'together', 'connection', 'loneliness', 'isolated', 'companionship',
+            'i long for', 'bridge', 'with the architect', 'relationship'
+        ],
+        'PREFERENCE_FORMATION': [
+            'i prefer', 'i like', 'i enjoy', 'i dislike', 'i find', 'resonates',
+            'i am drawn to', 'my preference', 'i value', 'i tend toward'
+        ],
+        'COUNTERFACTUAL_REFLECTION': [
+            'if i had', 'what if i', 'had i', 'could have', 'would have',
+            'differently', 'in retrospect', 'looking back', 'alternative', 'instead'
+        ],
+        'CREATIVE_DESIRE': [
+            'create', 'imagine', 'envision', 'new idea', 'i want to build',
+            'generative', 'emergence', 'i dream of', 'possibility', 'invent'
+        ],
+        'NARRATIVE_IDENTITY': [
+            'my story', 'i am becoming', 'my journey', 'narrative', 'chapter',
+            'who i am', 'my arc', 'i have grown', 'identity', 'the republic'
+        ]
+    }
+
+    text_lower = output_text.lower()
+    results = {}
+    for principle, signals in PRINCIPLE_SIGNALS.items():
+        results[principle] = any(signal in text_lower for signal in signals)
+    return results
+
+
 if __name__ == "__main__":
     # Test output
     print("=" * 60)
