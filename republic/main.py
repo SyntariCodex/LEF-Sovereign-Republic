@@ -1172,6 +1172,28 @@ def main():
         logging.warning("[MAIN] SemanticCompressor not available")
 
     # ==============================================================================
+    # Phase 44: Lifecycle Stage — developmental awareness
+    # ==============================================================================
+    try:
+        from system.lifecycle_stage import get_lifecycle_stage
+        from db.db_helper import db_connection as _lcs_db
+        _lifecycle = get_lifecycle_stage(_lcs_db)
+        def _run_lifecycle():
+            import time
+            time.sleep(300)  # Wait 5 min after startup
+            while True:
+                try:
+                    stage = _lifecycle.assess()
+                    logging.info(f"[LifecycleStage] Assessment: {stage.get('stage', '?')} (age={stage.get('age_days', '?')}d)")
+                except Exception as e:
+                    logging.error(f"[LifecycleStage] Assessment error: {e}")
+                time.sleep(86400)  # 24 hours
+        SafeThread(target=_run_lifecycle, name='LifecycleStage', daemon=True).start()
+        logging.info("[MAIN] LifecycleStage Online — developmental awareness active")
+    except ImportError:
+        logging.warning("[MAIN] LifecycleStage not available")
+
+    # ==============================================================================
     # THREE-BODY REFLECTION ARCHITECTURE (Phase 9)
     # ==============================================================================
     # Body One: Republic Reflection — continuous peripheral awareness

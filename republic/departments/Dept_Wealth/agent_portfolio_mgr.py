@@ -67,6 +67,13 @@ try:
 except ImportError:
     _COMPRESSOR_AVAILABLE = False
 
+# Phase 44.2: Lifecycle stage risk adjustment
+try:
+    from system.lifecycle_stage import get_stage_risk_multiplier
+    _LIFECYCLE_AVAILABLE = True
+except ImportError:
+    _LIFECYCLE_AVAILABLE = False
+
 class AgentPortfolioMgr(IntentListenerMixin):
     def __init__(self, db_path=None):
         self.db_path = db_path or DB_PATH
@@ -800,6 +807,15 @@ class AgentPortfolioMgr(IntentListenerMixin):
                 trade_size_usd = MAX_TRADE_SIZE
         except (Exception, TypeError):
             trade_size_usd = trade_size_fallback
+
+        # Phase 44.2: Lifecycle stage risk adjustment
+        lifecycle_multiplier = 1.0
+        if _LIFECYCLE_AVAILABLE:
+            try:
+                lifecycle_multiplier = get_stage_risk_multiplier()
+            except Exception:
+                pass
+        trade_size_usd = trade_size_usd * min(lifecycle_multiplier, 1.0)
 
         # Check Active Positions Count
         c.execute("SELECT count(*) FROM assets WHERE strategy_type='ARENA' AND quantity > 0")
