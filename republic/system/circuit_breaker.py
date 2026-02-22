@@ -20,6 +20,13 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
+# Phase 38.5 fix: Use db_helper for PostgreSQL compatibility
+try:
+    from db.db_helper import db_connection as _cb_db_connection, translate_sql as _cb_translate
+    _DB_HELPER_AVAILABLE = True
+except ImportError:
+    _DB_HELPER_AVAILABLE = False
+
 # Phase 19.1e: Redis for emergency stop coordination
 try:
     from system.redis_client import get_redis
@@ -135,8 +142,13 @@ class CircuitBreaker:
         }
 
         conn = None
+        _ctx_manager = None
         try:
-            conn = sqlite3.connect(self.db_path, timeout=30)
+            if _DB_HELPER_AVAILABLE:
+                _ctx_manager = _cb_db_connection()
+                conn = _ctx_manager.__enter__()
+            else:
+                conn = sqlite3.connect(self.db_path, timeout=30)
             cursor = conn.cursor()
 
             # 1. Calculate current portfolio value from assets table
@@ -364,7 +376,12 @@ class CircuitBreaker:
         except Exception as e:
             logger.error(f"[CircuitBreaker] Health check failed: {e}")
         finally:
-            if conn:
+            if _ctx_manager:
+                try:
+                    _ctx_manager.__exit__(None, None, None)
+                except Exception:
+                    pass
+            elif conn:
                 conn.close()
 
         self._last_health = health
@@ -425,6 +442,31 @@ class CircuitBreaker:
                 conn.commit()
         except Exception:
             pass
+
+        # Phase 48.5: Emergency stop triggers contemplation, not just halt
+        # Queue a Sabbath contemplation topic so rest has focused reflection
+        try:
+            from db.db_helper import db_connection as _sab_db, translate_sql as _sab_sql
+            with _sab_db() as _sab_conn:
+                _sab_c = _sab_conn.cursor()
+                _sab_c.execute(_sab_sql(
+                    "INSERT INTO consciousness_feed "
+                    "(agent_name, content, category, signal_weight) "
+                    "VALUES (?, ?, ?, ?)"
+                ), ("CircuitBreaker", json.dumps({
+                    'contemplation_topic': (
+                        f"Why did the circuit breaker trip? "
+                        f"Drawdown: {health['drawdown_pct']:.2%}, "
+                        f"Daily loss: ${health['daily_loss_usd']:.2f}. "
+                        f"What pattern led here? What must not be repeated?"
+                    ),
+                    'source': 'circuit_breaker_apoptosis',
+                    'duration_minutes': 30,
+                }), "sabbath_intention", 0.9))
+                _sab_conn.commit()
+            logger.info("[CIRCUIT_BREAKER] Sabbath contemplation topic queued for post-failure integration")
+        except Exception as _sab_err:
+            logger.warning("[CIRCUIT_BREAKER] Could not queue Sabbath contemplation: %s", _sab_err)
 
         # 3. The_Bridge/Inbox: Architect notification
         try:
@@ -599,8 +641,13 @@ class CircuitBreaker:
         Returns list of dicts: [{'asset': str, 'value_usd': float, 'pnl_pct': float}]
         """
         conn = None
+        _ctx_manager = None
         try:
-            conn = sqlite3.connect(self.db_path, timeout=30)
+            if _DB_HELPER_AVAILABLE:
+                _ctx_manager = _cb_db_connection()
+                conn = _ctx_manager.__enter__()
+            else:
+                conn = sqlite3.connect(self.db_path, timeout=30)
             cursor = conn.cursor()
 
             # Find positions with worst unrealized P&L
@@ -630,7 +677,12 @@ class CircuitBreaker:
             logger.error(f"[CircuitBreaker] Weakest positions query failed: {e}")
             return []
         finally:
-            if conn:
+            if _ctx_manager:
+                try:
+                    _ctx_manager.__exit__(None, None, None)
+                except Exception:
+                    pass
+            elif conn:
                 conn.close()
 
     def get_status_summary(self) -> str:

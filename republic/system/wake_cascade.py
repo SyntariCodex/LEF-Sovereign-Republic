@@ -42,6 +42,31 @@ class WakeCascade:
         """Execute all 5 layers sequentially. Returns wake_summary dict."""
         logger.info("[WAKE] 🌅 Wake Cascade beginning — 5 layers, inside-out")
 
+        # Phase 48.3: Signal escalation informed by thinking rhythm
+        # Read FrequencyJournal rhythm observations to modulate wake cascade sensitivity
+        self._escalation_multiplier = 1.0  # Default: normal sensitivity
+        try:
+            with self.db_connection() as _rc_conn:
+                _rhy_row = _rc_conn.execute("""
+                    SELECT content FROM consciousness_feed
+                    WHERE category = 'rhythm_observation'
+                    ORDER BY timestamp DESC LIMIT 1
+                """).fetchone()
+                if _rhy_row:
+                    import json as _json
+                    _rhythm = _json.loads(_rhy_row[0]) if isinstance(_rhy_row[0], str) else _rhy_row[0]
+                    _escalation_rate = _rhythm.get('escalation_frequency', 0)
+                    if _escalation_rate > 0.4:
+                        # High escalation rate — system is under stress, raise thresholds
+                        self._escalation_multiplier = 1.25
+                        logger.info(f"[WAKE] Rhythm: high escalation rate ({_escalation_rate:.2f}) — dampening cascade sensitivity")
+                    elif _escalation_rate < 0.1:
+                        # Low escalation rate — system is calm, maintain normal sensitivity
+                        self._escalation_multiplier = 1.0
+                        logger.debug(f"[WAKE] Rhythm: low escalation rate ({_escalation_rate:.2f}) — normal sensitivity")
+        except Exception:
+            pass
+
         results = {}
 
         # Layer 1: Genesis

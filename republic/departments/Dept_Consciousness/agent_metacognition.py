@@ -124,7 +124,36 @@ class AgentMetaCognition:
             return {"error": "Hippocampus not available"}
         
         self.log("🧘 Beginning meta-reflection cycle...")
-        
+
+        # Phase 48.4: MetaCognition checks memory health before reflecting
+        memory_health_score = 1.0
+        try:
+            from system.hippocampus_health import HippocampusHealth
+            _hh = HippocampusHealth(db_path=self.db_path)
+            _hr = _hh.get_health_report()
+            memory_health_score = _hr.get('overall_score', 1.0)
+            if memory_health_score < 0.5:
+                logging.warning(f"[{self.name}] Hippocampus health low: {memory_health_score:.2f}")
+                try:
+                    import json as _hh_json
+                    with db_connection(self.db_path) as _hh_conn:
+                        _hh_conn.execute(
+                            "INSERT INTO consciousness_feed "
+                            "(agent_name, content, category, signal_weight) "
+                            "VALUES (?, ?, 'memory_health_alert', 0.85)",
+                            (self.name, _hh_json.dumps({
+                                'memory_health': memory_health_score,
+                                'details': {k: v.get('score', 0) if isinstance(v, dict) else v
+                                            for k, v in _hr.items() if k != 'timestamp'},
+                                'recommendation': 'prioritize memory consolidation'
+                            }))
+                        )
+                        _hh_conn.commit()
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
         journal = self.hippocampus.memory.get('reasoning_journal', {}).get('entries', [])
         
         if len(journal) < 3:
@@ -203,7 +232,8 @@ class AgentMetaCognition:
             "entries_analyzed": len(journal),
             "patterns": patterns_observed,
             "growth_notes": growth_notes,
-            "top_themes": top_themes
+            "top_themes": top_themes,
+            "memory_health_score": memory_health_score  # Phase 48.4
         }
     
         # === Wire to consciousness_feed (Phase 1 Active Tasks) ===

@@ -55,6 +55,25 @@ def run_diagnostics():
         'overall': 'FAIL' if fails else ('WARN' if warns else 'OK'),
     }
 
+    # Phase 48.1: Make diagnostics visible to the nervous system via system_state
+    try:
+        from db.db_helper import db_connection as _diag_db
+        _diag_summary = {
+            'overall_status': results['summary']['overall'],
+            'failing_checks': [name for name, v in checks.items() if v.get('status') == 'FAIL'],
+            'warning_checks': [name for name, v in checks.items() if v.get('status') == 'WARN'],
+            'checked_at': datetime.utcnow().isoformat()
+        }
+        with _diag_db() as _diag_conn:
+            _diag_conn.execute(
+                "INSERT INTO system_state (key, value) VALUES ('diagnostics_health', ?) "
+                "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                (json.dumps(_diag_summary),)
+            )
+            _diag_conn.commit()
+    except Exception:
+        pass
+
     return results
 
 

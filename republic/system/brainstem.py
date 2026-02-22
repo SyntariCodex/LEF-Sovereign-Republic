@@ -497,6 +497,25 @@ class Brainstem:
         except Exception as e:
             logger.debug("[BRAINSTEM] System vitals error: %s", e)
 
+        # Phase 48.1: Brainstem consults diagnostics health oracle
+        try:
+            import json as _json
+            from db.db_helper import db_connection as _bs_db
+            with _bs_db() as _bs_conn:
+                _diag_row = _bs_conn.execute(
+                    "SELECT value FROM system_state WHERE key = 'diagnostics_health'"
+                ).fetchone()
+                if _diag_row:
+                    _diag = _json.loads(_diag_row[0]) if isinstance(_diag_row[0], str) else _diag_row[0]
+                    if _diag.get('overall_status') == 'FAIL':
+                        for _failing in _diag.get('failing_checks', []):
+                            logger.warning("[BRAINSTEM] Diagnostic FAIL: %s", _failing)
+                    elif _diag.get('overall_status') == 'WARN':
+                        if _diag.get('warning_checks'):
+                            logger.info("[BRAINSTEM] Diagnostic WARN: %s", ', '.join(_diag['warning_checks']))
+        except Exception:
+            pass
+
     # ------------------------------------------------------------------
     # Motor: Thread restart
     # ------------------------------------------------------------------

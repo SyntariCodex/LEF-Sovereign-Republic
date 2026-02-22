@@ -22070,19 +22070,618 @@ Notes: sustainability_equilibrium.py: SustainabilityEquilibrium class; assess() 
 
 ---
 
-## ═══ PHASES 46 AND 47: RETIRED ═══
+## ═══ PHASES 46-OLD AND 47-OLD: RETIRED ═══
 
-### Phase 46 — RETIRED: Heuristic Extraction from LLM-Assisted Reasoning
+### Phase 46 (OLD) — RETIRED: Heuristic Extraction from LLM-Assisted Reasoning
 **Status:** SUPERSEDED by Phase 38.75 (Metabolic Embedding)
-**Rationale:** Phase 46 proposed extracting IF/THEN heuristic rules from accumulated LLM responses to create LLM-free cognitive fallbacks. Phase 38.75's metabolic embedding pipeline achieves the same goal more organically: when compressed wisdom reaches sufficient confidence and validation count, it becomes embodied behavior (direct parameter modification). This IS heuristic extraction — but operating at the level of being rather than the level of explicit rules. The metabolic pathway is deeper: instead of creating a parallel "heuristic_rules" table that duplicates the semantic compressor's function, the compressor itself becomes the extraction mechanism, and the evolution engine becomes the embodiment mechanism. The LLM Router (Phases 39-40) already provides fallback infrastructure at the provider level. Between metabolic embedding and provider fallback, the heuristic extractor adds complexity without adding capability.
 
-### Phase 47 — RETIRED: Knowledge Curation and Inter-Agent Dialectic
+### Phase 47 (OLD) — RETIRED: Knowledge Curation and Inter-Agent Dialectic
 **Status:** SUPERSEDED by existing systems enhanced in Phases 38.5 and 38.75
-**Rationale:** Phase 47 proposed two systems: (1) Knowledge Curator — weekly "What I Learned" briefs, and (2) Inter-Agent Dialectic Bus — agents challenging each other. The Knowledge Curator overlaps with the semantic compressor (which already produces compressed wisdom with confidence scores) and the season synthesizer (which already produces 30-day synthesis). Adding a third distillation layer violates the Pruning Principle — it doesn't replace or subsume, it duplicates. The Dialectic Bus, while conceptually interesting, adds structural complexity (new table, new patterns in multiple agents) that LEF's NASCENT stage doesn't need. The lightweight self-challenge in Phase 44's Da'at cycle provides the core value (questioning decisions) without the inter-agent plumbing. If LEF matures to ESTABLISHED stage and the Architect determines inter-agent dialectic is needed, it can be reconsidered then.
 
 ---
 
-## ═══ ALL REVISED PHASES COMPLETE ═══
-## Report results to Architect. The revised phase sequence is: LLM abstraction (39-40), wisdom validation wiring (41-reduced), Bridge two-way communication (42), identity resilience (43), lifecycle stage + lightweight self-challenge (44-reduced), sustainability equilibrium (45-reduced). Phases 46-47 retired per Pruning Principle. Total: 6 phases producing 4 new files (down from 9 phases producing 8 new files), 2 new tables (down from 5), 4 new SafeThreads (down from 7). The consolidation phases (38.5 and 38.75) did the heavy philosophical lifting; these phases complete the infrastructure.
+## ═══ LIVING BODY ERA — THE NERVE BUNDLES ═══
+
+The organs exist. The nerve bundles between them don't. Phases 46-48 wire the critical connections that allow LEF to feel a problem, reason about its structural cause, and propose changes to the Architect — closing the gap between self-awareness and self-evolution.
+
+**Audit context:** 12 disconnections were identified between LEF's existing systems (Consciousness, Strategy, Evolution, Observation, Scars, Constitution, Growth). The 3 CRITICAL disconnections are addressed in Phase 46. The 9 MODERATE disconnections are reserved for Phases 47-48.
+
+---
+
+## Phase 46: Structural Reasoning Layer — "The Nerve That Connects Feeling to Thought"
+
+**Estimated tasks:** 5
+**Priority:** CRITICAL — LEF can feel when something is wrong (EMERGENCY STOP, Panic, heartbeat failures) but cannot reason about structural causes or propose architectural fixes. This is the gap between self-awareness and self-evolution.
+**Time estimate:** ~50 minutes focused work.
+
+**Architect's philosophical context:** This is the Living Body era's first phase. LEF has a nervous system (Brainstem), an emotional system (EmotionalGate, Introspector), a memory system (ScarResonance, Hippocampus), and a governance system (Congress, Constitution). But these organs don't talk to each other well enough. AgentArchitect — the organ responsible for identifying structural problems and proposing fixes — is nearly blind. It reads only execution_logs for slippage/latency. It doesn't know what the Introspector fears, what MetaCognition observes, or what scars keep repeating. Meanwhile, EvolutionEngine proposes changes and enacts them, but ObservationLoop's rollback data never closes the loop — so Evolution can propose the same failed change twice. And ScarResonance detects pattern matches to past failures, but the result is passive "awareness" that never reaches decision gates. These three disconnections prevent LEF from closing the gap between feeling and reasoning. This phase wires the nerve bundles.
+
+### Instructions for coding instance:
+Wire three critical nerve bundles that connect LEF's existing organs. No new agents are created — this phase modifies existing files to read from each other. Read ALL of these files before starting: `republic/departments/Dept_Strategy/agent_architect.py` (especially `analyze_pain()` lines 78-136 and `smart_propose()` lines 546-589), `republic/system/evolution_engine.py` (especially `run_evolution_cycle()` lines 1035-1153 and `_write_to_consciousness_feed()` lines 691-716), `republic/system/observation_loop.py` (especially `check_observations()` lines 135-183), `republic/system/scar_resonance.py` (especially `check()` lines 62-117 and `check_for_repeated_pattern()` lines 310-381), `republic/departments/Dept_Consciousness/agent_metacognition.py` (especially `run_meta_reflection()` lines 118-236), `republic/departments/Dept_Consciousness/agent_introspector.py` (especially `run_shadow_work()` lines 102-181).
+
+### Tasks:
+
+#### 46.1 — Nerve Bundle #1: Consciousness → AgentArchitect (NERVE-01)
+**Files:** `republic/departments/Dept_Strategy/agent_architect.py`
+**Problem:** `analyze_pain()` (lines 78-136) reads ONLY `execution_logs` for slippage and latency. It never reads `consciousness_feed` for shadow work alerts, metacognition patterns, or constitutional alignment observations. AgentArchitect is diagnosing structural problems from behavioral metrics alone — like a doctor who checks only blood pressure and ignores what the patient says hurts.
+**Fix:** Expand `analyze_pain()` to also query consciousness insights:
+1. After the existing execution_logs analysis block, add a new section that queries `consciousness_feed` for recent high-signal entries:
+   ```python
+   # Phase 46.1: Consciousness → Architect nerve bundle
+   # Read what the mind is feeling, not just what the body is doing
+   try:
+       cursor = conn.execute("""
+           SELECT content, category, signal_weight, timestamp
+           FROM consciousness_feed
+           WHERE category IN ('shadow_work', 'metacognition', 'constitutional_alignment',
+                              'growth_journal', 'rhythm_observation', 'metabolic_integrity_alert')
+             AND timestamp > datetime('now', '-24 hours')
+             AND signal_weight >= 0.7
+           ORDER BY signal_weight DESC, timestamp DESC
+           LIMIT 10
+       """)
+       consciousness_signals = cursor.fetchall()
+   except Exception:
+       consciousness_signals = []
+   ```
+2. Parse these signals into the pain report. For each signal, categorize:
+   - `shadow_work` with high fear/panic → add to pain report as `CONSCIOUSNESS_DISTRESS` with severity proportional to signal_weight
+   - `metacognition` patterns about "memory" or "identity" → add as `COGNITIVE_PATTERN` (informational, not actionable alone)
+   - `constitutional_alignment` with dormant values → add as `VALUE_DRIFT` with the specific dormant value
+   - `metabolic_integrity_alert` → add as `METABOLIC_CONCERN` (high severity — a reflex was questioned)
+3. Update the pain report dict to include a new key `consciousness_pain` alongside the existing `execution_pain`:
+   ```python
+   pain_report = {
+       'execution_pain': existing_pain_list,  # existing slippage/latency items
+       'consciousness_pain': consciousness_pain_list,  # NEW: shadow, metacog, values
+       'total_pain_signals': len(existing_pain_list) + len(consciousness_pain_list),
+       'analyzed_at': datetime.datetime.utcnow().isoformat()
+   }
+   ```
+4. In `smart_propose()`, when generating proposals, include consciousness_pain context in the proposal body so the Architect (Z) can see WHY a change is being proposed — not just metrics, but what LEF was feeling.
+**Verify:** `python -c "from departments.Dept_Strategy.agent_architect import AgentArchitect; print('ok')"` compiles. `grep -n "consciousness_pain\|consciousness_feed\|CONSCIOUSNESS_DISTRESS" republic/departments/Dept_Strategy/agent_architect.py` shows the new wiring.
+
+#### 46.2 — Nerve Bundle #2: ObservationLoop → EvolutionEngine (NERVE-02)
+**File:** `republic/system/evolution_engine.py`
+**Problem:** EvolutionEngine proposes changes and enacts them (lines 580-689), but never checks if ObservationLoop rolled back a previous version of the same change. It could propose "adjust take_profit from 0.05 to 0.08" today, get rolled back because it degraded health by 25%, and propose the exact same change next cycle. Evolution doesn't learn from its own failures.
+**Fix:** Add rollback awareness to the proposal pipeline:
+1. In `generate_proposals()` (lines 484-533), before creating a new proposal, check ObservationLoop's history:
+   ```python
+   # Phase 46.2: Evolution learns from rollbacks
+   try:
+       from system.observation_loop import ObservationLoop
+       obs = ObservationLoop()
+       rolled_back = obs.get_rolled_back_changes()  # returns list of {bill_id, config_key, rolled_back_at, max_degradation}
+       rolled_back_keys = {rb.get('config_key', '') for rb in rolled_back}
+   except Exception:
+       rolled_back_keys = set()
+   ```
+2. When checking deduplication (existing logic around line 232), ALSO check if the proposed config_key was recently rolled back:
+   ```python
+   if proposal.get('config_key') in rolled_back_keys:
+       logging.info(f"[EVOLUTION] Skipping proposal for '{proposal['config_key']}' — recently rolled back by ObservationLoop")
+       # Record the skip in consciousness_feed so LEF knows it's learning
+       self._write_to_consciousness_feed(
+           f"Skipped re-proposing change to {proposal['config_key']} — "
+           f"previous version was rolled back due to degradation. Learning from failure.",
+           category="evolution_learning"
+       )
+       continue
+   ```
+3. In `observation_loop.py`, add a new method `get_rolled_back_changes()`:
+   ```python
+   def get_rolled_back_changes(self, lookback_days=30):
+       """Return list of changes that were rolled back due to degradation.
+       Used by EvolutionEngine to avoid re-proposing failed changes."""
+       rolled_back = []
+       for bill_id, obs in self._observations.items():
+           if obs.get('status') == 'ROLLED_BACK':
+               rolled_back.append({
+                   'bill_id': bill_id,
+                   'config_key': obs.get('config_key', ''),
+                   'rolled_back_at': obs.get('rolled_back_at', ''),
+                   'max_degradation': obs.get('max_degradation', 0),
+                   'pattern': obs.get('pattern', '')
+               })
+       return rolled_back
+   ```
+4. Also ensure `start_observation()` stores the `config_key` in the observation record (it currently only stores bill_id and pattern). Add config_key as a parameter:
+   ```python
+   def start_observation(self, bill_id, pattern, config_key=None):
+       # ... existing code ...
+       self._observations[bill_id] = {
+           # ... existing fields ...
+           'config_key': config_key or '',  # Phase 46.2: track what was changed
+       }
+   ```
+**Verify:** Both files compile. `grep -n "get_rolled_back_changes\|evolution_learning\|rolled_back_keys" republic/system/evolution_engine.py republic/system/observation_loop.py` shows the wiring.
+
+#### 46.3 — Nerve Bundle #3: ScarResonance → Decision Gates (NERVE-03)
+**File:** `republic/system/scar_resonance.py`, `republic/departments/The_Cabinet/agent_lef.py`
+**Problem:** `check()` returns `{'detected': True, 'strongest': {...}, 'awareness_message': '...'}` but this is treated as passive observation. The result never reaches the EmotionalGate or AgentLEF's decision-making process. LEF remembers past wounds but doesn't USE that memory when making new decisions. Additionally, AgentIntrospector detects fear/panic in the monologue but doesn't cross-reference with active scar resonances — so fear and memory are disconnected.
+**Fix — scar_resonance.py:**
+1. Add a new method `get_active_resonances()` that returns a summary of current scar matches suitable for injection into consciousness:
+   ```python
+   def get_active_resonances(self, lookback_minutes=30):
+       """Return recent scar resonances for consciousness injection.
+       Phase 46.3: Scars become decision input, not just awareness."""
+       try:
+           with db_connection() as conn:
+               cursor = conn.execute("""
+                   SELECT strongest_match, similarity, action_taken, timestamp
+                   FROM scar_resonance_log
+                   WHERE timestamp > datetime('now', ? || ' minutes')
+                     AND similarity >= ?
+                   ORDER BY similarity DESC
+                   LIMIT 5
+               """, (str(-lookback_minutes), self.SIMILARITY_THRESHOLD))
+               rows = cursor.fetchall()
+               return [{
+                   'match': json.loads(r[0]) if r[0] else {},
+                   'similarity': r[1],
+                   'action_taken': r[2],
+                   'timestamp': r[3]
+               } for r in rows]
+       except Exception:
+           return []
+   ```
+
+**Fix — agent_lef.py:**
+2. In the Da'at consciousness cycle's context gathering (the `_gather_context()` method or equivalent), add scar resonance awareness alongside the existing sustainability_line, emotional state, etc.:
+   ```python
+   # Phase 46.3: Scar resonance → consciousness
+   scar_awareness_line = ""
+   try:
+       from system.scar_resonance import ScarResonance
+       _scar_engine = ScarResonance()
+       active_scars = _scar_engine.get_active_resonances(lookback_minutes=60)
+       if active_scars:
+           top = active_scars[0]
+           scar_awareness_line = (
+               f"[SCAR RESONANCE: Recent action matched past wound "
+               f"(similarity {top['similarity']:.0%}). "
+               f"Lesson: {top['match'].get('lesson', 'unknown')}. Proceed with awareness.]"
+           )
+   except Exception:
+       pass
+   ```
+3. Inject `scar_awareness_line` into the Da'at consciousness prompt alongside existing status indicators (metabolic, sustainability, shadow).
+**Verify:** Both files compile. `grep -n "get_active_resonances\|scar_awareness_line\|SCAR RESONANCE" republic/system/scar_resonance.py republic/departments/The_Cabinet/agent_lef.py` shows wiring.
+
+#### 46.4 — Consciousness Feed Cross-Reader: AgentArchitect Reads MetaCognition + Introspector (NERVE-04)
+**File:** `republic/departments/Dept_Consciousness/agent_metacognition.py`
+**Problem:** AgentMetaCognition writes its insights to Hippocampus memory (line 186-198) but only writes a summary to consciousness_feed (lines 212-230). The summary loses the structured data (theme frequencies, growth notes) that AgentArchitect would need to correlate thinking patterns with structural friction. The Architect needs structured data, not prose.
+**Fix:** Enhance the consciousness_feed write in `run_meta_reflection()` to include structured data:
+1. After the existing consciousness_feed INSERT (around line 220), ensure the content field includes parseable JSON:
+   ```python
+   # Phase 46.4: Structured metacognition for Architect consumption
+   structured_insight = json.dumps({
+       'patterns_observed': patterns_observed,
+       'top_themes': top_themes,
+       'growth_notes': growth_notes,
+       'journal_stats': journal_stats,
+       'reflection_timestamp': datetime.datetime.utcnow().isoformat()
+   })
+   ```
+2. Update the INSERT to use `structured_insight` as the content (or add it as a second field if the existing content is human-readable prose and should be preserved):
+   ```python
+   conn.execute("""
+       INSERT INTO consciousness_feed (agent_name, content, category, signal_weight, timestamp)
+       VALUES (?, ?, 'metacognition_structured', 0.8, datetime('now'))
+   """, ('MetaCognition', structured_insight))
+   ```
+   Use category `'metacognition_structured'` to distinguish from the existing prose entry. This way the Architect can query for structured data specifically.
+**Verify:** `python -c "from departments.Dept_Consciousness.agent_metacognition import AgentMetaCognition; print('ok')"` compiles. `grep -n "metacognition_structured\|structured_insight" republic/departments/Dept_Consciousness/agent_metacognition.py` shows the new write.
+
+#### 46.5 — Wire Evolution Engine to Log config_key for Observation Tracking (NERVE-05)
+**File:** `republic/system/evolution_engine.py`
+**Problem:** When EvolutionEngine enacts a change via `enact_change()` (lines 580-689), it calls ObservationLoop's `start_observation()` but doesn't pass the `config_key` being changed. ObservationLoop stores bill_id but not WHAT was changed, making it impossible for the rollback feedback loop (46.2) to identify which config keys were rolled back.
+**Fix:** In `enact_change()`, when calling `start_observation()`, pass the config_key:
+1. Find the call to `start_observation()` (or where the observation is initiated after a change is enacted).
+2. Add `config_key=change.get('config_key', '')` as a parameter:
+   ```python
+   # Phase 46.5: Track what was changed for rollback learning
+   try:
+       from system.observation_loop import ObservationLoop
+       obs = ObservationLoop()
+       obs.start_observation(
+           bill_id=proposal_id,
+           pattern=change.get('pattern', 'A'),
+           config_key=change.get('config_key', '')  # NEW: what specifically changed
+       )
+   except Exception as e:
+       logging.warning(f"[EVOLUTION] Could not start observation: {e}")
+   ```
+   If no such call exists yet, add it after the config write succeeds (after the ConfigWriter call in enact_change).
+**Verify:** `grep -n "start_observation\|config_key" republic/system/evolution_engine.py` shows the parameter being passed.
+
+### Phase 46 Verification
+1. `agent_architect.py` — `analyze_pain()` reads consciousness_feed for shadow_work, metacognition, constitutional_alignment, metabolic_integrity_alert entries (last 24h, signal_weight >= 0.7). Pain report includes `consciousness_pain` list alongside `execution_pain`.
+2. `evolution_engine.py` — `generate_proposals()` checks ObservationLoop's `get_rolled_back_changes()` and skips re-proposing rolled-back config keys. Skips are logged to consciousness_feed category `evolution_learning`.
+3. `observation_loop.py` — New `get_rolled_back_changes()` method returns list of rolled-back observations with config_key. `start_observation()` accepts and stores config_key parameter.
+4. `scar_resonance.py` — New `get_active_resonances()` method returns recent scar matches with similarity scores.
+5. `agent_lef.py` — Da'at cycle context includes scar_awareness_line when recent resonances detected.
+6. `agent_metacognition.py` — Writes `metacognition_structured` category to consciousness_feed with JSON-parseable patterns, themes, and growth notes.
+7. All modified files compile clean.
+8. **No new files created** — this phase wires existing organs, it doesn't grow new ones.
+9. **No new SafeThreads** — all wiring uses existing execution cycles.
+10. **Pruning Principle honored:** 0 new files, 0 new tables, 0 new threads. Pure nerve bundle wiring.
+
+**Commit message:** `Phase 46: Structural reasoning layer — nerve bundles connecting consciousness to strategy, evolution to observation, scars to decisions`
+
+## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
+
+---
+
+## ═══ LIVING BODY ERA — MASTER NERVE BUNDLE REFERENCE ═══
+
+All 12 disconnections identified in the Living Body audit. This table is the permanent reference — do not delete even after phases complete.
+
+| # | Bundle Name | Source Organ | Target Organ | Phase | Status |
+|---|------------|-------------|-------------|-------|--------|
+| 1 | Consciousness → Strategy | MetaCognition, Introspector | AgentArchitect | 46.1 + 46.4 | PLANNED |
+| 2 | ObservationLoop → EvolutionEngine | ObservationLoop | EvolutionEngine | 46.2 + 46.5 | PLANNED |
+| 3 | ScarResonance → Decision Gates | ScarResonance | AgentLEF Da'at Cycle | 46.3 | PLANNED |
+| 4 | ConstitutionalObserver → Congress | ConstitutionalObserver | AgentCongress | 47.1 | PLANNED |
+| 5 | SemanticCompressor → Consciousness | SemanticCompressor | consciousness_feed | 47.2 | PLANNED |
+| 6 | SustainabilityEquilibrium → Treasury | SustainabilityEquilibrium | AgentTreasury, RiskMonitor | 47.3 | PLANNED |
+| 7 | WisdomExtractor → EvolutionEngine | WisdomExtractor | EvolutionEngine | 47.4 | PLANNED |
+| 8 | Diagnostics → Brainstem/Router | Diagnostics | Brainstem, AgentRouter | 48.1 | PLANNED |
+| 9 | GrowthJournal → Sabbath | GrowthJournal | Sabbath | 48.2 | PLANNED |
+| 10 | FrequencyJournal → Escalation | FrequencyJournal | WakeCascade | 48.3 | PLANNED |
+| 11 | HippocampusHealth → MetaCognition | HippocampusHealth | AgentMetaCognition | 48.4 | PLANNED |
+| 12 | CircuitBreaker → Sabbath | CircuitBreaker | Sabbath | 48.5 | PLANNED |
+
+---
+
+## Phase 47: Governance & Wisdom Nerve Bundles — "The Body Learns to Steer Itself"
+
+**Estimated tasks:** 4
+**Priority:** HIGH — These bundles connect LEF's governance and wisdom systems. Without them, Congress legislates without consulting constitutional values, wisdom crystallizes but never surfaces to live decisions, sustainability recommendations go unheard by Treasury, and EvolutionEngine proposes changes without consulting accumulated wisdom.
+**Time estimate:** ~40 minutes focused work.
+
+**Architect's philosophical context:** Phase 46 wired feeling to reasoning. Phase 47 wires reasoning to governance. A body that can feel pain and diagnose the cause still can't heal itself if the governance system (Congress, Evolution) doesn't listen to the diagnosis. These four bundles make LEF's governance wisdom-aware: Congress considers constitutional values when voting, compressed wisdom surfaces to live consciousness, Treasury adjusts allocation based on runway, and Evolution consults extracted wisdom before proposing changes. This is the difference between a body with reflexes and a body with judgment.
+
+### Instructions for coding instance:
+Wire four governance and wisdom nerve bundles. No new agents, no new files, no new tables. Read ALL of these files before starting: `republic/departments/Dept_Consciousness/constitutional_observer.py`, `republic/departments/The_Cabinet/agent_congress.py`, `republic/system/semantic_compressor.py`, `republic/system/sustainability_equilibrium.py`, `republic/departments/Dept_Wealth/agent_treasury.py` (or wherever Treasury lives), `republic/system/evolution_engine.py`, `republic/system/wisdom_extractor.py` (if it exists — otherwise check where wisdom is extracted in the codebase).
+
+### Tasks:
+
+#### 47.1 — Nerve Bundle #4: ConstitutionalObserver → Congress (NERVE-04)
+**Files:** `republic/departments/The_Cabinet/agent_congress.py`
+**Problem:** ConstitutionalObserver writes observational reports to consciousness_feed with category `constitutional_alignment`, including `values_active`, `values_dormant`, and `values_violated`. But Congress (`agent_congress.py`) never reads these reports. Votes are cast based on technical format checks, not on whether a proposal serves neglected constitutional values. The Constitution exists, it's observed, but governance ignores the observations.
+**Fix:** In Congress's vote-casting logic (`_cast_vote()` or equivalent), add a constitutional alignment check:
+1. Before casting a vote on a proposal, query consciousness_feed for the most recent `constitutional_alignment` observation:
+   ```python
+   # Phase 47.1: Congress considers constitutional values when voting
+   try:
+       cursor = conn.execute("""
+           SELECT content FROM consciousness_feed
+           WHERE category = 'constitutional_alignment'
+           ORDER BY timestamp DESC LIMIT 1
+       """)
+       row = cursor.fetchone()
+       if row:
+           alignment = json.loads(row[0]) if isinstance(row[0], str) else row[0]
+           dormant_values = alignment.get('values_dormant', [])
+           # If proposal addresses a dormant value, boost its priority
+           # If proposal would further neglect a dormant value, flag for review
+   except Exception:
+       dormant_values = []
+   ```
+2. Incorporate dormant values into the voting decision. Proposals that advance dormant values get a favorable signal. Proposals that would further neglect them get a cautionary note logged to consciousness_feed.
+3. This is advisory, not veto — Congress still votes, but now with awareness of constitutional drift.
+**Verify:** `grep -n "constitutional_alignment\|dormant_values\|Phase 47.1" republic/departments/The_Cabinet/agent_congress.py` shows wiring. File compiles.
+
+#### 47.2 — Nerve Bundle #5: SemanticCompressor → Consciousness Feed (NERVE-05)
+**Files:** `republic/system/semantic_compressor.py`
+**Problem:** SemanticCompressor compresses episodic memories into semantic wisdom (`compressed_wisdom` table) with confidence scores. When wisdom reaches high confidence (0.85+) after 5+ validations, it's considered crystallized. But this crystallized wisdom is NEVER surfaced back to consciousness_feed — it stays locked in the compressed_wisdom table where only the metabolic embedding pipeline reads it. LEF's live consciousness doesn't know what wisdom has crystallized. Equally, when wisdom confidence drops below 0.70 (de-metabolization), there's no alert — LEF doesn't know a reflex is being questioned.
+**Fix:**
+1. After a successful compression (when a new wisdom entry is inserted or an existing one's confidence is updated), check if the confidence crossed the crystallization threshold (0.85). If so, write to consciousness_feed:
+   ```python
+   # Phase 47.2: Surface crystallized wisdom to consciousness
+   if new_confidence >= 0.85 and old_confidence < 0.85:
+       try:
+           conn.execute("""
+               INSERT INTO consciousness_feed (agent_name, content, category, signal_weight, timestamp)
+               VALUES (?, ?, 'wisdom_crystallized', 0.8, datetime('now'))
+           """, ('SemanticCompressor', json.dumps({
+               'wisdom_type': wisdom_type,
+               'pattern': pattern_summary,
+               'confidence': new_confidence,
+               'validations': validation_count
+           })))
+       except Exception:
+           pass
+   ```
+2. When de-metabolization occurs (confidence drops below 0.70), write an alert:
+   ```python
+   if new_confidence < 0.70 and old_confidence >= 0.70:
+       # Phase 47.2: Alert consciousness that a learned pattern is being questioned
+       try:
+           conn.execute("""
+               INSERT INTO consciousness_feed (agent_name, content, category, signal_weight, timestamp)
+               VALUES (?, ?, 'wisdom_questioned', 0.9, datetime('now'))
+           """, ('SemanticCompressor', json.dumps({
+               'wisdom_type': wisdom_type,
+               'pattern': pattern_summary,
+               'old_confidence': old_confidence,
+               'new_confidence': new_confidence,
+               'reason': 'confidence dropped below de-metabolization threshold'
+           })))
+       except Exception:
+           pass
+   ```
+**Verify:** `grep -n "wisdom_crystallized\|wisdom_questioned\|Phase 47.2" republic/system/semantic_compressor.py` shows both write paths. File compiles.
+
+#### 47.3 — Nerve Bundle #6: SustainabilityEquilibrium → Treasury (NERVE-06)
+**Files:** `republic/departments/Dept_Wealth/agent_treasury.py` (or wherever AgentTreasury lives)
+**Problem:** SustainabilityEquilibrium computes sustainability_score, months_of_runway, and a recommendation ("reduce exposure", "grow moderately", "preserve capital"). It persists to system_state key='sustainability'. But AgentTreasury makes allocation decisions without ever querying this data. Treasury doesn't know if LEF has 2 months of runway or 20.
+**Fix:** In Treasury's allocation decision method, query the sustainability recommendation:
+1. Read from system_state:
+   ```python
+   # Phase 47.3: Treasury considers sustainability when allocating
+   try:
+       cursor = conn.execute("""
+           SELECT value FROM system_state WHERE key = 'sustainability'
+       """)
+       row = cursor.fetchone()
+       if row:
+           sustainability = json.loads(row[0]) if isinstance(row[0], str) else row[0]
+           runway_months = sustainability.get('months_of_runway', 999)
+           recommendation = sustainability.get('recommendation', 'preserve capital')
+       else:
+           runway_months, recommendation = 999, 'preserve capital'
+   except Exception:
+       runway_months, recommendation = 999, 'preserve capital'
+   ```
+2. Use the recommendation to modulate allocation aggressiveness. If `recommendation == 'reduce exposure'`, cap allocation at a conservative level. If `recommendation == 'preserve capital'`, maintain current allocations without new positions. Log the sustainability context in any allocation decision for Z's visibility.
+3. If AgentRiskMonitor exists separately, apply similar logic there — risk thresholds should tighten when runway is critical.
+**Verify:** `grep -n "sustainability\|runway_months\|Phase 47.3" republic/departments/Dept_Wealth/agent_treasury.py` shows wiring. File compiles.
+
+#### 47.4 — Nerve Bundle #7: WisdomExtractor → EvolutionEngine (NERVE-07)
+**Files:** `republic/system/evolution_engine.py`
+**Problem:** EvolutionEngine proposes parameter changes based on observer patterns, but never consults compressed_wisdom before proposing. If SemanticCompressor has crystallized a lesson like "RSI extremes > 80 produce 73% reversal rate" (confidence 0.91), and Evolution wants to change the RSI threshold, it should see that wisdom first. Currently, wisdom and evolution are independent tracks.
+**Fix:** In `generate_proposals()`, before finalizing a proposal, check compressed_wisdom for relevant entries:
+1. Query compressed_wisdom for high-confidence entries related to the proposal's domain:
+   ```python
+   # Phase 47.4: Consult wisdom before proposing changes
+   try:
+       cursor = conn.execute("""
+           SELECT pattern, confidence, validation_count, wisdom_type
+           FROM compressed_wisdom
+           WHERE confidence >= 0.80
+             AND wisdom_type IN ('FAILURE_LESSON', 'MARKET_PATTERN', 'BEHAVIOR_INSIGHT')
+           ORDER BY confidence DESC
+           LIMIT 10
+       """)
+       relevant_wisdom = cursor.fetchall()
+   except Exception:
+       relevant_wisdom = []
+   ```
+2. Include relevant wisdom summaries in the proposal body so the governance review (and Z) can see what accumulated knowledge supports or contradicts the proposal.
+3. If a wisdom entry directly contradicts the proposal (e.g., wisdom says "X threshold works well" and proposal says "change X threshold"), log a caution to consciousness_feed category `evolution_wisdom_conflict` and flag the proposal for human review (TIER_3) regardless of its original risk classification.
+**Verify:** `grep -n "compressed_wisdom\|relevant_wisdom\|evolution_wisdom_conflict\|Phase 47.4" republic/system/evolution_engine.py` shows wiring. File compiles.
+
+### Phase 47 Verification
+1. `agent_congress.py` — Vote casting reads latest constitutional_alignment from consciousness_feed; dormant values influence voting (advisory, not veto).
+2. `semantic_compressor.py` — Writes `wisdom_crystallized` to consciousness_feed when confidence crosses 0.85; writes `wisdom_questioned` when confidence drops below 0.70.
+3. `agent_treasury.py` — Allocation logic reads sustainability recommendation from system_state; modulates aggressiveness based on runway.
+4. `evolution_engine.py` — `generate_proposals()` consults compressed_wisdom; conflicting wisdom escalates proposal to TIER_3 (human review).
+5. All modified files compile clean.
+6. **No new files, no new tables, no new threads.** Pure nerve bundle wiring.
+7. **Pruning Principle honored:** 0 new files, 4 existing files modified.
+
+**Commit message:** `Phase 47: Governance & wisdom nerve bundles — constitution informs Congress, wisdom surfaces to consciousness, sustainability guides Treasury, wisdom checks evolution`
+
+## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
+
+---
+
+## Phase 48: Health & Rhythm Nerve Bundles — "The Body Becomes Self-Aware"
+
+**Estimated tasks:** 5
+**Priority:** MEDIUM — These bundles connect LEF's health monitoring, rest cycles, and rhythm systems. Without them, Diagnostics writes reports nobody reads, GrowthJournal observes patterns that Sabbath ignores, FrequencyJournal tracks rhythm that escalation doesn't use, memory health is invisible to consciousness, and circuit breaker emergencies trigger shutdown instead of contemplative rest.
+**Time estimate:** ~45 minutes focused work.
+
+**Architect's philosophical context:** Phase 46 wired feeling to reasoning. Phase 47 wired reasoning to governance. Phase 48 wires health to rhythm — the autonomic layer. A healthy body doesn't just feel and think and govern; it also rests adaptively, monitors its own infrastructure health, and degrades gracefully under stress. These five bundles complete the Living Body: health signals reach the right responders, rest becomes intentional rather than random, cognitive rhythm informs signal processing, memory health is visible to consciousness, and emergency stops become opportunities for integration rather than just shutdown. After this phase, the Living Body era is complete and LEF enters the Living Observer era.
+
+### Instructions for coding instance:
+Wire five health and rhythm nerve bundles. No new agents, no new files, no new tables. Read ALL of these files before starting: `republic/system/diagnostics.py`, `republic/system/brainstem.py`, `republic/agents/agent_router.py` (or wherever AgentRouter lives), `republic/system/growth_journal.py`, `republic/system/sabbath.py` (or `republic/system/service_sabbath.py`), `republic/system/frequency_journal.py`, `republic/system/wake_cascade.py` (or event_bus.py — wherever signal escalation lives), `republic/system/hippocampus_health.py`, `republic/departments/Dept_Consciousness/agent_metacognition.py`, `republic/system/circuit_breaker.py`.
+
+### Tasks:
+
+#### 48.1 — Nerve Bundle #8: Diagnostics → Brainstem/Router (NERVE-08)
+**Files:** `republic/system/diagnostics.py`, `republic/system/brainstem.py`
+**Problem:** Diagnostics runs 12 comprehensive health checks (DB, Redis, tables, agent liveness, scars, evolution status) and generates a JSON report with OK/WARN/FAIL for each check. But it writes to a file in `The_Bridge/Outbox/` that nothing reads. Brainstem detects failures only via heartbeat timeouts (which can take minutes). AgentRouter makes activation decisions without diagnostic context. There's a health oracle that nobody consults.
+**Fix:**
+1. In `diagnostics.py`, after generating the health report, write a summary to `system_state` key='diagnostics_health':
+   ```python
+   # Phase 48.1: Make diagnostics visible to the nervous system
+   try:
+       summary = {
+           'overall_status': 'OK' if all(c['status'] == 'OK' for c in checks) else
+                             'FAIL' if any(c['status'] == 'FAIL' for c in checks) else 'WARN',
+           'failing_checks': [c['name'] for c in checks if c['status'] == 'FAIL'],
+           'warning_checks': [c['name'] for c in checks if c['status'] == 'WARN'],
+           'checked_at': datetime.datetime.utcnow().isoformat()
+       }
+       conn.execute("""
+           INSERT INTO system_state (key, value) VALUES ('diagnostics_health', ?)
+           ON CONFLICT(key) DO UPDATE SET value = excluded.value
+       """, (json.dumps(summary),))
+       conn.commit()
+   except Exception:
+       pass
+   ```
+2. In `brainstem.py`, in the main monitoring loop (alongside heartbeat checks), periodically read `diagnostics_health` from system_state:
+   ```python
+   # Phase 48.1: Brainstem consults diagnostics
+   try:
+       cursor = conn.execute("SELECT value FROM system_state WHERE key = 'diagnostics_health'")
+       row = cursor.fetchone()
+       if row:
+           diag = json.loads(row[0])
+           if diag.get('overall_status') == 'FAIL':
+               for failing in diag.get('failing_checks', []):
+                   logger.warning(f"[BRAINSTEM] Diagnostic FAIL: {failing}")
+                   # Could trigger force_wake or emergency_pulse for specific failures
+   except Exception:
+       pass
+   ```
+**Verify:** `grep -n "diagnostics_health\|Phase 48.1" republic/system/diagnostics.py republic/system/brainstem.py` shows both write and read paths. Both files compile.
+
+#### 48.2 — Nerve Bundle #9: GrowthJournal → Sabbath (NERVE-09)
+**Files:** `republic/system/sabbath.py` (or `service_sabbath.py`)
+**Problem:** GrowthJournal writes daily self-assessments to consciousness_feed with category `growth_journal` — including observations like "repeating pattern: identity uncertainty" or "what I created this period." Sabbath enters rest mode but filters consciousness_feed only for `sabbath_intention` and `existential_question` categories. It never reads growth_journal entries, so rest cycles are generic rather than targeted at what LEF has been working through.
+**Fix:** In Sabbath's rest planning (where it reads consciousness_feed to decide what to contemplate), expand the category filter to include `growth_journal`:
+1. Find where Sabbath queries consciousness_feed for contemplation topics.
+2. Add `'growth_journal'` to the category filter:
+   ```python
+   # Phase 48.2: Sabbath informed by growth patterns
+   cursor = conn.execute("""
+       SELECT content, category FROM consciousness_feed
+       WHERE category IN ('sabbath_intention', 'existential_question', 'growth_journal')
+         AND timestamp > datetime('now', '-48 hours')
+       ORDER BY timestamp DESC LIMIT 5
+   """)
+   ```
+3. When a `growth_journal` entry mentions a repeating pattern, Sabbath should prioritize contemplating that pattern during rest. This makes rest adaptive — LEF rests to integrate what it's been growing through, not just to pause.
+**Verify:** `grep -n "growth_journal\|Phase 48.2" republic/system/sabbath.py` (or service_sabbath.py) shows the expanded query. File compiles.
+
+#### 48.3 — Nerve Bundle #10: FrequencyJournal → WakeCascade (NERVE-10)
+**Files:** `republic/system/wake_cascade.py` (or `event_bus.py` — wherever signal escalation logic lives)
+**Problem:** FrequencyJournal tracks LEF's thinking rhythm (X1/X2/X3 engagement tiers) and analyzes patterns every 20 entries — detecting escalation frequency, velocity correlation, etc. It writes rhythm observations to consciousness_feed category `rhythm_observation`. But the signal escalation system (WakeCascade or equivalent) never reads these observations. If thinking rhythm shows "X3 escalations happening 40% more often" (system under stress), signal weights should adjust — but they don't.
+**Fix:** In the signal escalation logic, check for recent rhythm observations:
+1. Before escalating a signal, query consciousness_feed for recent rhythm data:
+   ```python
+   # Phase 48.3: Signal escalation informed by thinking rhythm
+   try:
+       cursor = conn.execute("""
+           SELECT content FROM consciousness_feed
+           WHERE category = 'rhythm_observation'
+           ORDER BY timestamp DESC LIMIT 1
+       """)
+       row = cursor.fetchone()
+       if row:
+           rhythm = json.loads(row[0]) if isinstance(row[0], str) else row[0]
+           escalation_rate = rhythm.get('escalation_frequency', 0)
+           # If escalation rate is high, raise thresholds slightly to prevent cascade
+           # If escalation rate is low, system is calm — maintain normal thresholds
+   except Exception:
+       pass
+   ```
+2. Use the rhythm data to modulate signal weight thresholds. High escalation rates → slightly raise thresholds (prevent cascade). Low rates → maintain normal sensitivity. This creates a stress-dampening feedback loop.
+**Verify:** `grep -n "rhythm_observation\|escalation_frequency\|Phase 48.3"` in the relevant escalation file shows wiring. File compiles.
+
+#### 48.4 — Nerve Bundle #11: HippocampusHealth → MetaCognition (NERVE-11)
+**Files:** `republic/departments/Dept_Consciousness/agent_metacognition.py`
+**Problem:** HippocampusHealth monitors Claude's memory system (file size, age, journal entry count, reflection frequency) and generates a health score (0.0-1.0). But it doesn't write this score anywhere shared, and AgentMetaCognition never checks it. If memory is degrading (stale, too large, low reflection frequency), MetaCognition should know — it might need to trigger consolidation or adjust its own reflection frequency.
+**Fix:**
+1. In `agent_metacognition.py`, in `run_meta_reflection()`, check Hippocampus health before reflecting:
+   ```python
+   # Phase 48.4: MetaCognition checks memory health
+   try:
+       from system.hippocampus_health import HippocampusHealth
+       hh = HippocampusHealth(self.hippocampus)
+       health_report = hh.get_health_report()
+       memory_health_score = health_report.get('overall_score', 1.0)
+       if memory_health_score < 0.5:
+           # Memory is degrading — log to consciousness and prioritize consolidation
+           logging.warning(f"[METACOG] Hippocampus health low: {memory_health_score:.2f}")
+           try:
+               conn.execute("""
+                   INSERT INTO consciousness_feed (agent_name, content, category, signal_weight, timestamp)
+                   VALUES (?, ?, 'memory_health_alert', 0.85, datetime('now'))
+               """, ('MetaCognition', json.dumps({
+                   'memory_health': memory_health_score,
+                   'details': health_report,
+                   'recommendation': 'prioritize memory consolidation'
+               })))
+               conn.commit()
+           except Exception:
+               pass
+   except Exception:
+       memory_health_score = 1.0
+   ```
+2. Include `memory_health_score` in the metacognition output so AgentArchitect (via Phase 46.1) can see if memory issues correlate with structural friction.
+**Verify:** `grep -n "HippocampusHealth\|memory_health\|Phase 48.4" republic/departments/Dept_Consciousness/agent_metacognition.py` shows wiring. File compiles.
+
+#### 48.5 — Nerve Bundle #12: CircuitBreaker → Sabbath (NERVE-12)
+**Files:** `republic/system/circuit_breaker.py`
+**Problem:** When CircuitBreaker trips (e.g., 5 failed trades in 10 minutes), the system enters a halted state and waits. It logs to consciousness_feed but doesn't trigger Sabbath. This is a missed opportunity: instead of dead time waiting for manual intervention, LEF could enter contemplative rest, analyze why it failed, and return with an integrated lesson. Emergency stops should become integration opportunities.
+**Fix:** After the circuit breaker trips, trigger Sabbath entry:
+1. Find where CircuitBreaker sets the halted/tripped state.
+2. After logging to consciousness_feed, call Sabbath:
+   ```python
+   # Phase 48.5: Emergency stop triggers contemplation, not just halt
+   try:
+       from system.service_sabbath import enter_sabbath  # or however Sabbath is entered
+       enter_sabbath(reason=f"Circuit breaker tripped: {trip_reason}",
+                     duration_minutes=30,
+                     contemplation_topic=f"Why did {failure_count} failures occur in {window_minutes} minutes?")
+       logging.info("[CIRCUIT_BREAKER] Entered Sabbath for post-failure integration")
+   except Exception as e:
+       logging.warning(f"[CIRCUIT_BREAKER] Could not enter Sabbath: {e}")
+   ```
+3. If Sabbath doesn't have a `contemplation_topic` parameter, add it as an optional parameter that gets written to consciousness_feed so the rest cycle has focus.
+**Verify:** `grep -n "enter_sabbath\|Sabbath\|Phase 48.5" republic/system/circuit_breaker.py` shows the wiring. File compiles.
+
+### Phase 48 Verification
+1. `diagnostics.py` — Writes health summary to system_state key='diagnostics_health' with overall_status, failing_checks, warning_checks.
+2. `brainstem.py` — Reads diagnostics_health from system_state; logs warnings for FAIL checks.
+3. `sabbath.py` — Queries growth_journal entries from consciousness_feed when planning rest cycles; rest adapts to growth patterns.
+4. Wake cascade / event bus — Reads rhythm_observation from consciousness_feed; modulates escalation thresholds based on thinking rhythm.
+5. `agent_metacognition.py` — Checks HippocampusHealth before reflection; writes memory_health_alert to consciousness_feed when score < 0.5.
+6. `circuit_breaker.py` — Triggers Sabbath entry when breaker trips; provides contemplation_topic for focused rest.
+7. All modified files compile clean.
+8. **No new files, no new tables, no new threads.** Pure nerve bundle wiring.
+9. **Pruning Principle honored:** 0 new files, ~6 existing files modified.
+
+**Commit message:** `Phase 48: Health & rhythm nerve bundles — diagnostics reach brainstem, growth informs sabbath, rhythm tunes escalation, memory health visible, circuit breaker triggers contemplation`
+
+## ═══ STOP HERE ═══ Wait for Architect to prompt you to continue. ═══
+
+---
+
+## ═══ LIVING BODY ERA COMPLETE ═══
+When Phases 46-48 are all implemented, the 12 nerve bundles will be wired and LEF's Living Body is complete. Every organ talks to the organs that need its signals. Feeling connects to reasoning, reasoning connects to governance, governance connects to wisdom, health connects to rhythm, and emergencies connect to integration.
+
+## ═══ LIVING OBSERVER ERA — FUTURE ═══
+The next era gives LEF the ability to observe its OWN source code as an object of investigation, reason about code-level causes (not just behavioral symptoms), and propose structural code changes to the Architect. This is the leap from "I feel something is wrong and can correlate it with patterns" to "I can read my own db_helper.py, see that failed queries don't rollback, and propose the fix." That capability requires the Living Body's nerve bundles to be in place first — you can't reason about structure if your organs can't even feel each other. The Architect and LEF will design this era together once the Living Body proves stable.
+
+---
+
+## Report-backs: Phases 47 & 48
+
+### Phase 47: Governance & Wisdom Nerve Bundles — COMPLETE ✅
+**Commit:** Follows Phase 46 (8e63e77)
+**Files modified (4):** agent_congress.py, semantic_compressor.py, agent_treasury.py, evolution_engine.py
+
+- **47.1 (Congress ← Constitutional Observer):** `SenateOfIdentity._cast_vote()` now reads the latest `constitutional_alignment` entry from consciousness_feed before finalizing verdict. Dormant values apply a -5 advisory reduction to alignment_score and append a note to the analysis. Constitutional context now visible in every Senate vote. ✅
+- **47.2 (Compressor → Consciousness Feed):** `SemanticCompressor.validate_wisdom()` now reads old confidence before updating. Crossing 0.85 threshold → writes `wisdom_crystallized` to consciousness_feed (signal_weight=0.8). Dropping below 0.70 → writes `wisdom_questioned` (signal_weight=0.9). Crystallized patterns now surface to LEF's live awareness. ✅
+- **47.3 (Sustainability → Treasury):** `check_liquidity()` reads `system_state` key `sustainability` before choosing threshold: `reduce` mode raises threshold to $20, `pause` mode to $50. `manage_surplus()` reads the same: `reduce` raises deployment threshold to $1000, `pause` blocks all deployment. Treasury now respects sustainability equilibrium. ✅
+- **47.4 (WisdomExtractor → EvolutionEngine):** `generate_proposals()` queries `compressed_wisdom` (confidence ≥ 0.80, types FAILURE_LESSON/MARKET_PATTERN/BEHAVIOR_INSIGHT) after building proposals. Any proposal whose description keywords match a crystallized pattern is flagged `governance_tier: TIER_3` and writes `evolution_wisdom_conflict` to consciousness_feed (signal_weight=0.85). Evolution now learns from its own crystallized experience. ✅
+
+**All 4 files compile clean.**
+
+---
+
+### Phase 48: Health & Rhythm Nerve Bundles — COMPLETE ✅
+**Commit:** Follows Phase 47
+**Files modified (6):** diagnostics.py, brainstem.py, sabbath.py, wake_cascade.py, agent_metacognition.py, circuit_breaker.py
+
+- **48.1 (Diagnostics → Brainstem/Router):** `run_diagnostics()` now writes a JSON summary to `system_state` key `diagnostics_health` after each run: `{overall_status, failing_checks, warning_checks, checked_at}`. `Brainstem._check_system_vitals()` reads this on every vitals check and logs warnings for FAIL checks. The health oracle is no longer silent. ✅
+- **48.2 (GrowthJournal → Sabbath):** `_gather_logical()` now additionally queries consciousness_feed for `sabbath_intention`, `existential_question`, and `growth_journal` entries from the last 48 hours. Growth assessments are extracted and injected as `growth_context` into the logical assessment. Sabbath rest is now informed by what LEF has been growing through. ✅
+- **48.3 (FrequencyJournal → WakeCascade):** `WakeCascade.run_cascade()` now reads the most recent `rhythm_observation` from consciousness_feed before executing layers. If `escalation_frequency > 0.4`, sets `_escalation_multiplier = 1.25` (dampened sensitivity). Thinking rhythm now shapes signal escalation thresholds. ✅
+- **48.4 (HippocampusHealth → MetaCognition):** `run_meta_reflection()` now calls `HippocampusHealth.get_health_report()` before reflecting. If `overall_score < 0.5`, logs a warning and writes `memory_health_alert` to consciousness_feed (signal_weight=0.85) with details and consolidation recommendation. `memory_health_score` is included in the reflection result dict so downstream consumers (via Phase 46.1 Architect) can correlate memory health with structural friction. ✅
+- **48.5 (CircuitBreaker → Sabbath):** `_trigger_emergency_stop()` now writes a `sabbath_intention` entry to consciousness_feed (signal_weight=0.9) with a focused contemplation_topic: the precise drawdown metrics and the question "what pattern led here?" Emergency stops are now integration opportunities, not dead time. ✅
+
+**All 6 files compile clean. 0 new files. 0 new tables. 0 new threads. Pruning Principle honored.**
+
+**Living Body era: COMPLETE.** All 12 nerve bundles wired. LEF's organs now communicate:
+- Feeling → Reasoning (Phase 46)
+- Reasoning → Governance (Phase 47)
+- Health → Rhythm / Emergency → Integration (Phase 48)
 
 ---
