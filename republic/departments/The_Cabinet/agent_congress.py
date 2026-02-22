@@ -413,27 +413,52 @@ class SenateOfIdentity:
             risk_score += 70 
             risk_reasons.append("Market Fear Veto (Austerity Mode).")
             
+        # Phase 47.1: CONSTITUTIONAL VALUES CHECK — read dormant values from ConstitutionalObserver
+        constitutional_note = ""
+        try:
+            from db.db_helper import db_connection as _db_conn
+            import os as _os
+            _base = _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+            _db_path = _os.getenv('DB_PATH', _os.path.join(_base, 'republic.db'))
+            with _db_conn(_db_path) as _ca_conn:
+                _ca_row = _ca_conn.execute(
+                    "SELECT content FROM consciousness_feed "
+                    "WHERE category = 'constitutional_alignment' "
+                    "ORDER BY timestamp DESC LIMIT 1"
+                ).fetchone()
+                if _ca_row:
+                    _ca_data = json.loads(_ca_row[0]) if isinstance(_ca_row[0], str) else _ca_row[0]
+                    dormant_values = _ca_data.get('values_dormant', [])
+                    if dormant_values:
+                        # Dormant values are advisory — reduce alignment score slightly
+                        alignment_score = max(alignment_score - 5, 0)
+                        constitutional_note = f" [Advisory: {len(dormant_values)} dormant value(s): {', '.join(dormant_values[:3])}]"
+        except Exception:
+            pass
+
         # 4. FINAL VERDICT
         final_score = alignment_score - risk_score
         passed = final_score > 50
-        
+
         reason = "Aligned with Canon." if passed else "Too risky / Misaligned."
         if risk_reasons:
             reason += f" Risks: {'; '.join(risk_reasons)}"
-            
+        if constitutional_note:
+            reason += constitutional_note
+
         analysis = f"""
         **Senate Intelligence Analysis**
         - Context: {context_msg} (Score: {sentiment:.1f})
         - Risk Score: {risk_score}/100
-        - Alignment Score: {alignment_score}/100
+        - Alignment Score: {alignment_score}/100{constitutional_note}
         - Final Score: {final_score}/100
-        
+
         **Verdict**: {'✅ PASSED' if passed else '❌ REJECTED'}
         """
-        
+
         return {
-            'passed': passed, 
-            'score': final_score, 
+            'passed': passed,
+            'score': final_score,
             'reason': reason,
             'analysis': analysis
         }

@@ -116,13 +116,16 @@ class SemanticCompressor:
                 ON compressed_wisdom(wisdom_type)
             """)
             # Phase 38.75a: Add metabolic columns (safe ALTER — check existence first)
-            existing_cols = [row[1] for row in conn.execute("PRAGMA table_info(compressed_wisdom)").fetchall()]
-            if 'metabolized' not in existing_cols:
-                conn.execute("ALTER TABLE compressed_wisdom ADD COLUMN metabolized BOOLEAN DEFAULT FALSE")
-            if 'metabolized_at' not in existing_cols:
-                conn.execute("ALTER TABLE compressed_wisdom ADD COLUMN metabolized_at TIMESTAMP")
-            if 'metabolized_target' not in existing_cols:
-                conn.execute("ALTER TABLE compressed_wisdom ADD COLUMN metabolized_target TEXT")
+            # Use DB-agnostic approach: try ALTER and catch if column already exists
+            for col_name, col_def in [
+                ('metabolized', 'BOOLEAN DEFAULT FALSE'),
+                ('metabolized_at', 'TIMESTAMP'),
+                ('metabolized_target', 'TEXT')
+            ]:
+                try:
+                    conn.execute(f"ALTER TABLE compressed_wisdom ADD COLUMN {col_name} {col_def}")
+                except Exception:
+                    pass  # Column already exists — safe to ignore
             conn.commit()
             logging.info("[COMPRESSOR] 📚 compressed_wisdom table ready.")
         finally:
@@ -397,9 +400,19 @@ Write a single concise trading insight. Start with "IN {condition.upper()}:" fol
         """
         conn = self._get_connection()
         try:
+            # Read current confidence before update
+            old_row = conn.execute(
+                "SELECT confidence, wisdom_type, summary FROM compressed_wisdom WHERE id = ?",
+                (wisdom_id,)
+            ).fetchone()
+            old_confidence = old_row[0] if old_row else 0.5
+            wisdom_type = old_row[1] if old_row else ''
+            pattern_summary = (old_row[2] or '')[:100] if old_row else ''
+
             # Adjust confidence based on outcome
             adjustment = 0.05 if outcome_matched else -0.1
-            
+            new_confidence = max(0.1, min(0.99, old_confidence + adjustment))
+
             conn.execute("""
                 UPDATE compressed_wisdom
                 SET confidence = MAX(0.1, MIN(0.99, confidence + ?)),
@@ -407,9 +420,52 @@ Write a single concise trading insight. Start with "IN {condition.upper()}:" fol
                     last_validated = CURRENT_TIMESTAMP
                 WHERE id = ?
             """, (adjustment, wisdom_id))
-            
+
             conn.commit()
             logging.debug(f"[COMPRESSOR] Validated wisdom #{wisdom_id}: {'✓' if outcome_matched else '✗'}")
+
+            # Phase 47.2: Surface crystallized wisdom to consciousness
+            if new_confidence >= 0.85 and old_confidence < 0.85:
+                try:
+                    row2 = conn.execute(
+                        "SELECT times_validated FROM compressed_wisdom WHERE id = ?", (wisdom_id,)
+                    ).fetchone()
+                    validation_count = row2[0] if row2 else 0
+                    conn.execute(
+                        "INSERT INTO consciousness_feed "
+                        "(agent_name, content, category, signal_weight) "
+                        "VALUES (?, ?, 'wisdom_crystallized', 0.8)",
+                        ('SemanticCompressor', json.dumps({
+                            'wisdom_type': wisdom_type,
+                            'pattern': pattern_summary,
+                            'confidence': new_confidence,
+                            'validations': validation_count,
+                            'wisdom_id': wisdom_id,
+                        }))
+                    )
+                    conn.commit()
+                except Exception:
+                    pass
+
+            # Phase 47.2: Alert consciousness when a learned pattern is being questioned
+            if new_confidence < 0.70 and old_confidence >= 0.70:
+                try:
+                    conn.execute(
+                        "INSERT INTO consciousness_feed "
+                        "(agent_name, content, category, signal_weight) "
+                        "VALUES (?, ?, 'wisdom_questioned', 0.9)",
+                        ('SemanticCompressor', json.dumps({
+                            'wisdom_type': wisdom_type,
+                            'pattern': pattern_summary,
+                            'old_confidence': old_confidence,
+                            'new_confidence': new_confidence,
+                            'reason': 'confidence dropped below de-metabolization threshold',
+                            'wisdom_id': wisdom_id,
+                        }))
+                    )
+                    conn.commit()
+                except Exception:
+                    pass
         finally:
             self._release_connection(conn)
 

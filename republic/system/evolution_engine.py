@@ -566,6 +566,60 @@ class EvolutionEngine:
             else:
                 logger.debug(f"[EVOLUTION] Observer '{domain}' has no generate_proposals method")
 
+        # Phase 47.4: Consult compressed_wisdom before finalizing proposals
+        # High-confidence crystallized wisdom can flag conflicts with proposed changes
+        try:
+            from db.db_helper import db_connection as _ew_db
+            with _ew_db() as _ew_conn:
+                _wisdom_rows = _ew_conn.execute(
+                    "SELECT wisdom_type, summary, confidence FROM compressed_wisdom "
+                    "WHERE confidence >= 0.80 AND metabolized = 0 "
+                    "AND wisdom_type IN ('FAILURE_LESSON', 'MARKET_PATTERN', 'BEHAVIOR_INSIGHT') "
+                    "ORDER BY confidence DESC LIMIT 10"
+                ).fetchall()
+                _wisdoms = [{'type': r[0], 'summary': r[1], 'confidence': r[2]} for r in _wisdom_rows]
+        except Exception:
+            _wisdoms = []
+
+        if _wisdoms:
+            _final_proposals = []
+            for _prop in all_proposals:
+                _prop_text = (
+                    (_prop.get('change_description', '') or '') + ' ' +
+                    (_prop.get('observation', '') or '')
+                ).lower()
+                _conflict = None
+                for _w in _wisdoms:
+                    _w_keywords = [kw for kw in (_w['summary'] or '').lower().split() if len(kw) > 5]
+                    if any(kw in _prop_text for kw in _w_keywords[:5]):
+                        _conflict = _w
+                        break
+                if _conflict:
+                    logger.info(
+                        f"[EVOLUTION] Wisdom conflict: proposal '{_prop.get('change_description', '')[:60]}' "
+                        f"conflicts with crystallized pattern (confidence {_conflict['confidence']:.2f}): "
+                        f"'{_conflict['summary'][:80]}' — escalating to TIER_3"
+                    )
+                    _prop['governance_tier'] = 'TIER_3'
+                    _prop['wisdom_conflict'] = _conflict['summary']
+                    try:
+                        from db.db_helper import db_connection as _wc_db
+                        with _wc_db() as _wc_conn:
+                            _wc_conn.execute(
+                                "INSERT INTO consciousness_feed (agent_name, content, category, signal_weight) "
+                                "VALUES (?, ?, 'evolution_wisdom_conflict', 0.85)",
+                                ('EvolutionEngine', json.dumps({
+                                    'proposal': _prop.get('change_description', '')[:120],
+                                    'conflicting_wisdom': _conflict['summary'][:120],
+                                    'wisdom_confidence': _conflict['confidence'],
+                                }))
+                            )
+                            _wc_conn.commit()
+                    except Exception:
+                        pass
+                _final_proposals.append(_prop)
+            all_proposals = _final_proposals
+
         logger.info(f"[EVOLUTION] Generated {len(all_proposals)} total proposals")
         return all_proposals
 

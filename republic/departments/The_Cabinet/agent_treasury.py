@@ -173,6 +173,20 @@ class AgentTreasury:
         """
         Checks if cash is too low. If so, triggers a SELL to generate liquidity.
         """
+        # Phase 47.3: Read sustainability recommendation from system_state
+        _sustainability_rec = None
+        try:
+            with db_connection(self.db_path) as _ss_conn:
+                _ss_row = _ss_conn.execute(
+                    "SELECT value FROM system_state WHERE key = 'sustainability' ORDER BY updated_at DESC LIMIT 1"
+                ).fetchone()
+                if _ss_row:
+                    import json as _json
+                    _ss_data = _json.loads(_ss_row[0]) if isinstance(_ss_row[0], str) else _ss_row[0]
+                    _sustainability_rec = _ss_data.get('recommendation') if isinstance(_ss_data, dict) else None
+        except Exception:
+            pass
+
         with db_connection(self.db_path) as conn:
             c = conn.cursor()
 
@@ -181,7 +195,16 @@ class AgentTreasury:
             row = c.fetchone()
             total_cash = row[0] if row and row[0] else 0.0
 
-            if total_cash < 10.0: # Liquidity Crisis Threshold
+            # Phase 47.3: Sustainability modulates liquidity threshold
+            _liquidity_threshold = 10.0
+            if _sustainability_rec == 'reduce':
+                _liquidity_threshold = 20.0  # More conservative — maintain higher cash buffer
+                self.logger.info("[TREASURY] Sustainability: REDUCE mode — liquidity threshold raised to $20")
+            elif _sustainability_rec == 'pause':
+                _liquidity_threshold = 50.0  # Pause mode — large buffer required
+                self.logger.info("[TREASURY] Sustainability: PAUSE mode — liquidity threshold raised to $50")
+
+            if total_cash < _liquidity_threshold: # Liquidity Crisis Threshold
                 # SAFETY: If total cash is ZERO and we have ZERO assets, this is likely a fresh/clean state.
                 # Don't panic sell phantom assets.
                 assets = await self.get_total_assets()
@@ -267,7 +290,27 @@ class AgentTreasury:
             except Exception as cb_err:
                 logging.debug(f"[TREASURY] Circuit breaker check skipped: {cb_err}")
 
-            if surplus > 500.0:  # PHASE 13: Raised from 5.0 to prevent over-trading
+            # Phase 47.3: Sustainability modulates surplus deployment aggressiveness
+            _surplus_threshold = 500.0  # Default deployment threshold (Phase 13)
+            try:
+                with db_connection(self.db_path) as _ss2_conn:
+                    _ss2_row = _ss2_conn.execute(
+                        "SELECT value FROM system_state WHERE key = 'sustainability' ORDER BY updated_at DESC LIMIT 1"
+                    ).fetchone()
+                    if _ss2_row:
+                        import json as _json2
+                        _ss2_data = _json2.loads(_ss2_row[0]) if isinstance(_ss2_row[0], str) else _ss2_row[0]
+                        _s_rec = _ss2_data.get('recommendation') if isinstance(_ss2_data, dict) else None
+                        if _s_rec == 'reduce':
+                            _surplus_threshold = 1000.0  # Require more surplus before deploying
+                            logging.info("[TREASURY] Sustainability: REDUCE mode — surplus threshold raised to $1000")
+                        elif _s_rec == 'pause':
+                            _surplus_threshold = float('inf')  # Block all surplus deployment
+                            logging.info("[TREASURY] Sustainability: PAUSE mode — surplus deployment BLOCKED")
+            except Exception:
+                pass
+
+            if surplus > _surplus_threshold:  # PHASE 13: Raised from 5.0 to prevent over-trading
                 logging.info(f"[TREASURY] Deploying Surplus Capital (${surplus:.2f}) into Growth Assets.")
 
                 # ALLOCATION STRATEGY: "The Flow" (Phase 10)
