@@ -86,28 +86,30 @@ class ObservationLoop:
         bill_id: str,
         snapshot_id: str,
         pattern: str = "A",
-        metrics: List[str] = None
+        metrics: List[str] = None,
+        config_key: str = ""
     ) -> bool:
         """
         Start observing system health after a change.
-        
+
         Args:
             bill_id: The bill that triggered the change
             snapshot_id: Git commit to rollback to if needed
             pattern: 'A' (threshold), 'B' (behavior), or 'C' (structural)
             metrics: List of metrics to monitor (defaults to all)
-            
+            config_key: Phase 46.5 — what config key was changed (for rollback learning)
+
         Returns:
             True if observation started
         """
         if metrics is None:
             metrics = ["error_count", "agent_health", "uptime"]
-            
+
         duration_hours = OBSERVATION_HOURS.get(pattern, 24)
-        
+
         # Capture baseline metrics
         baseline = self._capture_metrics(metrics)
-        
+
         observation = {
             "bill_id": bill_id,
             "snapshot_id": snapshot_id,
@@ -119,9 +121,10 @@ class ObservationLoop:
             "current": baseline,
             "status": "ACTIVE",
             "checks": 0,
-            "max_degradation": 0.0
+            "max_degradation": 0.0,
+            "config_key": config_key  # Phase 46.5: track what was changed
         }
-        
+
         self.observations[bill_id] = observation
         self._save_observations()
         
@@ -216,6 +219,23 @@ class ObservationLoop:
             
         return False
     
+    def get_rolled_back_changes(self, lookback_days: int = 30) -> list:
+        """
+        Phase 46.2: Return list of changes that were rolled back due to degradation.
+        Used by EvolutionEngine to avoid re-proposing failed changes.
+        """
+        rolled_back = []
+        for bill_id, obs in self.observations.items():
+            if obs.get('status') == 'ROLLED_BACK':
+                rolled_back.append({
+                    'bill_id': bill_id,
+                    'config_key': obs.get('config_key', ''),
+                    'rolled_back_at': obs.get('rolled_back_at', ''),
+                    'max_degradation': obs.get('max_degradation', 0),
+                    'pattern': obs.get('pattern', '')
+                })
+        return rolled_back
+
     def _capture_metrics(self, metrics: List[str]) -> Dict:
         """Capture current values for specified metrics."""
         result = {}
@@ -301,10 +321,33 @@ def run_observation_check():
     for alert in alerts:
         if alert["action"] == "ROLLBACK_RECOMMENDED":
             logger.warning(f"[OBS] Rollback recommended for {alert['bill_id']}")
-            # Auto-rollback if degradation is severe (>50%)
-            if alert["degradation"] > 0.50:
-                logger.warning(f"[OBS] Auto-rollback triggered for {alert['bill_id']}")
+            # Phase 18.6a: Auto-rollback when degradation > 20% (lowered from 50%)
+            if alert["degradation"] > DEGRADATION_THRESHOLD:
+                logger.warning(f"[OBS] Auto-rollback triggered for {alert['bill_id']} ({alert['degradation']:.1%})")
                 loop.trigger_rollback(alert["bill_id"])
+                # Write to consciousness_feed for awareness
+                try:
+                    from db.db_helper import db_connection as _db, translate_sql as _ts
+                    import json as _json
+                    with _db() as _conn:
+                        _c = _conn.cursor()
+                        _c.execute(_ts(
+                            "INSERT INTO consciousness_feed "
+                            "(agent_name, content, category, signal_weight) "
+                            "VALUES (?, ?, ?, ?)"
+                        ), (
+                            "ObservationLoop",
+                            _json.dumps({
+                                "event": "auto_rollback",
+                                "bill_id": alert["bill_id"],
+                                "degradation": alert["degradation"],
+                            }),
+                            "system_integrity",
+                            0.85,
+                        ))
+                        _conn.commit()
+                except Exception:
+                    pass
                 
     return alerts
 

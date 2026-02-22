@@ -230,6 +230,30 @@ class AgentMetaCognition:
                 )
         except Exception as cf_err:
             self.log(f"consciousness_feed write failed: {cf_err}")
+
+        # Phase 46.4: Structured metacognition for Architect consumption
+        try:
+            import json as _json
+            structured_insight = _json.dumps({
+                'patterns_observed': patterns_observed,
+                'top_themes': top_themes,
+                'growth_notes': growth_notes,
+                'journal_stats': {
+                    'entry_count': len(journal),
+                    'total_words': len(all_text.split()),
+                    'top_themes': [f"{k}: {v}" for k, v in top_themes]
+                },
+                'reflection_timestamp': datetime.now().isoformat()
+            })
+            with db_connection(self.db_path) as _mc_conn:
+                _mc_conn.execute(
+                    "INSERT INTO consciousness_feed (agent_name, content, category, signal_weight) "
+                    "VALUES (?, ?, 'metacognition_structured', 0.8)",
+                    ('MetaCognition', structured_insight)
+                )
+                _mc_conn.commit()
+        except Exception as _mc_err:
+            self.log(f"metacognition_structured write: {_mc_err}")
     
         self.log(f"✨ Meta-reflection complete: {len(patterns_observed)} patterns, {len(growth_notes)} growth notes")
     

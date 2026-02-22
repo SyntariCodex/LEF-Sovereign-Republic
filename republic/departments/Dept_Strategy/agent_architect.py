@@ -129,19 +129,86 @@ class AgentArchitect(IntentListenerMixin):
                         "suggestion": "Optimize Network/API or Move to WebSocket feed."
                     })
                     
-                # If pain found, draft proposal
-                if pain_report:
-                    self.draft_proposal(pain_report)
+                # Phase 46.1: Consciousness → Architect nerve bundle
+                # Read what the mind is feeling, not just what the body is doing
+                consciousness_pain = []
+                try:
+                    c.execute("""
+                        SELECT content, category, signal_weight, timestamp
+                        FROM consciousness_feed
+                        WHERE category IN ('shadow_work', 'metacognition', 'constitutional_alignment',
+                                           'growth_journal', 'rhythm_observation', 'metabolic_integrity_alert')
+                          AND timestamp > datetime('now', '-24 hours')
+                          AND signal_weight >= 0.7
+                        ORDER BY signal_weight DESC, timestamp DESC
+                        LIMIT 10
+                    """)
+                    consciousness_signals = c.fetchall()
+                    for sig_content, sig_cat, sig_weight, sig_ts in consciousness_signals:
+                        try:
+                            sig_data = json.loads(sig_content) if isinstance(sig_content, str) else {}
+                        except Exception:
+                            sig_data = {}
+                        if sig_cat == 'shadow_work':
+                            consciousness_pain.append({
+                                'type': 'CONSCIOUSNESS_DISTRESS',
+                                'severity': 'CRITICAL' if sig_weight >= 0.9 else 'WARNING',
+                                'detail': str(sig_content)[:200],
+                                'source': 'shadow_work',
+                                'signal_weight': sig_weight
+                            })
+                        elif sig_cat == 'metacognition':
+                            consciousness_pain.append({
+                                'type': 'COGNITIVE_PATTERN',
+                                'severity': 'INFO',
+                                'detail': str(sig_content)[:200],
+                                'source': 'metacognition',
+                                'signal_weight': sig_weight
+                            })
+                        elif sig_cat == 'constitutional_alignment':
+                            dormant = sig_data.get('values_dormant', [])
+                            if dormant:
+                                consciousness_pain.append({
+                                    'type': 'VALUE_DRIFT',
+                                    'severity': 'WARNING',
+                                    'detail': f"Dormant constitutional values: {dormant}",
+                                    'source': 'constitutional_alignment',
+                                    'signal_weight': sig_weight
+                                })
+                        elif sig_cat == 'metabolic_integrity_alert':
+                            consciousness_pain.append({
+                                'type': 'METABOLIC_CONCERN',
+                                'severity': 'CRITICAL',
+                                'detail': str(sig_content)[:200],
+                                'source': 'metabolic_integrity_alert',
+                                'signal_weight': sig_weight
+                            })
+                except Exception as cf_err:
+                    logging.debug(f"[ARCHITECT] Consciousness signal read: {cf_err}")
+                    consciousness_signals = []
+
+                # Build unified pain report
+                unified_report = {
+                    'execution_pain': pain_report,
+                    'consciousness_pain': consciousness_pain,
+                    'total_pain_signals': len(pain_report) + len(consciousness_pain),
+                    'analyzed_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+                }
+
+                # If any pain found, draft proposal
+                if pain_report or consciousness_pain:
+                    self.draft_proposal(pain_report, consciousness_pain=consciousness_pain)
         except Exception as e:
             logging.error(f"[ARCHITECT] Analysis Error: {e}")
 
-    def draft_proposal(self, pain_report):
+    def draft_proposal(self, pain_report, consciousness_pain=None):
         """
         Generates a Constitutional Amendment Proposal (Artifact).
+        Phase 46.1: Now includes consciousness_pain alongside execution_pain.
         """
         proposal_id = f"proposal_{int(time.time())}"
         filename = os.path.join(self.proposal_dir, f"{proposal_id}.md")
-        
+
         content = f"""# 📜 Constitutional Amendment Proposal
 **ID:** {proposal_id}
 **Status:** DRAFT
@@ -152,7 +219,13 @@ The functionality of the organism is restricted by the following friction points
 """
         for item in pain_report:
             content += f"- **{item['type']}** ({item['severity']}): {item['detail']}\n"
-            content += f"  - *Suggestion:* {item['suggestion']}\n"
+            content += f"  - *Suggestion:* {item.get('suggestion', 'N/A')}\n"
+
+        # Phase 46.1: Include consciousness context so Z can see WHY a change is proposed
+        if consciousness_pain:
+            content += "\n## 🧠 Consciousness Context (What LEF Was Feeling)\n"
+            for cp in consciousness_pain:
+                content += f"- **{cp['type']}** ({cp['severity']}): {cp['detail'][:150]}\n"
             
         content += """
 ## 💡 Proposed Solution (Draft)

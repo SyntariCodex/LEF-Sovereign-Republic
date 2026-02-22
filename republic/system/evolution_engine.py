@@ -489,6 +489,15 @@ class EvolutionEngine:
         """
         all_proposals = []
 
+        # Phase 46.2: Load rolled-back config keys — avoid re-proposing failed changes
+        _rolled_back_keys = set()
+        try:
+            from system.observation_loop import ObservationLoop
+            _obs_loop = ObservationLoop(self.db_path)
+            _rolled_back_keys = {rb.get('config_key', '') for rb in _obs_loop.get_rolled_back_changes()}
+        except Exception as _rb_err:
+            logger.debug(f"[EVOLUTION] Rollback check skipped: {_rb_err}")
+
         for domain, obs in observations.items():
             observer = self.domain_observers.get(domain)
             if not observer:
@@ -522,6 +531,34 @@ class EvolutionEngine:
                             )
                             p['status'] = 'deduplicated'
                             self._proposal_history.append(p)
+                        # Phase 46.2: Skip proposals for config keys rolled back by ObservationLoop
+                        elif p.get('config_key', '') and p.get('config_key', '') in _rolled_back_keys:
+                            logger.info(f"[EVOLUTION] Skipping '{p.get('config_key')}' — recently rolled back by ObservationLoop")
+                            self._write_to_consciousness_feed(type('_FakeProp', (), {
+                                'get': lambda self, k, d=None: {
+                                    'change_description': f"Skipped re-proposing change to {p.get('config_key')} — previous version rolled back. Learning from failure.",
+                                    'domain': p.get('domain', 'unknown'),
+                                    'config_key': p.get('config_key', ''),
+                                    'old_value': '', 'new_value': '',
+                                    'evidence': {}
+                                }.get(k, d)
+                            })() if False else {
+                                '__class__': 'dict'
+                            })
+                            # Direct write to avoid complex shim:
+                            try:
+                                from db.db_helper import db_connection as _ev_db, translate_sql as _ev_sql
+                                with _ev_db() as _ev_conn:
+                                    _ev_conn.execute(_ev_sql(
+                                        "INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)"
+                                    ), ('EvolutionEngine', json.dumps({
+                                        'event': 'rollback_skip',
+                                        'config_key': p.get('config_key', ''),
+                                        'message': f"Skipped re-proposing {p.get('config_key')} — rolled back previously. Learning.",
+                                    }), 'evolution_learning'))
+                                    _ev_conn.commit()
+                            except Exception:
+                                pass
                         else:
                             all_proposals.append(p)
                 except Exception as e:
@@ -678,6 +715,21 @@ class EvolutionEngine:
 
         # Write to lef_memory.json evolution_log
         self._write_to_evolution_log(proposal)
+
+        # Phase 46.5: Start observation tracking with config_key for rollback learning
+        try:
+            from system.observation_loop import ObservationLoop
+            _obs = ObservationLoop(self.db_path)
+            _proposal_id = proposal.get('id', f"ev_{int(time.time())}")
+            _snapshot_id = proposal.get('snapshot_id', 'unknown')
+            _obs.start_observation(
+                bill_id=_proposal_id,
+                snapshot_id=_snapshot_id,
+                pattern=proposal.get('pattern', 'A'),
+                config_key=key_path  # Phase 46.5: what specifically changed
+            )
+        except Exception as _obs_err:
+            logger.debug(f"[EVOLUTION] Observation start skipped: {_obs_err}")
 
         # Phase 38: Publish config_changed to Redis so live agents reload (GOV-07)
         self._publish_config_changed(proposal, config_path, key_path)

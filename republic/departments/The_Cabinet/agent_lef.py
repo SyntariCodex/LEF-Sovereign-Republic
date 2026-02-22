@@ -1301,6 +1301,22 @@ Respond with ONLY the lesson text, no explanation."""
         except Exception:
             pass
 
+        # Phase 46.3: Scar resonance → consciousness
+        scar_awareness_line = ""
+        try:
+            from system.scar_resonance import ScarResonance as _ScarRes
+            _scar_engine = _ScarRes()
+            active_scars = _scar_engine.get_active_resonances(lookback_minutes=60)
+            if active_scars:
+                top = active_scars[0]
+                scar_awareness_line = (
+                    f"[SCAR RESONANCE: Recent action matched past wound "
+                    f"(similarity {top['similarity']:.0%}). "
+                    f"Lesson: {top['match'].get('lesson', top['match'].get('summary', 'unknown'))[:120]}. Proceed with awareness.]"
+                )
+        except Exception:
+            pass
+
         return {
             "recent_thoughts": recent_thoughts,
             "cash": cash,
@@ -1316,6 +1332,7 @@ Respond with ONLY the lesson text, no explanation."""
             "metabolic_alerts": metabolic_alerts,
             "metabolic_status": metabolic_status,
             "sustainability_line": sustainability_line,
+            "scar_awareness_line": scar_awareness_line,
             "time": datetime.now().strftime("%H:%M")
         }
 
@@ -1382,6 +1399,7 @@ Respond with ONLY the lesson text, no explanation."""
             {context.get('metabolic_awareness', '')}
             {context.get('metabolic_status', '')}
             {context.get('sustainability_line', '')}
+            {context.get('scar_awareness_line', '')}
             [EXTERNAL CONTEXT — The Broader Ecosystem]
             {self._load_project_context()}
 

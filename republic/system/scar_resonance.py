@@ -270,15 +270,53 @@ class ScarResonance:
         
         return '\n'.join(lines)
     
+    def get_active_resonances(self, lookback_minutes: int = 30) -> list:
+        """
+        Phase 46.3: Return recent scar resonances for consciousness injection.
+        Scars become decision input, not just awareness.
+        """
+        try:
+            conn = sqlite3.connect(self.db_path, timeout=30.0)
+            c = conn.cursor()
+            c.execute("""
+                CREATE TABLE IF NOT EXISTS scar_resonance_log (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+                    strongest_match TEXT,
+                    similarity REAL,
+                    action_taken TEXT,
+                    was_heeded INTEGER
+                )
+            """)
+            c.execute("""
+                SELECT strongest_match, similarity, action_taken, timestamp
+                FROM scar_resonance_log
+                WHERE timestamp > datetime('now', ? || ' minutes')
+                  AND similarity >= ?
+                ORDER BY similarity DESC
+                LIMIT 5
+            """, (str(-lookback_minutes), self.SIMILARITY_THRESHOLD))
+            rows = c.fetchall()
+            conn.close()
+            return [{
+                'match': json.loads(r[0]) if r[0] else {},
+                'similarity': r[1],
+                'action_taken': r[2],
+                'timestamp': r[3]
+            } for r in rows]
+        except Exception as e:
+            logger.debug(f"[SCAR_RESONANCE] get_active_resonances: {e}")
+            return []
+
     def log_resonance(self, resonance: Dict, action_taken: str = None):
         """Log a resonance event for future analysis."""
         if not resonance['detected']:
             return
-        
+
         try:
             conn = sqlite3.connect(self.db_path, timeout=30.0)
             c = conn.cursor()
-            
+
             # Ensure logging table exists
             c.execute("""
                 CREATE TABLE IF NOT EXISTS scar_resonance_log (
