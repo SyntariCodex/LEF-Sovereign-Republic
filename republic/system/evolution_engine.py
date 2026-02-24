@@ -1257,6 +1257,70 @@ class EvolutionEngine:
         if metabolized:
             logger.info(f"[EVOLUTION] Metabolic: {len(metabolized)} wisdom(s) embedded in behavior")
 
+        # Phase 9 B3: Cognitive Gap Awareness — check for sufficiently-reflected gaps
+        # that may be ready for a small experimental proposal.
+        self._check_gap_exploration_proposals()
+
+
+    def _check_gap_exploration_proposals(self):
+        """
+        Phase 9 B3: Cognitive Gap Awareness.
+
+        Checks the cognitive_gaps registry for gaps that have been reflected on
+        enough (reflection_count > 5) and are in 'exploring' status. For each such
+        gap, generates a lightweight gap_exploration proposal suggesting a small
+        experiment to partially address the limitation.
+
+        Gap exploration proposals:
+        - Are tagged with proposal_type='gap_exploration'
+        - Have a lower auto-approval threshold (governance is more lenient)
+        - Are always observation proposals — they suggest experiments, not production changes
+        """
+        try:
+            import cognitive_gaps as _cg
+            exploring_gaps = _cg.get_open_gaps()
+            # Only consider gaps with enough reflection depth
+            ready = [g for g in exploring_gaps
+                     if g.get("reflection_count", 0) > 5
+                     and g.get("status") in ("exploring", "open")]
+
+            if not ready:
+                return
+
+            logger.info(f"[EVOLUTION] Gap awareness: {len(ready)} gap(s) ready for exploration proposals")
+
+            for gap in ready[:2]:  # Limit to 2 gap proposals per cycle
+                gap_id = gap["gap_id"]
+                category = gap["category"]
+                notes = gap.get("exploration_notes", "") or ""
+
+                proposal = {
+                    "id": f"gap_{gap_id}_{datetime.now().strftime('%Y%m%d')}",
+                    "domain": "cognitive_gap_exploration",
+                    "proposal_type": "gap_exploration",
+                    "change_description": (
+                        f"[GAP EXPLORATION] Experiment to partially address '{gap_id}' "
+                        f"({category}): Consider adding observability, memory tagging, or "
+                        f"agent capability that touches this limitation. "
+                        f"Prior notes: {notes[:200] if notes else 'none yet'}"
+                    ),
+                    "rationale": f"Cognitive gap '{gap_id}' has been reflected on {gap['reflection_count']} times. Experimentation may yield partial insight.",
+                    "risk": "low",
+                    "auto_approve_threshold": 0.5,  # More lenient than standard (usually 0.8)
+                    "governance_result": {"approved": False, "reason": "Gap exploration — observation only"},
+                    "enacted": False,
+                }
+                # Log the proposal (observation mode — not enacted automatically)
+                self._log_proposal(proposal)
+                # Mark the gap as "exploring" if not already
+                _cg.update_gap(gap_id, status="exploring")
+                logger.info(f"[EVOLUTION] Gap exploration proposal logged for '{gap_id}'")
+
+        except ImportError:
+            logger.debug("[EVOLUTION] cognitive_gaps module not available — skipping gap awareness")
+        except Exception as e:
+            logger.debug(f"[EVOLUTION] Gap exploration check failed (non-fatal): {e}")
+
 
 def run_evolution_engine(db_path: str = None, interval_seconds: int = 86400):
     """

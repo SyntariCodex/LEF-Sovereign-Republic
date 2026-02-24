@@ -131,7 +131,56 @@ class AgentContemplator:
                     )
                 except Exception as cf_err:
                     print(f"[{self.name}] consciousness_feed write failed: {cf_err}")
-            
+
+                # === Phase 9 B2: Cognitive Gap Awareness (1-in-5 chance each cycle) ===
+                # Contemplator occasionally reflects on a known limitation.
+                # This is not about solving gaps — it is about noticing and reasoning about them.
+                if random.random() < 0.20:
+                    try:
+                        import cognitive_gaps as _cg
+                        open_gaps = _cg.get_open_gaps()
+                        if open_gaps:
+                            gap = random.choice(open_gaps)
+                            gap_id = gap["gap_id"]
+                            gap_desc = gap["description"]
+                            prior_count = gap.get("reflection_count", 0)
+
+                            # Generate a brief reflection note
+                            reflection = (
+                                f"[Cycle reflection #{prior_count + 1}] "
+                                f"Contemplating: '{gap_desc[:120]}'. "
+                                f"This limitation shapes how I interact with the world. "
+                                f"Partial mitigation may be possible through better "
+                                f"prompting, richer memory, or additional agents — "
+                                f"but the gap itself persists. Awareness is the first step."
+                            )
+
+                            # Persist the reflection
+                            _cg.reflect_on_gap(gap_id)
+                            _cg.update_gap(gap_id, exploration_notes=reflection)
+
+                            gap_msg = f"[GAP REFLECTION] {gap_id} ({gap['category']}): {reflection[:200]}"
+                            print(f"[{self.name}] 🔍 {gap_msg}")
+
+                            # Emit to consciousness_feed so LEF is aware of this reflection
+                            try:
+                                from db.db_writer import queue_insert
+                                queue_insert(
+                                    conn.cursor(),
+                                    table="consciousness_feed",
+                                    data={
+                                        "agent_name": "Contemplator",
+                                        "content": gap_msg,
+                                        "category": "gap_reflection"
+                                    },
+                                    source_agent="AgentContemplator",
+                                    priority=1
+                                )
+                            except Exception:
+                                pass
+                    except Exception as gap_err:
+                        print(f"[{self.name}] Gap reflection error (non-fatal): {gap_err}")
+
         except Exception as e:
             print(f"[{self.name}] Contemplation Error: {e}")
 

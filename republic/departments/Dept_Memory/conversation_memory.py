@@ -17,7 +17,11 @@ from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, asdict
 from contextlib import contextmanager
 
-# DB path resolution - use dedicated memory.db to avoid conflicts with main republic.db
+# DB path resolution.
+# In PostgreSQL mode (DATABASE_BACKEND=postgresql), db_connection() ignores db_path
+# and routes all writes to the shared PostgreSQL pool. The memory.db file is NEVER
+# created in that case — conversations/conversation_messages tables live in PostgreSQL.
+# (Phase 9 A2 audit: memory.db is intentionally kept as a SQLite fallback path only.)
 BASE_DIR = Path(__file__).parent.parent.parent
 DB_PATH = BASE_DIR / "departments" / "Dept_Memory" / "memory.db"
 

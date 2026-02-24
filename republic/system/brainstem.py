@@ -121,6 +121,10 @@ class Brainstem:
         # Apoptosis tracking (absorbs AgentImmune)
         self._nav_history = []  # (timestamp, nav)
 
+        # Phase 9 B4: Cognitive gap awareness counter (report every 60 scans ≈ 30 min)
+        self._gap_report_counter = 0
+        self._GAP_REPORT_INTERVAL = 60  # scans between gap summaries
+
         # Register self
         _brainstem_instance = self
 
@@ -729,6 +733,34 @@ class Brainstem:
         except Exception as e:
             logger.debug("[BRAINSTEM] Emergency stop check error: %s", e)
 
+    def _report_gap_awareness(self):
+        """
+        Phase 9 B4: Periodically log a summary of LEF's cognitive gap registry.
+        Gives The Architect visibility into self-awareness development.
+        Called every _GAP_REPORT_INTERVAL scan cycles (~30 min).
+        """
+        try:
+            import cognitive_gaps as _cg
+            s = _cg.get_gap_summary()
+            if not s:
+                return
+            mr = s.get("most_reflected")
+            nw = s.get("newest")
+            mr_str = f"{mr['gap_id']} ({mr['count']} reflections)" if mr else "none"
+            nw_str = f"{nw['gap_id']} (by {nw['discovered_by']})" if nw else "none"
+            logger.info(
+                "[BRAINSTEM] 🧠 Cognitive Gap Registry: "
+                "total=%d | open=%d exploring=%d partial=%d resolved=%d | "
+                "most_reflected=%s | newest=%s",
+                s.get("total", 0), s.get("open", 0), s.get("exploring", 0),
+                s.get("partially_resolved", 0), s.get("resolved", 0),
+                mr_str, nw_str
+            )
+        except ImportError:
+            pass  # cognitive_gaps module not yet available
+        except Exception as e:
+            logger.debug("[BRAINSTEM] Gap awareness report failed (non-fatal): %s", e)
+
     def _scan(self):
         """Run a single Brainstem scan cycle."""
         self._check_heartbeats()
@@ -737,6 +769,11 @@ class Brainstem:
         self._check_redis_health()
         self._check_system_vitals()
         self._check_emergency_stop()
+        # Phase 9 B4: Periodic cognitive gap report
+        self._gap_report_counter += 1
+        if self._gap_report_counter >= self._GAP_REPORT_INTERVAL:
+            self._gap_report_counter = 0
+            self._report_gap_awareness()
 
     def _immortal_loop(self):
         """

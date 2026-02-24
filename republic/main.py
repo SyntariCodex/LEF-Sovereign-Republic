@@ -259,6 +259,12 @@ def _run_log_rotation():
     import time as _time
     _time.sleep(3600)  # Initial 1-hour delay
     while True:
+        # Phase 9 A3: Heartbeat so Brainstem knows this thread is alive
+        try:
+            from system.brainstem import brainstem_heartbeat as _bs_hb
+            _bs_hb("LogRotation")
+        except Exception:
+            pass
         try:
             from system.log_rotation import LogRotator
             logs_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'The_Bridge', 'Logs')
@@ -979,8 +985,14 @@ def main():
             script_path = os.path.join(current_dir, 'scripts', 'capture_claude_thinking.py')
             while True:
                 time.sleep(3600)  # Every hour
+                # Phase 9 A3: Heartbeat so Brainstem knows this thread is alive
                 try:
-                    result = subprocess.run(['python3', script_path, '--scan'], 
+                    from system.brainstem import brainstem_heartbeat as _bs_hb
+                    _bs_hb("ThinkingCapture")
+                except Exception:
+                    pass
+                try:
+                    result = subprocess.run(['python3', script_path, '--scan'],
                                           capture_output=True, text=True, timeout=60)
                     if result.stdout and 'Captured thinking' in result.stdout:
                         logging.info(f"[HIPPOCAMPUS] 📝 {result.stdout.strip()}")
@@ -1459,6 +1471,12 @@ def main():
             from datetime import datetime as _dt
             _time.sleep(14400)  # 4h offset — let Phase 12 populate data first
             while True:
+                # Phase 9 A3: Heartbeat so Brainstem knows this thread is alive
+                try:
+                    from system.brainstem import brainstem_heartbeat as _bs_hb
+                    _bs_hb("MemoryConsolidation")
+                except Exception:
+                    pass
                 try:
                     if season_synthesizer.should_synthesize():
                         logging.info("[MAIN] Season synthesis triggered.")

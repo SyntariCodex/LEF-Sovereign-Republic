@@ -83,7 +83,8 @@ class ConnectionPool:
         # Phase 8.4: Track checked-out connections for stale reaping
         self._checkout_times = {}  # {conn_id: checkout_timestamp}
         self._checkout_wrappers = {}  # {conn_id: weakref to wrapper} (PG only)
-        self._checkout_keys = {}  # {conn_id: thread_key} — needed for cross-thread putconn()
+        self._checkout_raw_conns = {}  # {conn_id: raw_conn} — strong ref so reaper can call putconn()
+        self._checkout_keys = {}  # kept for cleanup compat; no longer populated
         self._leaked_reclaimed = 0  # Lifetime counter of reclaimed leaked connections
 
         # Phase 6.75: Health logging
@@ -245,6 +246,8 @@ class ConnectionPool:
                     self._in_use.add(id(raw_conn))
                     self._active_count += 1
                     self._checkout_times[id(raw_conn)] = time.time()
+                    # Phase 9: Store strong ref so reaper can call putconn() if wrapper is GC'd
+                    self._checkout_raw_conns[id(raw_conn)] = raw_conn
                 # Wrap with auto-translating wrapper so ALL agents get SQL translation
                 # Pass pool reference so close() returns to pool instead of closing
                 try:
@@ -331,6 +334,7 @@ class ConnectionPool:
                 self._active_count = max(0, self._active_count - 1)
                 self._checkout_times.pop(conn_id, None)
                 self._checkout_wrappers.pop(conn_id, None)
+                self._checkout_raw_conns.pop(conn_id, None)
                 self._checkout_keys.pop(conn_id, None)
 
         # Phase 8.5c: If connection is already dead at the PostgreSQL level,
@@ -415,18 +419,31 @@ class ConnectionPool:
                                 logger.debug(f"[DB_POOL] REAPER: wrapper.close() failed: {e}")
 
                     # Wrapper already GC'd — check if connection still tracked
+                    leaked_raw_conn = None
                     with self._pool_lock:
                         if conn_id in self._in_use:
-                            # Connection leaked and wrapper gone — fix the counter
+                            # Phase 9: Get strong ref so we can call putconn() AFTER releasing the lock
+                            leaked_raw_conn = self._checkout_raw_conns.get(conn_id)
+                            # Fix counters and tracking dicts
                             self._in_use.discard(conn_id)
                             self._active_count = max(0, self._active_count - 1)
                             self._checkout_times.pop(conn_id, None)
                             self._checkout_wrappers.pop(conn_id, None)
+                            self._checkout_raw_conns.pop(conn_id, None)
+                            self._checkout_keys.pop(conn_id, None)
                             reclaimed += 1
                             logger.warning(
-                                f"[DB_POOL] REAPER: Fixed orphaned counter for lost connection "
+                                f"[DB_POOL] REAPER: Returning orphaned psycopg2 slot for lost connection "
                                 f"(checked out {age:.0f}s ago)"
                             )
+                    # Phase 9: Return the slot to psycopg2's pool OUTSIDE the lock to avoid deadlock.
+                    # This is the critical fix: without this, psycopg2 treats the slot as
+                    # permanently in-use even though our counters say it's free.
+                    if leaked_raw_conn is not None:
+                        try:
+                            self._pg_pool.putconn(leaked_raw_conn, close=True)
+                        except Exception:
+                            pass  # Slot already freed or conn already closed by psycopg2
 
                 if reclaimed > 0:
                     self._leaked_reclaimed += reclaimed
