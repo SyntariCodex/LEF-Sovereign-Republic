@@ -38,6 +38,8 @@ POOL_SIZE = 200 if DATABASE_BACKEND == 'sqlite' else 150  # PostgreSQL: 150 shar
 CONNECTION_TIMEOUT = 120.0  # seconds
 MAX_OVERFLOW = 50 if DATABASE_BACKEND == 'sqlite' else 0  # PostgreSQL: hard cap at POOL_SIZE (150 of 300 max_connections)
 CONNECTION_RECYCLE_SECONDS = 120  # Recycle connections older than 2 minutes
+STALE_CONNECTION_SECONDS = 300  # Phase 8.4: Reap connections checked out longer than 5 minutes
+REAPER_INTERVAL_SECONDS = 60  # Phase 8.4: How often the reaper thread runs
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +80,12 @@ class ConnectionPool:
         self._overflow_total = 0
         self._conn_created_at = {}
 
+        # Phase 8.4: Track checked-out connections for stale reaping
+        self._checkout_times = {}  # {conn_id: checkout_timestamp}
+        self._checkout_wrappers = {}  # {conn_id: weakref to wrapper} (PG only)
+        self._checkout_keys = {}  # {conn_id: thread_key} — needed for cross-thread putconn()
+        self._leaked_reclaimed = 0  # Lifetime counter of reclaimed leaked connections
+
         # Phase 6.75: Health logging
         self._last_health_log = 0
         self._health_log_interval = 60
@@ -86,6 +94,12 @@ class ConnectionPool:
             self._init_pg_pool()
         else:
             self._init_sqlite_pool()
+
+        # Phase 8.4: Start the stale connection reaper thread
+        self._reaper_thread = threading.Thread(
+            target=self._reaper_loop, name="DBPool-Reaper", daemon=True
+        )
+        self._reaper_thread.start()
 
         self._initialized = True
 
@@ -208,30 +222,47 @@ class ConnectionPool:
     def _get_pg(self, timeout: float):
         """Get a PostgreSQL connection from the pool, wrapped for SQLite compat."""
         import psycopg2
+        import weakref
 
         # Retry with backoff if pool is temporarily exhausted
-        max_retries = 3
+        max_retries = 5
         for attempt in range(max_retries):
             try:
                 raw_conn = self._pg_pool.getconn()
+                # Phase 8.4: Health-check — psycopg2 may hand back a closed connection
+                # (e.g., one returned via putconn(close=True) during error recovery).
+                # If closed, discard it and retry.
+                if raw_conn.closed:
+                    logger.debug("[DB_POOL] Got closed connection from pool, discarding and retrying")
+                    try:
+                        # Phase 8.5d: psycopg2 uses _rused[id(conn)] internally — no key needed
+                        self._pg_pool.putconn(raw_conn, close=True)
+                    except Exception:
+                        pass
+                    continue
                 raw_conn.autocommit = False
                 with self._pool_lock:
                     self._in_use.add(id(raw_conn))
                     self._active_count += 1
+                    self._checkout_times[id(raw_conn)] = time.time()
                 # Wrap with auto-translating wrapper so ALL agents get SQL translation
                 # Pass pool reference so close() returns to pool instead of closing
                 try:
                     from db.db_helper import _PgConnectionWrapper
-                    return _PgConnectionWrapper(raw_conn, pool=self)
+                    wrapper = _PgConnectionWrapper(raw_conn, pool=self)
+                    # Phase 8.4: Store weak reference so reaper can force-close stale wrappers
+                    with self._pool_lock:
+                        self._checkout_wrappers[id(raw_conn)] = weakref.ref(wrapper)
+                    return wrapper
                 except ImportError:
                     return raw_conn
-            except psycopg2.pool.PoolError as e:
+            except (psycopg2.pool.PoolError, psycopg2.InterfaceError) as e:
                 if attempt < max_retries - 1:
                     wait = (attempt + 1) * 2  # 2s, 4s backoff
-                    logger.warning(f"[DB_POOL] Pool exhausted, retry {attempt+1}/{max_retries} in {wait}s...")
+                    logger.warning(f"[DB_POOL] Pool issue ({type(e).__name__}), retry {attempt+1}/{max_retries} in {wait}s...")
                     time.sleep(wait)
                 else:
-                    logger.error(f"[DB_POOL] PostgreSQL pool exhausted after {max_retries} retries: {e}")
+                    logger.error(f"[DB_POOL] PostgreSQL pool failed after {max_retries} retries: {e}")
                     raise
             except Exception as e:
                 logger.error(f"[DB_POOL] PostgreSQL connection error: {e}")
@@ -268,7 +299,15 @@ class ConnectionPool:
                     pass
 
     def _release_pg(self, conn):
-        """Release a PostgreSQL connection (unwraps if wrapped)."""
+        """Release a PostgreSQL connection (unwraps if wrapped).
+
+        Phase 8.3: Fixed counter race — decrement _active_count AFTER
+        successful putconn() so health metrics stay accurate even when
+        pool return fails.
+        Phase 8.5: Added double-release guard — skip release if the
+        connection is not tracked as checked out, preventing the flood
+        of "PostgreSQL release error" warnings from duplicate close() calls.
+        """
         import psycopg2
         # Unwrap if it's a _PgConnectionWrapper
         try:
@@ -277,19 +316,126 @@ class ConnectionPool:
         except ImportError:
             raw_conn = conn
 
+        conn_id = id(raw_conn)
+
+        # Phase 8.5: Double-release guard — if this connection isn't tracked
+        # as in_use, it was already returned to the pool. Skip silently.
         with self._pool_lock:
-            conn_id = id(raw_conn)
-            self._in_use.discard(conn_id)
-            self._active_count = max(0, self._active_count - 1)
+            if conn_id not in self._in_use:
+                return
+
+        # Phase 8.5b: Helper to clean up tracking dicts after release
+        def _cleanup_tracking():
+            with self._pool_lock:
+                self._in_use.discard(conn_id)
+                self._active_count = max(0, self._active_count - 1)
+                self._checkout_times.pop(conn_id, None)
+                self._checkout_wrappers.pop(conn_id, None)
+                self._checkout_keys.pop(conn_id, None)
+
+        # Phase 8.5c: If connection is already dead at the PostgreSQL level,
+        # still tell psycopg2 via putconn(close=True) so it frees the slot.
+        # Without this, dead connections permanently consume pool slots.
+        if raw_conn.closed:
+            _cleanup_tracking()
+            try:
+                # Phase 8.5d: psycopg2 uses _rused[id(conn)] internally — no key needed
+                self._pg_pool.putconn(raw_conn, close=True)
+            except Exception:
+                pass  # Slot may already be freed internally
+            logger.debug(f"[DB_POOL] Returned dead connection to pool (slot freed)")
+            return
+
         try:
             raw_conn.rollback()
+            # Phase 8.5d: psycopg2 uses _rused[id(conn)] to find the key automatically
             self._pg_pool.putconn(raw_conn)
+            # Only update counters AFTER successful return to pool
+            _cleanup_tracking()
         except Exception as e:
-            logger.warning(f"[DB_POOL] PostgreSQL release error: {e}")
+            # Connection died between our closed check and putconn() —
+            # clean up tracking and return slot to psycopg2.
+            _cleanup_tracking()
+            logger.debug(f"[DB_POOL] Connection expired during release (normal): {e}")
             try:
                 self._pg_pool.putconn(raw_conn, close=True)
             except Exception:
-                pass
+                pass  # Pool will create fresh connections as needed
+
+    def _reaper_loop(self):
+        """Phase 8.4: Periodically reclaim stale checked-out connections.
+
+        Runs as a daemon thread. Every REAPER_INTERVAL_SECONDS, scans for
+        connections that have been checked out longer than STALE_CONNECTION_SECONDS.
+
+        Two reclamation paths:
+        1. If the wrapper still exists (weakref alive), call wrapper.close()
+           which triggers the normal release path.
+        2. If the wrapper was already GC'd but the raw connection is still
+           tracked as in_use (shouldn't happen with __del__, but safety net),
+           force-return it to the pool.
+        """
+        while True:
+            try:
+                time.sleep(REAPER_INTERVAL_SECONDS)
+                if self.backend != 'postgresql':
+                    continue  # SQLite connections are cheaper, skip reaping
+
+                now = time.time()
+                stale_conns = []
+
+                with self._pool_lock:
+                    for conn_id, checkout_time in list(self._checkout_times.items()):
+                        age = now - checkout_time
+                        if age > STALE_CONNECTION_SECONDS:
+                            stale_conns.append((conn_id, age))
+
+                if not stale_conns:
+                    continue
+
+                reclaimed = 0
+                for conn_id, age in stale_conns:
+                    # Try to close via the wrapper (proper release path)
+                    wrapper_ref = None
+                    with self._pool_lock:
+                        wrapper_ref = self._checkout_wrappers.get(conn_id)
+
+                    if wrapper_ref:
+                        wrapper = wrapper_ref()
+                        if wrapper is not None:
+                            try:
+                                wrapper.close()
+                                reclaimed += 1
+                                logger.warning(
+                                    f"[DB_POOL] REAPER: Reclaimed stale connection "
+                                    f"(checked out {age:.0f}s ago, limit {STALE_CONNECTION_SECONDS}s)"
+                                )
+                                continue
+                            except Exception as e:
+                                logger.debug(f"[DB_POOL] REAPER: wrapper.close() failed: {e}")
+
+                    # Wrapper already GC'd — check if connection still tracked
+                    with self._pool_lock:
+                        if conn_id in self._in_use:
+                            # Connection leaked and wrapper gone — fix the counter
+                            self._in_use.discard(conn_id)
+                            self._active_count = max(0, self._active_count - 1)
+                            self._checkout_times.pop(conn_id, None)
+                            self._checkout_wrappers.pop(conn_id, None)
+                            reclaimed += 1
+                            logger.warning(
+                                f"[DB_POOL] REAPER: Fixed orphaned counter for lost connection "
+                                f"(checked out {age:.0f}s ago)"
+                            )
+
+                if reclaimed > 0:
+                    self._leaked_reclaimed += reclaimed
+                    logger.info(
+                        f"[DB_POOL] REAPER: Reclaimed {reclaimed} stale connections "
+                        f"(lifetime total: {self._leaked_reclaimed})"
+                    )
+            except Exception as e:
+                logger.debug(f"[DB_POOL] REAPER: Error in reaper loop: {e}")
 
     def close_all(self):
         """Close all connections in the pool."""
@@ -317,16 +463,19 @@ class ConnectionPool:
                 total_capacity = POOL_SIZE
                 utilization = self._active_count / total_capacity * 100 if total_capacity > 0 else 0
                 status = "HEALTHY" if utilization < 60 else ("HIGH" if utilization < 85 else "CRITICAL")
-                logger.info(
+                _log_fn = logger.debug if status == "HEALTHY" else logger.warning
+                _log_fn(
                     f"[DB_POOL] {status} [PG] | Active: {self._active_count} | "
-                    f"Utilization: {utilization:.0f}% of {total_capacity}"
+                    f"Utilization: {utilization:.0f}% of {total_capacity} | "
+                    f"Leaked reclaimed: {self._leaked_reclaimed}"
                 )
             else:
                 available = self._pool.qsize()
                 total_capacity = POOL_SIZE + MAX_OVERFLOW
                 utilization = (self._active_count + self._overflow_count) / total_capacity * 100 if total_capacity > 0 else 0
                 status = "HEALTHY" if utilization < 60 else ("HIGH" if utilization < 85 else "CRITICAL")
-                logger.info(
+                _log_fn = logger.debug if status == "HEALTHY" else logger.warning
+                _log_fn(
                     f"[DB_POOL] {status} [SQLite] | Active: {self._active_count} | Available: {available} | "
                     f"Overflow: {self._overflow_count}/{MAX_OVERFLOW} | "
                     f"Utilization: {utilization:.0f}% of {total_capacity} | "
@@ -417,5 +566,6 @@ def pool_status() -> dict:
         "pool_size": POOL_SIZE,
         "overflow_active": pool._overflow_count,
         "overflow_max": MAX_OVERFLOW,
-        "overflow_lifetime": pool._overflow_total
+        "overflow_lifetime": pool._overflow_total,
+        "leaked_reclaimed": pool._leaked_reclaimed,
     }

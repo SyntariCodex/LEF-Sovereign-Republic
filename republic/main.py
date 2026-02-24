@@ -354,8 +354,15 @@ def main():
                 conn.close()
                 
         except Exception as e:
-            logging.error(f"Database check failed: {e}")
-            needs_init = True
+            # Phase 8.5d: PRAGMA statements are translated to '' on PostgreSQL backend,
+            # which raises ProgrammingError("no results to fetch"). This is expected
+            # and not a real error — suppress at debug level and skip re-init.
+            _e_str = str(e).lower()
+            if 'no results to fetch' in _e_str or (_e_str.strip() == '' and os.getenv('DATABASE_BACKEND', 'sqlite').lower() == 'postgresql'):
+                logging.debug(f"[DB] PRAGMA check skipped (PostgreSQL backend, expected): {e}")
+            else:
+                logging.error(f"Database check failed: {e}")
+                needs_init = True
             
     if needs_init:
         logging.warning(f"Database {db_path} missing or uninitialized. Running setup...")
@@ -599,8 +606,8 @@ def main():
             try:
                 house.run_session()
                 senate.run_session()
-            except Exception:
-                pass
+            except Exception as e:
+                logging.warning(f"[CONGRESS] Session error: {type(e).__name__}: {e}")
             time.sleep(20)
     t_congress = SafeThread(target=run_congress_agent, name="Congress")
     threads.append(t_congress)
@@ -1165,8 +1172,7 @@ def main():
                     logging.error(f"[SemanticCompressor] Cycle error: {e}")
                 time.sleep(86400)  # 24 hours — daily compression
         t_compressor = SafeThread(target=_run_compression, name='SemanticCompressor', daemon=True)
-        t_compressor.start()
-        threads.append(t_compressor)
+        threads.append(t_compressor)  # Started by the main thread loop below
         logging.info("[MAIN] SemanticCompressor Online — daily wisdom distillation active")
     except ImportError:
         logging.warning("[MAIN] SemanticCompressor not available")
@@ -1522,6 +1528,23 @@ def main():
                                  "CircuitBreaker", "AgentRiskMonitor",
                                  "AgentSurgeonGeneral",
                                  "AgentImmune", "AgentHealthMonitor"}
+
+            # Build launcher factories for vital threads so Brainstem can restart them.
+            # Each launcher must create a NEW SafeThread, start it, and return it.
+            _thread_targets = {}
+            for t in threads:
+                # SafeThread exposes .target; plain threading.Thread uses ._target
+                _thread_targets[t.name] = getattr(t, 'target', getattr(t, '_target', None))
+
+            def _make_launcher(name, target_fn):
+                """Factory that returns a launcher callable for Brainstem."""
+                def _launcher():
+                    new_t = SafeThread(target=target_fn, name=name, daemon=True)
+                    new_t.start()
+                    logging.info(f"[MAIN] Brainstem relaunched thread '{name}'")
+                    return new_t
+                return _launcher
+
             for t in threads:
                 if t.name in vital_threads:
                     crit = Criticality.VITAL
@@ -1529,7 +1552,14 @@ def main():
                     crit = Criticality.IMPORTANT
                 else:
                     crit = Criticality.STANDARD
-                brainstem.register_thread(t.name, thread_ref=t, criticality=crit)
+                # Provide launcher for vital and important threads
+                launcher_fn = None
+                if t.name in vital_threads or t.name in important_threads:
+                    target_fn = _thread_targets.get(t.name)
+                    if target_fn:
+                        launcher_fn = _make_launcher(t.name, target_fn)
+                brainstem.register_thread(t.name, thread_ref=t,
+                                          criticality=crit, launcher=launcher_fn)
             logging.info(f"[MAIN] 🫀 Brainstem: {len(threads)} threads registered")
         except Exception as e:
             logging.warning(f"[MAIN] Brainstem thread registration failed: {e}")

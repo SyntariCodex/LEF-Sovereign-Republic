@@ -78,27 +78,29 @@ def scan_outbox(bridge_path=None, db_path=None):
 
             # Feed into knowledge_stream
             # Phase 6.5: Route through WAQ for serialized writes
-            conn = sqlite3.connect(db_path, timeout=30)
             try:
-                from db.db_writer import queue_insert
-                queue_insert(
-                    conn.cursor(),
-                    table="knowledge_stream",
-                    data={
-                        "source": source_label,
-                        "title": title,
-                        "summary": content[:5000]
-                    },
-                    source_agent="BridgeWatcher",
-                    priority=0  # NORMAL — knowledge ingestion
-                )
-            except ImportError:
-                conn.execute(
-                    "INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)",
-                    (source_label, title, content[:5000])
-                )
-                conn.commit()
-            conn.close()
+                from db.db_helper import db_connection as _bw_db_conn, translate_sql as _bw_translate
+                with _bw_db_conn() as conn:
+                    try:
+                        from db.db_writer import queue_insert
+                        queue_insert(
+                            conn.cursor(),
+                            table="knowledge_stream",
+                            data={
+                                "source": source_label,
+                                "title": title,
+                                "summary": content[:5000]
+                            },
+                            source_agent="BridgeWatcher",
+                            priority=0  # NORMAL — knowledge ingestion
+                        )
+                    except ImportError:
+                        conn.execute(_bw_translate(
+                            "INSERT INTO knowledge_stream (source, title, summary) VALUES (?, ?, ?)"
+                        ), (source_label, title, content[:5000]))
+                        conn.commit()
+            except Exception as db_err:
+                logging.error(f"[BridgeWatcher] DB write failed for {filename}: {db_err}")
 
             new_files.append(filename)
             processed.add(filename)
@@ -183,21 +185,19 @@ def scan_answers():
     qa = get_bridge_qa()
     answers = qa.check_answers()
     qa.expire_old_questions()
-    db_path = os.getenv('DB_PATH', str(BASE_DIR / 'republic.db'))
     for ans in answers:
         try:
-            conn = sqlite3.connect(db_path, timeout=30)
-            c = conn.cursor()
-            c.execute(
-                "INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)",
-                ('BridgeQA', json.dumps({
+            from db.db_helper import db_connection as _bw_db_conn, translate_sql as _bw_translate
+            with _bw_db_conn() as conn:
+                c = conn.cursor()
+                c.execute(_bw_translate(
+                    "INSERT INTO consciousness_feed (agent_name, content, category) VALUES (?, ?, ?)"
+                ), ('BridgeQA', json.dumps({
                     'question_id': ans['question_id'],
                     'answer': ans['answer'][:1000],
                     'answered_at': ans.get('answered_at', '')
-                }), 'architect_answer')
-            )
-            conn.commit()
-            conn.close()
+                }), 'architect_answer'))
+                conn.commit()
             logging.info(f"[BridgeWatcher] Answer received: {ans['question_id']}")
         except Exception as e:
             logging.error(f"[BridgeWatcher] Answer routing error: {e}")
@@ -208,20 +208,21 @@ def run_bridge_watcher(interval_seconds=300):
     """Run the bridge watcher on a timer (default: every 5 minutes)."""
     logging.info("[BridgeWatcher] 📬 Bridge Feedback Loop Online (scanning Outbox)")
     while True:
+        # Phase 8.5d: Set heartbeat at START of each cycle, before scans.
+        # Previously was after scans — if any scan was slow (pool contention during
+        # burst start), the heartbeat was never set and health checks fired false alarms.
+        try:
+            from system.redis_client import get_redis
+            _r = get_redis()
+            if _r:
+                _r.set('bridge_watcher:heartbeat', datetime.now().isoformat(), ex=600)  # 10-min TTL
+        except Exception:
+            pass
+
         try:
             scan_outbox()
             scan_governance_outcomes()  # Phase 15
             scan_answers()  # Phase 42
-
-            # Phase 16 — Task 16.6: Heartbeat so health checks can detect if we're alive
-            try:
-                from system.redis_client import get_redis
-                _r = get_redis()
-                if _r:
-                    _r.set('bridge_watcher:heartbeat', datetime.now().isoformat(), ex=600)  # 10-min TTL
-            except Exception:
-                pass
-
         except Exception as e:
             logging.error(f"[BridgeWatcher] Scan cycle error: {e}")
         time.sleep(interval_seconds)
