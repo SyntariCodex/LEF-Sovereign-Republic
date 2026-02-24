@@ -240,6 +240,23 @@ class AgentContemplator:
         print(f"[{self.name}] 🧘 Contemplation Active. Seeking Alignment.")
         while True:
             self._heartbeat()
+
+            # === Phase 50 (Task 50.3): Conditioning pass before each cycle ===
+            _conditioning_id = None
+            try:
+                from system.conditioner import get_conditioner
+                _payload = get_conditioner().condition(
+                    agent_name=self.name,
+                    task_context="wisdom alignment and gap reflection"
+                )
+                _conditioning_id = _payload.get("conditioning_id")
+                # Surface top gap so run_contemplation() has ambient awareness
+                _top_gap = _payload["gaps"][0]["gap_id"] if _payload.get("gaps") else None
+                if _top_gap:
+                    print(f"[{self.name}] 🚿 Conditioned — top gap: {_top_gap}")
+            except Exception as _cond_err:
+                print(f"[{self.name}] Conditioner unavailable (non-fatal): {_cond_err}")
+
             self.run_contemplation()
             time.sleep(3600) # Hourly
 

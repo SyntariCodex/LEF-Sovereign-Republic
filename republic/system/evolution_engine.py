@@ -1144,6 +1144,23 @@ class EvolutionEngine:
         Called once every 24 hours (same cadence as TradeAnalyst).
         """
         logger.info("[EVOLUTION] === Starting evolution cycle ===")
+
+        # === Phase 50 (Task 50.3): Conditioning pass before each cycle ===
+        _conditioning_id = None
+        try:
+            from system.conditioner import get_conditioner
+            _payload = get_conditioner().condition(
+                agent_name="EvolutionEngine",
+                task_context="evolution cycle — observe, reflect, propose"
+            )
+            _conditioning_id = _payload.get("conditioning_id")
+            _n_gaps = len(_payload.get("gaps", []))
+            logger.info(f"[EVOLUTION] 🚿 Conditioned — gaps:{_n_gaps} "
+                        f"reflections:{len(_payload.get('recent_reflections', []))} "
+                        f"wisdom:{len(_payload.get('wisdom', []))}")
+        except Exception as _cond_err:
+            logger.debug(f"[EVOLUTION] Conditioner unavailable (non-fatal): {_cond_err}")
+
         self._update_velocity_counters()
 
         # Phase 38.5d: Check for dormant systems (Pruning Principle)

@@ -349,26 +349,58 @@ class AgentPostMortem:
         - Analysis: Every 5 minutes
         """
         logging.info("[POST_MORTEM] 🔍 Starting post-mortem cycle...")
-        
+
         while True:
             try:
                 self._heartbeat()
-                
+
+                # === Phase 50 (Task 50.3): Conditioning pass before each cycle ===
+                _conditioning_id = None
+                try:
+                    from system.conditioner import get_conditioner
+                    _payload = get_conditioner().condition(
+                        agent_name=self.name,
+                        task_context="post-mortem analysis — failed trades and scar writing"
+                    )
+                    _conditioning_id = _payload.get("conditioning_id")
+                    logging.debug(
+                        f"[POST_MORTEM] 🚿 Conditioned — "
+                        f"gaps:{len(_payload.get('gaps', []))} "
+                        f"id={str(_conditioning_id)[:8]}"
+                    )
+                except Exception as _cond_err:
+                    logging.debug(f"[POST_MORTEM] Conditioner unavailable (non-fatal): {_cond_err}")
+
                 # Analyze failed trades
                 new_scars = self.analyze_failed_trades()
-                
+
                 if new_scars > 0:
                     logging.info(f"[POST_MORTEM] 📖 Wrote {new_scars} new scars to book_of_scars.")
-                
+
                 # Check for critical patterns
                 critical = self.get_critical_scars()
                 if critical:
                     logging.warning(f"[POST_MORTEM] ⚠️ {len(critical)} CRITICAL scars detected!")
                     for scar in critical[:3]:  # Log top 3
                         logging.warning(f"  └─ {scar['asset']}: {scar['failure_type']} (x{scar['times_repeated']})")
-                
+
+                # === Phase 50 (Task 50.6): Write outcome score back to conditioning_log ===
+                # Binary outcome: good = cycle found no new critical scars, bad = critical scars present.
+                if _conditioning_id:
+                    try:
+                        from system.conditioner import get_conditioner
+                        # Good outcome: no new scars this cycle + no critical patterns
+                        outcome_score = 0.0 if (new_scars > 0 or critical) else 1.0
+                        get_conditioner().write_outcome(_conditioning_id, outcome_score)
+                        logging.debug(
+                            f"[POST_MORTEM] Conditioning outcome written — "
+                            f"score={outcome_score:.1f} id={str(_conditioning_id)[:8]}"
+                        )
+                    except Exception as _out_err:
+                        logging.debug(f"[POST_MORTEM] Outcome write error (non-fatal): {_out_err}")
+
                 time.sleep(300)  # Every 5 minutes
-                
+
             except Exception as e:
                 logging.error(f"[POST_MORTEM] Cycle error: {e}")
                 time.sleep(60)

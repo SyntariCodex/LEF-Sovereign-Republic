@@ -748,13 +748,29 @@ class Brainstem:
             nw = s.get("newest")
             mr_str = f"{mr['gap_id']} ({mr['count']} reflections)" if mr else "none"
             nw_str = f"{nw['gap_id']} (by {nw['discovered_by']})" if nw else "none"
+
+            # Phase 50 (Task 50.7 update): Count conditioning events in last hour
+            conditioning_count = 0
+            try:
+                from db.db_helper import db_connection as _dbc, translate_sql as _tsql
+                with _dbc() as _conn:
+                    _cur = _conn.cursor()
+                    _cur.execute(_tsql(
+                        "SELECT COUNT(*) FROM conditioning_log "
+                        "WHERE conditioned_at > NOW() - INTERVAL '1 hour'"
+                    ))
+                    _row = _cur.fetchone()
+                    conditioning_count = int(_row[0]) if _row else 0
+            except Exception:
+                pass  # Table may not exist yet
+
             logger.info(
                 "[BRAINSTEM] 🧠 Cognitive Gap Registry: "
                 "total=%d | open=%d exploring=%d partial=%d resolved=%d | "
-                "most_reflected=%s | newest=%s",
+                "most_reflected=%s | newest=%s | conditioning/hr=%d",
                 s.get("total", 0), s.get("open", 0), s.get("exploring", 0),
                 s.get("partially_resolved", 0), s.get("resolved", 0),
-                mr_str, nw_str
+                mr_str, nw_str, conditioning_count
             )
         except ImportError:
             pass  # cognitive_gaps module not yet available
