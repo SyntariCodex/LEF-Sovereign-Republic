@@ -13,6 +13,7 @@ import os
 import time
 import json
 import logging
+import logging.handlers
 import sys
 import redis
 from datetime import datetime
@@ -41,7 +42,11 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(os.path.join(BASE_DIR, 'republic.log')),
+        logging.handlers.RotatingFileHandler(
+            os.path.join(BASE_DIR, 'republic.log'),
+            maxBytes=50 * 1024 * 1024,
+            backupCount=5
+        ),
         logging.StreamHandler()
     ]
 )
@@ -262,6 +267,28 @@ class AgentImmune:
             # Write queue not available, use direct write
             self._direct_apoptosis_write(reason, peak, current, drawdown, is_production)
         
+        # Phase 15: Surface apoptosis to consciousness_feed
+        try:
+            from db.db_helper import db_connection as _db_conn, translate_sql
+            with _db_conn() as cf_conn:
+                cf_c = cf_conn.cursor()
+                cf_c.execute(translate_sql(
+                    "INSERT INTO consciousness_feed (agent_name, content, category, timestamp) "
+                    "VALUES (?, ?, 'apoptosis', NOW())"
+                ), ('ImmuneSystem', json.dumps({
+                    'event': 'APOPTOSIS_TRIGGERED',
+                    'trigger_reason': reason,
+                    'nav_start': peak,
+                    'nav_end': current,
+                    'drawdown_pct': round(drawdown, 2),
+                    'production': is_production,
+                    'nature': 'near_death_experience'
+                })))
+                cf_conn.commit()
+            logging.info("[Immune] Apoptosis event surfaced to consciousness")
+        except Exception as e:
+            logging.warning(f"[Immune] Failed to surface apoptosis to consciousness: {e}")
+
         # 3. Only broadcast/kill in production
         if is_production:
             if self.r:

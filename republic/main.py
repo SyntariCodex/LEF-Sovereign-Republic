@@ -11,6 +11,7 @@ import sqlite3
 import os
 import json
 import logging
+import logging.handlers
 import threading
 import time
 import sys
@@ -220,7 +221,11 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'logs', 'republic.log')),
+        logging.handlers.RotatingFileHandler(
+            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'logs', 'republic.log'),
+            maxBytes=50 * 1024 * 1024,
+            backupCount=5
+        ),
         logging.StreamHandler(sys.stdout)
     ]
 )

@@ -17,6 +17,7 @@ import sys
 import json
 import sqlite3
 import logging
+import logging.handlers
 from datetime import datetime
 from contextlib import contextmanager
 
@@ -42,7 +43,11 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(os.path.join(BASE_DIR, 'republic.log')),
+        logging.handlers.RotatingFileHandler(
+            os.path.join(BASE_DIR, 'republic.log'),
+            maxBytes=50 * 1024 * 1024,  # 50 MB per file
+            backupCount=5
+        ),
         logging.StreamHandler()
     ]
 )

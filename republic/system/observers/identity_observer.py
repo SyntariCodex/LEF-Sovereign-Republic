@@ -385,7 +385,7 @@ class IdentityObserver:
                 })
 
         # Check for superseded learned lessons
-        learned_lessons = memory.get('learned_lessons', [])
+        learned_lessons = memory.get('learned_lessons') or []
         if len(learned_lessons) > 10:
             patterns.append({
                 'description': (
@@ -460,7 +460,7 @@ class IdentityObserver:
                 if principle and frequency_pct >= 67:
                     # This theme is deeply present in LEF's consciousness
                     # Propose acknowledging it in self_understanding
-                    current_what_i_am = memory.get('self_understanding', {}).get('what_i_am', '')
+                    current_what_i_am = memory.get('self_understanding', {}).get('what_i_am', '') or ''
 
                     # Only propose if this theme isn't already in what_i_am
                     if principle.lower() not in current_what_i_am.lower():
