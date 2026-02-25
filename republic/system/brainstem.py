@@ -545,6 +545,19 @@ class Brainstem:
             )
             return
 
+        # Guard: never restart a thread that is still alive — it's just slow, not dead.
+        # Launching a duplicate creates thread explosion (both old + new run concurrently).
+        existing_thread = info.get("thread_ref")
+        if existing_thread and isinstance(existing_thread, threading.Thread) and existing_thread.is_alive():
+            logger.warning(
+                "[BRAINSTEM] ⏳ Thread '%s' is still alive (just slow) — skipping restart",
+                thread_name
+            )
+            # Reset last_seen so the alert doesn't fire again for another full window
+            with self._lock:
+                self._heartbeats[thread_name]["last_seen"] = time.time()
+            return
+
         try:
             logger.info("[BRAINSTEM] 🔄 Restarting thread '%s'...", thread_name)
             new_thread = launcher()
