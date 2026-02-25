@@ -389,8 +389,10 @@ class AgentPostMortem:
                 if _conditioning_id:
                     try:
                         from system.conditioner import get_conditioner
-                        # Good outcome: no new scars this cycle + no critical patterns
-                        outcome_score = 0.0 if (new_scars > 0 or critical) else 1.0
+                        # Good outcome: no NEW scars written this cycle.
+                        # Existing chronic scars (critical) are not penalized here —
+                        # they represent ongoing structural issues, not this cycle's performance.
+                        outcome_score = 0.0 if new_scars > 0 else 1.0
                         get_conditioner().write_outcome(_conditioning_id, outcome_score)
                         logging.debug(
                             f"[POST_MORTEM] Conditioning outcome written — "
