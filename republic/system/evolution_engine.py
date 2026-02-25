@@ -133,10 +133,97 @@ class EvolutionEngine:
             logger.warning(f"[EVOLUTION] Could not load proposal history: {e}")
             self._proposal_history = []
 
+    def _prune_proposal_history(self):
+        """
+        Phase 38.6: Prune stale proposals to prevent unbounded file growth.
+
+        Policy (in priority order):
+        - ALWAYS keep: enacted proposals and approved governance results (permanent record)
+        - ALWAYS keep: cooling proposals (actively in the governance pipeline)
+        - EXPIRE: null-result proposals (governance_result=None) older than 72 hours
+        - EXPIRE: unknown-status proposals older than 7 days
+        - HARD CAP: after above pruning, if > 500 remain, keep newest 500
+        """
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc)
+
+        def _parse_ts(p):
+            ts_str = p.get('timestamp', '')
+            if not ts_str:
+                return None
+            try:
+                dt = datetime.fromisoformat(str(ts_str))
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                return dt
+            except (ValueError, TypeError):
+                return None
+
+        def _is_protected(p):
+            """Proposals that must never be pruned."""
+            if p.get('enacted'):
+                return True
+            gr = p.get('governance_result')
+            if isinstance(gr, dict) and gr.get('approved') is True:
+                return True
+            if p.get('cooling_started') and not (isinstance(gr, dict) and gr.get('approved') is False):
+                return True
+            return False
+
+        before = len(self._proposal_history)
+        kept = []
+        pruned = 0
+
+        for p in self._proposal_history:
+            if _is_protected(p):
+                kept.append(p)
+                continue
+
+            ts = _parse_ts(p)
+            gr = p.get('governance_result')
+            age_hours = (now - ts).total_seconds() / 3600 if ts else 0
+
+            # Null-result: governance never ran — expire after 72 hours
+            if gr is None and age_hours > 72:
+                pruned += 1
+                continue
+
+            # Unknown status: governance returned unknown — expire after 7 days
+            if isinstance(gr, dict) and gr.get('status') == 'unknown' and age_hours > 168:
+                pruned += 1
+                continue
+
+            kept.append(p)
+
+        # Hard cap: keep newest 500 after policy pruning
+        if len(kept) > 500:
+            # Split protected vs non-protected to preserve all protected
+            protected = [p for p in kept if _is_protected(p)]
+            non_protected = [p for p in kept if not _is_protected(p)]
+            # Keep newest non-protected up to 500 - len(protected) slots
+            slots = max(0, 500 - len(protected))
+            non_protected_sorted = sorted(
+                non_protected,
+                key=lambda p: str(p.get('timestamp', '')),
+                reverse=True
+            )[:slots]
+            cap_pruned = len(non_protected) - len(non_protected_sorted)
+            kept = protected + non_protected_sorted
+            pruned += cap_pruned
+
+        self._proposal_history = kept
+
+        if pruned > 0:
+            logger.info(
+                "[EVOLUTION] 🌿 Proposal history pruned: %d removed → %d remain (was %d)",
+                pruned, len(kept), before
+            )
+
     def _save_proposal_history(self):
         """Persist proposal history to disk. Uses atomic write + flock (Phase 21.1f)."""
         import tempfile
         import fcntl
+        self._prune_proposal_history()  # Phase 38.6: prune before each save
         try:
             dir_name = os.path.dirname(self.PROPOSAL_LOG_PATH)
             os.makedirs(dir_name, exist_ok=True)

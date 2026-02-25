@@ -27,9 +27,13 @@ Or use the context manager:
 
 import os
 import re
+import time
+import logging
 import datetime
 from contextlib import contextmanager
 from pathlib import Path
+
+_logger = logging.getLogger(__name__)
 
 # Default DB path
 BASE_DIR = Path(__file__).parent.parent
@@ -39,6 +43,23 @@ DATABASE_BACKEND = os.getenv('DATABASE_BACKEND', 'sqlite').lower()
 # Cached pool reference
 _pool = None
 _pool_failed = False
+
+# Phase 38.6: Module-level startup staleness check — fires once per process.
+# Warns operators immediately if the SQLite DB is stale AND the backend
+# defaults to 'sqlite' because DATABASE_BACKEND env var was not set.
+try:
+    _sqlite_path = DEFAULT_DB_PATH
+    if DATABASE_BACKEND == 'sqlite' and os.path.exists(_sqlite_path):
+        _db_age_hours = (time.time() - os.path.getmtime(_sqlite_path)) / 3600
+        if _db_age_hours > 24:
+            _logger.critical(
+                "[DB_HELPER] ⚠️  STALE SQLITE ON STARTUP: '%s' last modified %.1fh ago. "
+                "DATABASE_BACKEND defaults to 'sqlite' — if PostgreSQL is the intended backend, "
+                "set DATABASE_BACKEND=postgresql in your environment.",
+                _sqlite_path, _db_age_hours
+            )
+except OSError:
+    pass
 
 
 def get_backend() -> str:
@@ -81,13 +102,27 @@ def translate_sql(sql: str) -> str:
     result = result.replace('?', '%s')
 
     # INSERT OR REPLACE → INSERT ... ON CONFLICT DO UPDATE
-    # This is complex and context-dependent; for now, convert to basic form
+    # Parse the table and columns to generate proper ON CONFLICT clause
+    _had_or_replace = bool(re.search(r'INSERT\s+OR\s+REPLACE\s+INTO', result, flags=re.IGNORECASE))
     result = re.sub(
         r'INSERT\s+OR\s+REPLACE\s+INTO',
         'INSERT INTO',
         result,
         flags=re.IGNORECASE
     )
+    if _had_or_replace and 'ON CONFLICT' not in result.upper():
+        # Extract column names from VALUES clause to build DO UPDATE SET
+        col_match = re.search(r'INSERT\s+INTO\s+\w+\s*\(([^)]+)\)', result, flags=re.IGNORECASE)
+        if col_match:
+            cols = [c.strip().strip("'\"") for c in col_match.group(1).split(',')]
+            # First column is typically the primary key for system_state-style tables
+            conflict_col = cols[0]
+            update_cols = cols[1:]
+            if update_cols:
+                updates = ', '.join([f"{c} = EXCLUDED.{c}" for c in update_cols])
+                result = result.rstrip().rstrip(';') + f' ON CONFLICT ({conflict_col}) DO UPDATE SET {updates}'
+            else:
+                result = result.rstrip().rstrip(';') + f' ON CONFLICT ({conflict_col}) DO NOTHING'
 
     # INSERT OR IGNORE → INSERT INTO ... ON CONFLICT DO NOTHING
     _had_or_ignore = bool(re.search(r'INSERT\s+OR\s+IGNORE\s+INTO', result, flags=re.IGNORECASE))
@@ -150,6 +185,19 @@ def translate_sql(sql: str) -> str:
 
     # AUTOINCREMENT → strip (PostgreSQL uses SERIAL)
     result = re.sub(r'\bAUTOINCREMENT\b', '', result, flags=re.IGNORECASE)
+
+    # GROUP_CONCAT(col) → string_agg(col::text, ',')
+    # GROUP_CONCAT(col, sep) → string_agg(col::text, sep)
+    result = re.sub(
+        r'\bGROUP_CONCAT\s*\(\s*(\w+)\s*,\s*([^)]+)\s*\)',
+        r'string_agg(\1::text, \2)',
+        result, flags=re.IGNORECASE
+    )
+    result = re.sub(
+        r'\bGROUP_CONCAT\s*\(\s*(\w+)\s*\)',
+        r"string_agg(\1::text, ',')",
+        result, flags=re.IGNORECASE
+    )
 
     # INTEGER PRIMARY KEY → INTEGER PRIMARY KEY (keep as-is for PG, but strip AUTOINCREMENT above)
     # CREATE TABLE IF NOT EXISTS with SQLite-only types — mostly compatible
@@ -284,6 +332,24 @@ def _create_direct_sqlite_connection(db_path=None, timeout=120.0):
     """Create a direct SQLite connection (fallback when pool unavailable)."""
     import sqlite3
     db = db_path or DEFAULT_DB_PATH
+
+    # Phase 38.6: Staleness guard — warn if connecting to a stale SQLite DB.
+    # Protects against silently reading old data when PostgreSQL is the primary
+    # backend but DATABASE_BACKEND env var was omitted, causing a silent fallback
+    # to the legacy republic.db file which may be days or weeks out of date.
+    try:
+        if os.path.exists(db):
+            age_hours = (time.time() - os.path.getmtime(db)) / 3600
+            if age_hours > 24:
+                _logger.critical(
+                    "[DB_HELPER] ⚠️  STALE SQLITE: '%s' last modified %.1fh ago. "
+                    "If PostgreSQL is the intended backend, set DATABASE_BACKEND=postgresql "
+                    "to avoid reading stale data. Current backend: %s",
+                    db, age_hours, DATABASE_BACKEND
+                )
+    except OSError:
+        pass
+
     conn = sqlite3.connect(db, timeout=timeout)
     _configure_sqlite_connection(conn)
     return conn
@@ -358,10 +424,20 @@ class _DualAccessRow:
 
 
 class _PgCursorWrapper:
-    """Wraps a psycopg2 cursor to auto-translate SQLite SQL."""
+    """Wraps a psycopg2 cursor to auto-translate SQLite SQL.
 
-    def __init__(self, cursor):
+    Phase 8.3: Auto-rollback on failed queries to prevent PostgreSQL
+    'current transaction is aborted' cascading errors.  In PostgreSQL,
+    a single failed query poisons the entire transaction — all subsequent
+    queries fail until an explicit ROLLBACK.  SQLite doesn't have this
+    behaviour, so the 300+ raw sqlite3.connect() call sites never handled
+    it.  By catching exceptions and auto-rolling-back here, we keep the
+    connection usable for subsequent queries.
+    """
+
+    def __init__(self, cursor, pg_conn=None):
         self._cursor = cursor
+        self._pg_conn = pg_conn  # Raw psycopg2 connection for auto-rollback
 
     @property
     def connection(self):
@@ -441,7 +517,17 @@ class _PgCursorWrapper:
             sql_lower = translated.lower()
             if any(col in sql_lower for col in self._TIMESTAMP_COLUMNS):
                 params = self._coerce_epoch_params(params)
-        return self._cursor.execute(translated, params)
+        # Phase 8.3: Auto-rollback on failure to prevent transaction poisoning
+        try:
+            return self._cursor.execute(translated, params)
+        except Exception as e:
+            if self._pg_conn:
+                try:
+                    self._pg_conn.rollback()
+                    _logger.debug(f"[DB_HELPER] Auto-rollback after failed query: {type(e).__name__}: {e}")
+                except Exception:
+                    pass
+            raise
 
     def executemany(self, sql, params_list):
         translated = translate_sql(sql)
@@ -452,7 +538,17 @@ class _PgCursorWrapper:
             sql_lower = translated.lower()
             if any(col in sql_lower for col in self._TIMESTAMP_COLUMNS):
                 params_list = [self._coerce_epoch_params(p) for p in params_list]
-        return self._cursor.executemany(translated, params_list)
+        # Phase 8.3: Auto-rollback on failure
+        try:
+            return self._cursor.executemany(translated, params_list)
+        except Exception as e:
+            if self._pg_conn:
+                try:
+                    self._pg_conn.rollback()
+                    _logger.debug(f"[DB_HELPER] Auto-rollback after failed executemany: {type(e).__name__}: {e}")
+                except Exception:
+                    pass
+            raise
 
     def fetchone(self):
         row = self._cursor.fetchone()
@@ -503,13 +599,20 @@ class _PgConnectionWrapper:
         self._pool = pool  # Reference to pool for proper release on close()
         self._closed = False  # Guard against double-close
         self.row_factory = None  # SQLite compatibility
+        self._checkout_time = time.time()  # Phase 8.4: Track when connection was checked out
+
+    # NOTE: __del__ finalizer intentionally REMOVED (Phase 8.4b).
+    # ThreadedConnectionPool gives the SAME raw connection to the same thread
+    # on repeated getconn() calls. Multiple wrappers can share one raw conn.
+    # __del__ on stale wrappers would close connections still in active use.
+    # Leak recovery is handled by the DBPool-Reaper thread instead.
 
     def cursor(self):
         # Use standard cursor (returns tuples) for maximum SQLite compat
         # Agents access rows by index (row[0]) and by name (row['col']),
         # so we use a regular cursor and let _coerce_row handle type conversion
         raw_cursor = self._conn.cursor()
-        return _PgCursorWrapper(raw_cursor)
+        return _PgCursorWrapper(raw_cursor, pg_conn=self._conn)
 
     def execute(self, sql, params=None):
         """Direct execute on connection (SQLite pattern)."""
