@@ -174,15 +174,21 @@ class ConstitutionGuard:
             # actual agent ACTIONS (broadcasts, trades, executions, proposals).
             # Normal telemetry/polling/research is NOT a circular action.
             # Phase 34: Parameterized LIKE patterns — no string concatenation in SQL
+            # Phase 50-fix: Patterns must represent genuinely repeated *actions*, not telemetry.
+            # Removed '%Broadcast:%' — router status broadcasts (e.g., "Broadcast: Wake 6, Sleep 11")
+            #   are high-frequency telemetry, not circular actions.
+            # '%Dispatched intent%' — catches per-intent dispatch to a channel (not cycle summary).
+            # '%TRADE%', '%BUY%', '%SELL%', '%EXECUTED%' — actual trade actions.
+            # '%PROPOSAL%' — governance proposals.
+            # '%APOPTOSIS%' — extreme self-termination signals.
             ACTION_INDICATORS = [
-                '%Broadcast:%',
                 '%EXECUTED%',
                 '%TRADE%',
                 '%BUY%',
                 '%SELL%',
                 '%APOPTOSIS%',
                 '%PROPOSAL%',
-                '%Dispatched intent%',  # Match per-intent dispatch, NOT cycle summary "Dispatched N intents"
+                '%Dispatched intent%',
             ]
             placeholders = " OR ".join("message LIKE ?" for _ in ACTION_INDICATORS)
             c.execute(f"""
