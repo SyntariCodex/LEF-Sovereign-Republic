@@ -241,7 +241,31 @@ class ConnectionPool:
                     except Exception:
                         pass
                     continue
-                raw_conn.autocommit = False
+
+                # Defensive checkout: rollback any open transaction left by
+                # a previous user who didn't clean up before returning the
+                # connection to the pool (e.g. reaper reclamation path).
+                # psycopg2 does NOT auto-rollback on putconn() — it's the
+                # application's responsibility.  Setting autocommit while a
+                # transaction is open raises "set_session cannot be used
+                # inside a transaction".
+                try:
+                    import psycopg2.extensions as _pg_ext
+                    if raw_conn.status in (
+                        _pg_ext.STATUS_IN_TRANSACTION,   # 1 — open txn
+                        _pg_ext.STATUS_PREPARED,         # 5 — prepared txn
+                    ):
+                        logger.debug("[DB_POOL] Checkout: rolling back dirty connection (status=%d)", raw_conn.status)
+                        raw_conn.rollback()
+                    raw_conn.autocommit = False
+                except Exception as _ae:
+                    # Still unclean — discard this slot and retry with a fresh one
+                    logger.debug("[DB_POOL] Discarding unclean connection on checkout (%s), retrying", _ae)
+                    try:
+                        self._pg_pool.putconn(raw_conn, close=True)
+                    except Exception:
+                        pass
+                    continue
                 with self._pool_lock:
                     self._in_use.add(id(raw_conn))
                     self._active_count += 1
