@@ -177,7 +177,6 @@ If no actionable intent, respond: {{"intent_type": "NONE"}}"""
                     response = self.client.models.generate_content(model=self.model_id, contents=prompt)
                     response_text = response.text.strip() if response and response.text else None
                 except Exception as _e:
-                    import logging
                     logging.debug(f"Legacy LLM fallback failed: {_e}")
             result = response_text
             

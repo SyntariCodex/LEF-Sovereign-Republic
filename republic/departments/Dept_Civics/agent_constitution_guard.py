@@ -182,7 +182,7 @@ class ConstitutionGuard:
                 '%SELL%',
                 '%APOPTOSIS%',
                 '%PROPOSAL%',
-                '%Dispatched%',
+                '%Dispatched intent%',  # Match per-intent dispatch, NOT cycle summary "Dispatched N intents"
             ]
             placeholders = " OR ".join("message LIKE ?" for _ in ACTION_INDICATORS)
             c.execute(f"""
