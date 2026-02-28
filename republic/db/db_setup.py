@@ -39,21 +39,23 @@ def init_db(db_path=None):
         print(f"[DB] ⚠️ Could not set WAL mode: {e}")
 
     # 1. Virtual Wallets (The Rooms)
-    c.execute('''CREATE TABLE IF NOT EXISTS virtual_wallets
-                 (id INTEGER PRIMARY KEY,
-                  name TEXT UNIQUE, 
-                  role TEXT, 
-                  allocation_cap REAL)''')
+    # -- Phase 16: Table removed (never used in production). Preserved as comment for reference.
+    # c.execute('''CREATE TABLE IF NOT EXISTS virtual_wallets
+    #              (id INTEGER PRIMARY KEY,
+    #               name TEXT UNIQUE,
+    #               role TEXT,
+    #               allocation_cap REAL)''')
     
     # 2. Assets (Moved to updated definition below)
 
     # 3. Oracle List (The Garden)
-    c.execute('''CREATE TABLE IF NOT EXISTS oracles
-                 (handle TEXT PRIMARY KEY,
-                  weight INTEGER,
-                  category TEXT,
-                  is_canon BOOLEAN DEFAULT 0,
-                  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+    # -- Phase 16: Table removed (never used in production). Preserved as comment for reference.
+    # c.execute('''CREATE TABLE IF NOT EXISTS oracles
+    #              (handle TEXT PRIMARY KEY,
+    #               weight INTEGER,
+    #               category TEXT,
+    #               is_canon BOOLEAN DEFAULT 0,
+    #               added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
     
     # 4. Trade Queue (The Human Gate)
     c.execute('''CREATE TABLE IF NOT EXISTS trade_queue
@@ -242,14 +244,15 @@ def init_db(db_path=None):
     )
     
     # 13. Macro History (The World Context) - Agent SNW
-    c.execute('''CREATE TABLE IF NOT EXISTS macro_history
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                  fed_rate REAL,
-                  cpi_inflation REAL,
-                  fear_greed_index INTEGER,
-                  liquidity_status TEXT,
-                  notes TEXT)''')
+    # -- Phase 16: Table removed (never used in production). Preserved as comment for reference.
+    # c.execute('''CREATE TABLE IF NOT EXISTS macro_history
+    #              (id INTEGER PRIMARY KEY AUTOINCREMENT,
+    #               timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    #               fed_rate REAL,
+    #               cpi_inflation REAL,
+    #               fear_greed_index INTEGER,
+    #               liquidity_status TEXT,
+    #               notes TEXT)''')
                   
     # 14. Agent Logs (The Action History) - For Governance UI
     c.execute('''CREATE TABLE IF NOT EXISTS agent_logs
@@ -323,18 +326,19 @@ def init_db(db_path=None):
     """)
 
     # 20. Library Catalog (The Bookshelf) - Phase 8
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS library_catalog (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            source_url TEXT,
-            author TEXT,
-            category TEXT, -- Economics, History, Strategy, Civics
-            summary TEXT,
-            status TEXT DEFAULT 'UNREAD',
-            ingested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
+    # -- Phase 16: Table removed (never used in production). Preserved as comment for reference.
+    # c.execute("""
+    #     CREATE TABLE IF NOT EXISTS library_catalog (
+    #         id INTEGER PRIMARY KEY AUTOINCREMENT,
+    #         title TEXT,
+    #         source_url TEXT,
+    #         author TEXT,
+    #         category TEXT, -- Economics, History, Strategy, Civics
+    #         summary TEXT,
+    #         status TEXT DEFAULT 'UNREAD',
+    #         ingested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    #     )
+    # """)
 
     # 21. Mental Models (The Distilled Intellect) - Phase 8
     c.execute("""
@@ -550,6 +554,7 @@ def init_db(db_path=None):
     """)
 
     # 34. Consciousness Feed (The Nervous System) - Phase 1 Active Tasks
+    #     Phase 46+: Added signal_weight and signal_vector to match PostgreSQL schema
     c.execute("""
         CREATE TABLE IF NOT EXISTS consciousness_feed (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -557,7 +562,9 @@ def init_db(db_path=None):
             content TEXT NOT NULL,
             category TEXT DEFAULT 'reflection',
             timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
-            consumed INTEGER DEFAULT 0
+            consumed INTEGER DEFAULT 0,
+            signal_weight REAL DEFAULT 0.5,
+            signal_vector TEXT DEFAULT '{}'
         )
     """)
 
@@ -565,6 +572,125 @@ def init_db(db_path=None):
     c.execute("CREATE INDEX IF NOT EXISTS idx_cf_consumed ON consciousness_feed(consumed)")
     c.execute("CREATE INDEX IF NOT EXISTS idx_cf_timestamp ON consciousness_feed(timestamp)")
     c.execute("CREATE INDEX IF NOT EXISTS idx_cf_agent ON consciousness_feed(agent_name)")
+
+    # 35. Republic Awareness (Body One output — Phase 9 Three-Body Reflection)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS republic_awareness (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+            active_patterns TEXT NOT NULL DEFAULT '[]',
+            scar_domain_activity TEXT NOT NULL DEFAULT '{}',
+            agent_health TEXT NOT NULL DEFAULT '{}',
+            republic_health_signals TEXT NOT NULL DEFAULT '{}',
+            pattern_count INTEGER DEFAULT 0,
+            cycle_number INTEGER DEFAULT 0
+        )
+    """)
+    c.execute("CREATE INDEX IF NOT EXISTS idx_ra_timestamp ON republic_awareness(timestamp)")
+
+    # 36. Sovereign Reflection (Body Two output — Phase 9 Three-Body Reflection)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS sovereign_reflection (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+            pattern_id TEXT NOT NULL,
+            pattern_description TEXT NOT NULL,
+            gravity_profile TEXT NOT NULL DEFAULT '{}',
+            gravity_level TEXT DEFAULT 'baseline',
+            scar_resonance_count INTEGER DEFAULT 0,
+            impression TEXT,
+            status TEXT DEFAULT 'active',
+            first_seen TEXT DEFAULT CURRENT_TIMESTAMP,
+            last_updated TEXT DEFAULT CURRENT_TIMESTAMP,
+            surfaced_to_sabbath INTEGER DEFAULT 0,
+            resolution TEXT
+        )
+    """)
+    c.execute("CREATE INDEX IF NOT EXISTS idx_sr_status ON sovereign_reflection(status)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_sr_gravity ON sovereign_reflection(gravity_level)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_sr_timestamp ON sovereign_reflection(timestamp)")
+
+    # 37. Sabbath Log (Body Three audit trail — Phase 9 Three-Body Reflection)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS sabbath_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+            trigger_pattern_id TEXT NOT NULL,
+            gravity_profile TEXT NOT NULL DEFAULT '{}',
+            gravity_level TEXT NOT NULL,
+            duration_seconds REAL,
+            logical_assessment TEXT,
+            resonance_assessment TEXT,
+            outcome TEXT NOT NULL,
+            intention TEXT,
+            proposal_id TEXT,
+            notes TEXT
+        )
+    """)
+    c.execute("CREATE INDEX IF NOT EXISTS idx_sabbath_timestamp ON sabbath_log(timestamp)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_sabbath_outcome ON sabbath_log(outcome)")
+
+    # 38. Reverb Log (Phase 10 — tracks effects of enacted evolution changes)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS reverb_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+            proposal_id TEXT NOT NULL,
+            domain TEXT,
+            change_description TEXT,
+            reverb_assessment TEXT,
+            observations TEXT DEFAULT '[]',
+            hours_post_enactment REAL DEFAULT 0
+        )
+    """)
+    c.execute("CREATE INDEX IF NOT EXISTS idx_reverb_proposal ON reverb_log(proposal_id)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_reverb_timestamp ON reverb_log(timestamp)")
+
+    # Table 81: execution_feedback (Phase 19.2a — execution quality tracking)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS execution_feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            trade_queue_id INTEGER,
+            asset TEXT,
+            intended_price REAL,
+            actual_price REAL,
+            slippage_pct REAL,
+            intended_qty REAL,
+            actual_qty REAL,
+            fill_rate REAL,
+            fees_usd REAL,
+            execution_time_ms INTEGER,
+            status TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    c.execute("CREATE INDEX IF NOT EXISTS idx_exec_feedback_asset ON execution_feedback(asset)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_exec_feedback_created ON execution_feedback(created_at)")
+
+    # Phase 21.1b: Composite index for consciousness_feed cleanup queries
+    c.execute("CREATE INDEX IF NOT EXISTS idx_cf_cleanup ON consciousness_feed(consumed, timestamp, category)")
+
+    # Phase 21.1c: Indexes for agent_logs (high-volume table, needs fast queries)
+    c.execute("CREATE INDEX IF NOT EXISTS idx_agent_logs_source ON agent_logs(source)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_agent_logs_level ON agent_logs(level)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_agent_logs_ts ON agent_logs(timestamp)")
+
+    # Phase 21.1d: Training summary table (archive before purging action_training_log)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS training_summary (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_name TEXT,
+            action_type TEXT,
+            avg_reward REAL,
+            total_count INTEGER,
+            positive_count INTEGER,
+            negative_count INTEGER,
+            period_start TIMESTAMP,
+            period_end TIMESTAMP,
+            summarized_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    c.execute("CREATE INDEX IF NOT EXISTS idx_training_summary_agent ON training_summary(agent_name)")
 
     conn.commit()
     conn.close()

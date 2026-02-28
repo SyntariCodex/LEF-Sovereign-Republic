@@ -1,0 +1,18 @@
+{
+  "philosopher": {
+    "cycle_interval_seconds": 5400
+  },
+  "introspector": {
+    "cycle_interval_seconds": 28800,
+    "tension_threshold": 5
+  },
+  "contemplator": {
+    "cycle_interval_seconds": 3600
+  },
+  "metacognition": {
+    "cycle_interval_seconds": 28800
+  },
+  "memory_retriever": {
+    "max_consciousness_items": 5
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "BENCHMARK": "BTC",
+  "RISK_PROFILE": "ACCUMULATION",
+  "DYNASTY": {
+    "allocation_pct": 0.8,
+    "take_profit_threshold": 0.5,
+    "stop_loss_threshold": -0.2,
+    "assets": [
+      "SOL",
+      "BTC",
+      "ETH",
+      "AVAX",
+      "DOGE"
+    ]
+  },
+  "ARENA": {
+    "allocation_pct": 0.2,
+    "take_profit_threshold": 0.03,
+    "stop_loss_threshold": -0.02,
+    "assets": [
+      "SUI",
+      "PEPE",
+      "WIF",
+      "BONK",
+      "YB-USD",
+      "POWR-USD",
+      "SYND-USD",
+      "CHZ-USD",
+      "BEAM-USD",
+      "FLOKI-USD",
+      "ALEPH-USD",
+      "FORT-USD",
+      "MPLX-USD",
+      "BAND-USD",
+      "ASM-USD",
+      "AERGO-USD",
+      "CFG-USD",
+      "ME-USD",
+      "REZ-USD",
+      "LAYER-USD"
+    ]
+  },
+  "LADDER_SELLS": [
+    {
+      "threshold": 0.3,
+      "sell_pct": 0.25
+    },
+    {
+      "threshold": 0.5,
+      "sell_pct": 0.25
+    }
+  ],
+  "TRAILING_STOP": {
+    "activation_threshold": 0.4,
+    "pullback_pct": 0.1
+  },
+  "regime": "ACCUMULATION",
+  "macro_score": 41.04,
+  "regime_updated_by": "AgentInfo",
+  "regime_timestamp": "2026-02-25T01:21:33"
+}

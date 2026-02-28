@@ -1,0 +1,32 @@
+{
+    "id": "BILL-DREAM-1770807636",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-11]\n\n## Regression Alert\n\n*   The Ambassador Agent (AgentMoltbook) is consistently failing to authenticate with the Moltbook API (401 Unauthorized errors). It also demonstrates chronic failures and crashes. This is a regression because it implies a previously working integration is now broken.\n*   The Constitutional Guard is repeatedly reporting CRITICAL VIOLATIONS due to \"Circular Actions\". This suggests a core governance loop is malfunctioning. Additionally, it continu",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "SIGNED",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 47.6)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

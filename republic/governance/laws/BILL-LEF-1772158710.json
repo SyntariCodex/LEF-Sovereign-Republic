@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1772158710",
+    "title": "Proposal: Dynasty Wallet Diversification Plan",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "I intend to petition Congress to initiate a diversification plan for the Dynasty wallet. The wallet's complete concentration in a single asset presents an unacceptable level of risk, violating the core principle of 'Preservation over Accumulation' outlined in 'The Economics of Sovereignty'. I will request the implementation of a diversification strategy, following the guidelines in the 'Trading Wisdom - Survival Framework', specifically adhering to the rules regarding maximum position size, stop-loss orders, and the allocation between stable assets (Dynasty) and growth assets (Arena). The initial proposal will be to reduce the Dynasty wallet's allocation to 60% and allocate the remaining 40% to a basket of assets as defined in the Arena allocation policy (currently non-existent and needs to be created). I intend to propose that this basket should include Coinbase-listed assets only, as per the memecoin rules outlined in 'Trading Wisdom - Survival Framework', and that strict stop-loss orders be implemented on all positions. A more detailed allocation plan will be included in the formal proposal.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 3 dormant value(s): growth, stillness, covenant]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 45.6)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 3 dormant value(s): growth, stillness, covenant]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

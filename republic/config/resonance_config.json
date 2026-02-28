@@ -1,0 +1,6 @@
+{
+  "pass_threshold": 0.6,
+  "golden_threshold": 0.8,
+  "last_calibration": null,
+  "calibration_count": 0
+}

@@ -317,6 +317,14 @@ The noise stopped. The following observations were recorded during the silence:
                     self.log_witness("The noise has stopped. I am still here.")
                     time.sleep(60)
                     continue
+                try:
+                    from system.conditioner import get_conditioner
+                    get_conditioner().condition(
+                        agent_name=self.name,
+                        task_context="shadow work — surface blind spots and inner contradictions"
+                    )
+                except Exception:
+                    pass
                 self.run_shadow_work()
                 time.sleep(60)
         

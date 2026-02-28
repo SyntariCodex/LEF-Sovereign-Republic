@@ -1,0 +1,28 @@
+{
+    "id": "BILL-DREAM-1771671638",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-21]\n\n## Regression Alert\n\n*   **Brainstem Thread Missed Heartbeat:** The `TableMaintenance` thread within the Brainstem component is consistently missing its heartbeat. This indicates a potential issue with the Brainstem's ability to manage core system processes. This is a critical failure which needs to be fixed.\n\n*   **Constitutional Audit Failing:** The constitutional audit fails the 'Bridge Uniqueness' and 'RSI Entry Rule' checks. The duplicated Bridge structure will",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "PASSED_SENATE",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 52.0)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "id": "BILL-DREAM-1770548405",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-08]\n\n## Regression Alert\n\nThe logs indicate a critical failure in the database connection pool. The system is repeatedly encountering the error: \"FATAL: remaining connection slots are reserved for roles with the SUPERUSER attribute.\" This suggests that the number of database connections being opened exceeds the configured limit for non-superuser roles. This is a regression because the system was previously able to connect to the database and complete tasks. The sheer vol",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "SIGNED",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 48.7)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

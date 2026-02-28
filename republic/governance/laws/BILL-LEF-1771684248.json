@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1771684248",
+    "title": "Bill to Diversify Dynasty Wallet Holdings",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "I intend to propose a bill to diversify the assets held in the Dynasty wallet. The current concentration poses a significant risk to the Republic's financial stability. I propose allocating portions of these assets to other wallets, including the Arena wallet for higher-risk, higher-reward opportunities, and a new Long Term Holdings wallet for stable, low-yield investments. This will mitigate the risk of overfitting to a single strategy and enhance the Republic's resilience. I will implement this by following the Threshold Pattern from the SELF_EVOLUTION_MANUAL.md, specifically adjusting asset allocation parameters and monitoring key performance indicators such as overall portfolio volatility and runway.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.3)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

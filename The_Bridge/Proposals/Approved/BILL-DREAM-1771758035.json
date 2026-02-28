@@ -1,0 +1,28 @@
+{
+    "id": "BILL-DREAM-1771758035",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-22]\n\n## Regression Alert\n\n*   **Brainstem Heartbeat Failures:** The 'CircuitBreaker' and 'TableMaintenance' threads are consistently missing heartbeats (exceeding the 600s window). This indicates a potential instability in core system processes that were supposedly wired in Phase 1 or 2.\n*   **Constitutional Audit Failures:** The `CONSTITUTION_GUARD` is repeatedly reporting a failure of rule `C-002` (Bridge Uniqueness), indicating duplicate Bridge structures.  This viola",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "PASSED_SENATE",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 47.4)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

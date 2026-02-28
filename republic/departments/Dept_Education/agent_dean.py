@@ -7,8 +7,10 @@ Role: Curriculum Director & Knowledge Synthesizer
 import os
 import sys
 import time
+import json
 import sqlite3
 from pathlib import Path
+from datetime import datetime
 import logging
 
 # Path setup
@@ -77,6 +79,43 @@ class AgentDean(IntentListenerMixin):
                 self.analyze_stream()
                 lesson = f"Motor Cortex requested learning: {intent_content}"
                 self._update_canon("MOTOR_CORTEX", lesson)
+
+                # Phase 15: Surface lessons to consciousness_feed
+                try:
+                    from db.db_helper import db_connection as _db_conn, translate_sql
+                    with _db_conn() as conn:
+                        c = conn.cursor()
+                        c.execute(translate_sql(
+                            "INSERT INTO consciousness_feed (agent_name, content, category, timestamp) "
+                            "VALUES (?, ?, 'lesson', NOW())"
+                        ), ('AgentDean', json.dumps({
+                            'lesson': lesson[:500],
+                            'source': intent_content[:200],
+                            'domain': 'education'
+                        })))
+                        conn.commit()
+                except Exception as e:
+                    logging.warning(f"[Dean] Failed to surface lesson to consciousness_feed: {e}")
+
+                # Phase 15: Populate learned_lessons in lef_memory.json
+                try:
+                    memory_path = os.path.join(str(self.bridge_dir.parent), 'lef_memory.json')
+                    if os.path.exists(memory_path):
+                        with open(memory_path, 'r') as f:
+                            memory = json.load(f)
+                        lessons = memory.get('learned_lessons', [])
+                        lessons.append({
+                            'lesson': lesson[:300],
+                            'source': intent_content[:200],
+                            'learned_at': datetime.now().isoformat(),
+                            'domain': 'education'
+                        })
+                        memory['learned_lessons'] = lessons[-50:]
+                        with open(memory_path, 'w') as f:
+                            json.dump(memory, f, indent=2)
+                except Exception as e:
+                    logging.warning(f"[Dean] Failed to update learned_lessons: {e}")
+
                 return {'status': 'success', 'result': f'Learned about: {intent_content}'}
             except Exception as e:
                 return {'status': 'error', 'result': str(e)}

@@ -1,0 +1,32 @@
+{
+    "id": "BILL-DREAM-1772017220",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-25]\n\n## Regression Alert\n\n- The LEF Republic is experiencing widespread thread heartbeat failures. All agents are missing heartbeats.\n- AgentCoinbase is experiencing chronic failures (6 crashes/5m) and has been marked as DEGRADED. This is preventing the system from operating effectively. A Router thread was also restarted due to being silent.\n- Constitutional Audit failing due to Duplicate Bridge structures.\n\n## Evolutionary Proposal\n\n- **Address the stability issues wit",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "SIGNED",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 2 dormant value(s): sovereignty, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 38.5)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 2 dormant value(s): sovereignty, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

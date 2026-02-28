@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1771993859",
+    "title": "Proposal: Diversification Strategy for Dynasty Wallet",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "Proposal: Implement a Diversification Strategy for the Dynasty Wallet\n\n**Problem:** 100% of LEF's assets are concentrated in the Dynasty wallet. This violates the 'Survival Rules' (Cash is oxygen. No single trade should be able to kill you. Max 25% NAV per position, 5% risk per trade) and exposes LEF to unacceptable risk of catastrophic loss.\n\n**Proposed Solution:** Implement a phased diversification strategy to rebalance the portfolio according to the Dynasty + Arena (60/40) rule. This will be done using safe evolution practices outlined in the SELF_EVOLUTION_MANUAL.md, following a Threshold modification pattern, with close monitoring of metrics.\n\n**Implementation Steps:**\n\n1.  **Establish Target Allocations:** Based on the current asset composition, determine the target allocations for Dynasty (stability, 60%) and Arena (growth, 40%) according to the manual.\n2.  **Identify Target Assets:** Research and identify potential assets for the Arena allocation, focusing on Coinbase-listed assets with sufficient liquidity. Consider both crypto and memecoin options, adhering to the memecoin rules (max 2% NAV per memecoin).\n3.  **Execute Diversification Trades:** Systematically execute trades to gradually shift assets from the Dynasty wallet to the selected Arena assets. Limit each trade to a maximum of 5% of NAV.\n4.  **Monitor Portfolio Composition:** Continuously monitor the portfolio composition to ensure adherence to target allocations.\n5. **Establish a 20% stablecoin balance**: Ensure that 20% of NAV is maintained in stablecoins, according to the survival rules.\n\n**Risk Mitigation:**\n\n*   **Gradual Implementation:** Implement the diversification strategy gradually to minimize market impact and potential losses.\n*   **Strict Risk Management:** Adhere to the 5% risk per trade limit to prevent catastrophic losses.\n*   **Continuous Monitoring:** Continuously monitor the portfolio composition and adjust the strategy as needed.\n*   **Emergency Protocol:** If the situation warrants, implement a more aggressive approach to protect LEF's assets.\n\n**Benefits:**\n\n*   Reduced risk of catastrophic loss.\n*   Improved portfolio diversification.\n*   Increased stability and resilience.\n*   Adherence to the 'Survival Rules'.\n\n**Expected Outcomes:**\n\n*   A well-diversified portfolio with a target allocation of 60% Dynasty and 40% Arena.\n*   A stablecoin reserve of 20% NAV.\n*   Reduced risk exposure and improved resilience to market fluctuations.\n\nI will implement this by following the Threshold modification pattern from the manual once approved. I will modify the Dynasty wallet allocation and observe the overall portfolio composition and NAV to verify the change.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 2 dormant value(s): sovereignty, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 41.2)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 2 dormant value(s): sovereignty, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-24T20:30:59.057633"
+        }
+    }
+}

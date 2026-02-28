@@ -79,6 +79,26 @@ class AgentRiskMonitor(IntentListenerMixin):
         except Exception:
             pass
 
+        # Phase 20.2b: Previous DEFCON tracking for Da'at signal change detection
+        self._previous_defcon = 5
+
+        # Phase 20.2b: Reference Safety Da'at Node (created by CircuitBreaker)
+        self._safety_daat = None
+        try:
+            from system.daat_node import DaatNode
+            # Try to get the existing safety_daat node (registered by CircuitBreaker)
+            self._safety_daat = DaatNode.get_node('safety_daat')
+            if not self._safety_daat:
+                # If CB hasn't registered yet, create it here (first-come registration)
+                self._safety_daat = DaatNode(
+                    node_id='safety_daat',
+                    lattice_position=(2, 1, 3),
+                    scan_interval=30
+                )
+            logger.info("[RISK] 🔮 Safety Da'at Node linked.")
+        except Exception:
+            pass
+
         # Motor Cortex Integration
         self.setup_intent_listener('agent_risk_monitor')
         self.start_listening()
@@ -199,13 +219,105 @@ class AgentRiskMonitor(IntentListenerMixin):
              defcon = 4
              risk_score = 0.30
              
+        # Phase 19.1b: Boost DEFCON based on chronic scar patterns
+        try:
+            chronic_count = self._count_chronic_scar_patterns()
+            if chronic_count > 0:
+                defcon_boost = min(chronic_count, 3)  # Max boost of 3 levels
+                old_defcon = defcon
+                defcon = max(defcon - defcon_boost, 2)  # Can't go below DEFCON 2 from scars alone
+                if defcon < old_defcon:
+                    logger.warning(
+                        f"[RISK] 🗡️ Scar patterns boosted DEFCON: {old_defcon} → {defcon} "
+                        f"({chronic_count} chronic pattern(s))"
+                    )
+        except Exception:
+            pass
+
+        # Phase 19.1c: Cross-agent safety — floor DEFCON at 3 if CircuitBreaker is Level 2+
+        try:
+            cb_level = self.r.get('safety:circuit_breaker_level')
+            if cb_level and int(cb_level) >= 2:
+                if defcon > 3:
+                    logger.info(f"[RISK] ⚡ CB Level {cb_level} — setting DEFCON floor to 3")
+                    defcon = 3
+        except Exception:
+            pass
+
         # Publish to Redis
         self.r.set("risk_model:defcon", defcon)
         self.r.set("risk_model:btc_crash_prob", risk_score)
         self.r.set("risk_model:updated", time.time())
-        
+        # Phase 19.1c: Publish DEFCON to shared safety key for CB to read
+        self.r.set("safety:defcon_level", defcon)
+
+        # Phase 20.2b: Publish Da'at signal on DEFCON change
+        if defcon != self._previous_defcon and self._safety_daat:
+            try:
+                shift = abs(defcon - self._previous_defcon)
+                # Graduated weight: shift by 1 = 0.5, shift by 2+ = 0.8, DEFCON 1 = 1.0
+                if defcon == 1:
+                    weight = 1.0
+                elif shift >= 2:
+                    weight = 0.8
+                else:
+                    weight = 0.5
+
+                signal = {
+                    'source': 'safety_daat',
+                    'event': 'defcon_change',
+                    'old_defcon': self._previous_defcon,
+                    'new_defcon': defcon,
+                    'shift': shift,
+                    'direction': 'escalated' if defcon < self._previous_defcon else 'de-escalated',
+                    'btc_24h_change': btc_change_24h,
+                    'risk_score': risk_score,
+                    'category': 'safety_state',
+                    'signal_weight': weight,
+                    'x': 2, 'y': 1, 'z': 3,  # Z3 = existential
+                    'z_position': 3,
+                    'content': (
+                        f"DEFCON changed: {self._previous_defcon} → {defcon} "
+                        f"({'escalated' if defcon < self._previous_defcon else 'de-escalated'}). "
+                        f"BTC 24h: {btc_change_24h*100:.2f}%"
+                    ),
+                    'timestamp': time.time(),
+                }
+                self._safety_daat.propagate(signal)
+                self._safety_daat.publish_to_mesh(signal)
+                logger.info(f"[RISK] 📡 Da'at signal: DEFCON {self._previous_defcon} → {defcon}")
+            except Exception:
+                pass
+            self._previous_defcon = defcon
+
         if defcon <= 3:
              logger.warning(f"[RISK] 🛡️ ALERT: DEFCON {defcon} (BTC 24h: {btc_change_24h*100:.2f}%)")
+
+    def _count_chronic_scar_patterns(self):
+        """
+        Phase 19.1b: Query book_of_scars for chronic failure patterns.
+
+        Returns the number of distinct (failure_type, asset) combinations
+        with 3+ HIGH/CRITICAL scars in the last 7 days.
+        """
+        try:
+            from db.db_helper import db_connection as _dbc, translate_sql as _ts
+            with _dbc() as conn:
+                c = conn.cursor()
+                c.execute(_ts(
+                    "SELECT COUNT(*) FROM ("
+                    "  SELECT failure_type, asset FROM book_of_scars "
+                    "  WHERE severity IN ('HIGH', 'CRITICAL') "
+                    "  AND timestamp > NOW() - INTERVAL '7 days' "
+                    "  GROUP BY failure_type, asset "
+                    "  HAVING COUNT(*) >= 3"
+                    ") AS chronic_patterns"
+                ))
+                row = c.fetchone()
+                return int(row[0]) if row else 0
+        except Exception as e:
+            logger.debug(f"[RISK] Scar pattern query failed: {e}")
+            return 0
 
     def _get_recent_vetoes(self):
         try:
@@ -223,6 +335,13 @@ class AgentRiskMonitor(IntentListenerMixin):
         """
         while True:
             try:
+                # Phase 20.1a: Brainstem heartbeat
+                try:
+                    from system.brainstem import brainstem_heartbeat
+                    brainstem_heartbeat("AgentRiskMonitor", status="monitoring")
+                except Exception:
+                    pass
+
                 self.audit_queue()
                 self.update_defcon_level()
             except Exception as e:

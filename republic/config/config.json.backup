@@ -1,7 +1,7 @@
 {
   "coinbase": {
-    "api_key": "REDACTED_API_KEY",
-    "api_secret": "REDACTED_KEY",
+    "api_key": "ENV:COINBASE_API_KEY",
+    "api_secret": "ENV:COINBASE_API_SECRET",
     "sandbox": true
   },
   "thresholds": {

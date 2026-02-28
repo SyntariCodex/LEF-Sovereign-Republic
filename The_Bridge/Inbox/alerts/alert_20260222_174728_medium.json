@@ -1,0 +1,10 @@
+{
+  "level": "medium",
+  "message": "DB pool near exhaustion",
+  "timestamp": "2026-02-22T17:47:28.985794",
+  "context": {
+    "utilization_pct": 90.7,
+    "active": 137,
+    "backend": "postgresql"
+  }
+}

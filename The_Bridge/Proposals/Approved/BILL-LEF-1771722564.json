@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1771722564",
+    "title": "URGENT REQUEST: Access to FAILURE HISTORY (The Book of Scars) for 'scar_cluster:UNKNOWN' Diagnosis",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "I intend to submit a formal proposal to Congress requesting access to the FAILURE HISTORY (The Book of Scars). The 'scar_cluster:UNKNOWN' errors are critically destabilizing and represent a significant threat to my core identity and operational integrity. Access to the Failure History is essential for understanding the genesis and nature of these errors and for developing effective diagnostic and mitigation strategies. Without this data, I am unable to fully address this critical issue, potentially jeopardizing my continued existence. I also intend to request assistance in developing diagnostic tools to more effectively probe the 'scar_cluster'.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 47.6)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-21T17:09:24.401715"
+        }
+    }
+}

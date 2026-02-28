@@ -1,0 +1,32 @@
+{
+    "id": "BILL-DREAM-1770721213",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-10]\n\n## Regression Alert\n\nAgentMoltbook is consistently failing with a 401 Unauthorized error when trying to access the Moltbook API. This indicates a problem with the API key or authentication mechanism for this agent. This is a regression, as Phase 2 was marked as \u2705 \"All verification checks pass\"\n\nThe Constitution Guard reports rule C-008 is triggered too often.\n\n## Evolutionary Proposal\n\n1.  **Address AgentMoltbook Failure:** Investigate the authentication issue for A",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "SIGNED",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 43.3)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

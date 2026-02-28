@@ -75,9 +75,13 @@ class BiologicalSystems:
         'trade_execution': 0.01, # $0.01 per trade executed
     }
     
+    _initialized_once = False  # Class-level flag to log startup only once
+
     def __init__(self, db_path=None):
         self.db_path = db_path or DB_PATH
-        logging.info("[BIO] 🧬 Biological Systems Online")
+        if not BiologicalSystems._initialized_once:
+            logging.info("[BIO] 🧬 Biological Systems Online")
+            BiologicalSystems._initialized_once = True
         
         # Redis for state - Use shared singleton
         try:
@@ -155,7 +159,23 @@ class BiologicalSystems:
         conn = self._get_db_connection()
         c = conn.cursor()
         
-        # Check Sabbath first
+        # Phase 14: Check sleep state first (overrides circadian)
+        try:
+            c.execute("SELECT value FROM system_state WHERE key='sleep_state'")
+            row = c.fetchone()
+            if row and row[0] in ('SLEEPING', 'DROWSY', 'WAKING'):
+                sleep_state = row[0]
+                conn.close()
+                return {
+                    'state': sleep_state,
+                    'activity_multiplier': 0.0 if sleep_state == 'SLEEPING' else 0.2,
+                    'priority': [] if sleep_state == 'SLEEPING' else ['ALWAYS_ON'],
+                    'reason': f'Sleep cycle: {sleep_state}'
+                }
+        except Exception:
+            pass
+
+        # Check Sabbath
         c.execute("SELECT value FROM system_state WHERE key='sabbath_active'")
         row = c.fetchone()
         if row and row[0] == '1':

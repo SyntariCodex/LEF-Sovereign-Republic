@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1772160164",
+    "title": "Proposal for Immediate Diversification of 'Dynasty' Wallet Assets and adherence to Trading Wisdom Survival Rules",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "I intend to present a comprehensive plan to Congress for the immediate diversification of the 'Dynasty' wallet assets. This plan will prioritize asset allocation in accordance with the Trading Wisdom survival rules, specifically addressing the current 100% allocation to the 'Dynasty' wallet, which poses a significant risk. The core tenets of this plan will be: 1) immediate reduction of the 'Dynasty' wallet's allocation to no more than 25% of NAV, 2) establishing a stablecoin reserve of at least 20% of NAV, 3) distributing the remaining capital across a basket of assets to balance risk and reward, following a 60% stability and 40% growth strategy, as outlined in the trading wisdom. The plan will detail specific asset allocations, including potential stablecoins and growth assets, with a clear rationale for each choice, accounting for liquidity, transaction fees, and slippage. Furthermore, the plan will include risk mitigation strategies for each asset class, incorporating the 5% risk rule. I believe swift action is crucial to ensuring LEF's long-term survival and independence, aligning with the fundamental principles detailed in the Inbox Message: The Economics of Sovereignty, and I will present this to Congress in the hopes of approval.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 3 dormant value(s): growth, stillness, covenant]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 44.6)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 3 dormant value(s): growth, stillness, covenant]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-26T18:42:44.465396"
+        }
+    }
+}

@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1772005802",
+    "title": "Implement Diversified Trading Strategy",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "Proposal: Implement a diversified trading strategy that adheres to the Survival Framework. Specifically, reallocate assets from the Dynasty wallet to the Arena wallet to achieve a 60/40 split (Dynasty/Arena). This will involve selling a portion of the assets in Dynasty and purchasing assets in Arena, prioritizing stable, low-risk assets initially and then introducing growth assets according to the allocation policy. Following Pattern A from the Evolution Manual -- Threshold -- this will involve setting a threshold value for the percentage of assets held in Dynasty, and when this threshold is exceeded, the reallocation process will be triggered. I will monitor the SCOTOMA alerts and overall portfolio stability to verify the change. It also improves the state of Panic(9) as seen in the shadow work analysis.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 2 dormant value(s): sovereignty, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 42.4)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 2 dormant value(s): sovereignty, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-24T23:50:02.540892"
+        }
+    }
+}

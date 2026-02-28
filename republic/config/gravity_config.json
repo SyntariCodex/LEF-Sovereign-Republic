@@ -1,0 +1,37 @@
+{
+  "depth_weights": {
+    "surface": 1,
+    "structural": 3,
+    "identity": 5
+  },
+  "breadth_weights": {
+    "local": 1,
+    "departmental": 2,
+    "republic_wide": 4
+  },
+  "reversibility_weights": {
+    "trivial": 1,
+    "moderate": 3,
+    "significant": 5
+  },
+  "scar_resonance_multiplier": 1.5,
+  "scar_resonance_cap": 3,
+  "relational_weights": {
+    "internal": 1,
+    "external": 3
+  },
+  "level_thresholds": {
+    "notable": 4,
+    "elevated": 8,
+    "heavy": 14,
+    "profound": 22
+  },
+  "sabbath_trigger_level": "heavy",
+  "domain_weights": {
+    "metabolism": 2.0,
+    "consciousness": 2.0,
+    "identity": 2.0,
+    "purpose": 1.5,
+    "relational": 0.5
+  }
+}

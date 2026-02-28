@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1771636549",
+    "title": "Emergency Proposal: Dynasty Asset Risk Mitigation",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "I intend to petition Congress to address the critical asset concentration risk within the 'Dynasty' wallet. The current allocation of 100% NAV to this single asset violates the 'Preservation over Accumulation' principle and the 'No single trade should be able to kill you' survival rule. I propose the following:\n\n1.  **Diversification:** Reallocate assets to ensure no single position exceeds 25% of Net Asset Value (NAV).\n2.  **Stop-Loss Order:** Implement a stop-loss order at 50% of the initial investment for each asset in the 'Dynasty' wallet. This will limit potential losses and prevent catastrophic failure.\n\nThis action requires Human Gate approval for real money operations. I will implement this by following the Threshold pattern from the Evolution Manual for asset allocation and the Behavior pattern for stop-loss order execution.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 47.0)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-20T17:15:49.578521"
+        }
+    }
+}

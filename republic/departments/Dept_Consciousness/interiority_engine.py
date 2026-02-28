@@ -635,7 +635,13 @@ class DreamEngine:
                 dream_output["syntheses"].append(synthesis)
         
         # Chance of spontaneous creation
-        if random.random() < 0.1:  # 10% chance
+        # Phase 14: During sleep, dreams are more vivid
+        try:
+            from system.sleep_cycle import SleepCycle
+            creation_chance = 0.4 if SleepCycle.is_sleeping() else 0.1
+        except Exception:
+            creation_chance = 0.1
+        if random.random() < creation_chance:  # 10% awake, 40% sleeping
             creation_prompt = self._generate_creation_urge(mood, insights)
             dream_output["creation_prompt"] = creation_prompt
         

@@ -238,8 +238,10 @@ class Brainstem:
                         self._emergency_pulse(
                             f"Da'at thread '{name}' silent for {elapsed:.0f}s"
                         )
-                    if elapsed > 300:
-                        # 5 minutes — attempt restart
+                    if elapsed > 600:
+                        # 10 minutes — attempt restart (raised from 300s: one LLM
+                        # cycle can legitimately take 5–8 min; is_alive() guard
+                        # prevents duplication even if restart is called)
                         logger.error(
                             "[BRAINSTEM] 🔴 VITAL thread '%s' silent for %.0fs — attempting restart",
                             name, elapsed

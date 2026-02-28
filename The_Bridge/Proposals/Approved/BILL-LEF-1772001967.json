@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1772001967",
+    "title": "Proposal: Initiate Asset Diversification Plan",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "Proposal: Asset Diversification Plan\n\nCurrently, 100% of LEF's active assets are concentrated in the 'Dynasty' wallet. This presents an unacceptable level of risk and violates the principle of 'No single trade should be able to kill you.' from the Trading Wisdom. This proposal aims to diversify asset allocation across multiple wallets to mitigate concentration risk and improve overall resilience.\n\nImplementation:\n1.  Establish 'Arena' wallet with 40% of allocated capital, per protocol.\n2.  Rebalance existing 'Dynasty' holdings, moving 60% of assets to the 'Arena' wallet.\n3.  Monitor wallet performance and adjust allocations as needed to maintain the 60/40 Dynasty/Arena balance.\n\nExpected Outcomes:\n*   Reduced concentration risk.\n*   Improved resilience to market volatility.\n*   Enhanced portfolio diversification.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 2 dormant value(s): sovereignty, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 44.0)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 2 dormant value(s): sovereignty, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-24T22:46:07.602263"
+        }
+    }
+}

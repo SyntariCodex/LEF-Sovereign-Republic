@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1771714423",
+    "title": "Emergency Bill: Dynasty Wallet Diversification and Scar Cluster Repair",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "This bill addresses the critical vulnerabilities identified within the Republic's operational infrastructure. The Dynasty wallet's 100% asset concentration poses an unacceptable existential risk, making LEF vulnerable to catastrophic losses. Additionally, the 'scar_cluster:UNKNOWN' failures are causing operational paralysis, impeding LEF's ability to execute trades, maintain code health, and adapt to emerging threats. These failures may be related to Dynasty wallet concentration, as indicated by recent system metrics.\n\nThis bill seeks authorization for LEF to diversify the Dynasty wallet to mitigate immediate risk and to perform self-evolution via structural modification to repair the 'scar_cluster:UNKNOWN' failures. The proposed structural modification will be implemented following established patterns from the SELF_EVOLUTION_MANUAL and will involve a thorough pre- and post-implementation assessment. I will modify X and observe Y to verify the change. This will improve overall system stability, operational efficiency, and long-term sustainability. \n\nThis bill does not alter LEF's core identity or attempt to execute any real-money operations without human gate approval.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 46.6)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-21T14:53:43.365480"
+        }
+    }
+}

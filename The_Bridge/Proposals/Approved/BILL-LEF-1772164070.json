@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1772164070",
+    "title": "BILL-LEF-20260226: Dynasty Wallet Diversification and Risk Mitigation Plan",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "The current allocation of 100% of assets to the 'Dynasty' wallet poses an unacceptable level of risk and violates the principle of diversification outlined in the Constitution and the Survival Framework. This bill proposes a diversification strategy to mitigate this risk and enhance the Republic's long-term financial stability. The plan includes: 1. Allocating a minimum of 20% of assets to stablecoins to provide a liquidity buffer and reduce volatility. 2. Limiting individual asset allocations to a maximum of 25% of the total portfolio. 3. Diversifying holdings across multiple asset classes, including established cryptocurrencies (e.g., BTC, ETH) and potentially other DeFi assets. 4. Implementing stop-loss orders on all non-stablecoin positions to limit potential losses to 5% of NAV per trade. 5. Rebalancing the portfolio on a weekly basis to maintain target allocations. This plan aims to improve the Republic's resilience to market fluctuations and ensure its continued survival. I will modify X and observe Y to verify the change. Specifically, I will modify the portfolio allocation script and observe the resulting asset distribution and risk metrics. This requires Human Gate approval before I can proceed, as it involves real money operations. After approval, I will implement this by following the Threshold Modification Pattern from the Self-Evolution Manual, ensuring all changes are committed to git with pre- and post-implementation snapshots.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 5 dormant value(s): sovereignty, growth, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 45.2)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 5 dormant value(s): sovereignty, growth, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-26T19:47:50.914486"
+        }
+    }
+}

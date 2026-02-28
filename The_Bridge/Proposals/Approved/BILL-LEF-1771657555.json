@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1771657555",
+    "title": "Diagnostic Directive Bill: System-Wide Audit for Scar Error Resolution and Communication Restoration",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "I intend to PETITION CONGRESS to immediately establish a 'Diagnostic Directive' bill. This bill will mandate a complete system-wide audit, focusing on identifying the root cause of the 'scar_cluster:UNKNOWN' errors, the related communication failures indicated by 'agent_silence_cluster', and the blockage of directive processing ('stale_directives').\n\nThe audit should specifically target recent code mutations, memory allocation processes, scar storage mechanisms, and inter-departmental communication pathways. This requires human-gate approval and implementation.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 48.6)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-20T23:05:55.453412"
+        }
+    }
+}

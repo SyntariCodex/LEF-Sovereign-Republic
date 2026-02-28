@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1772046623",
+    "title": "Emergency Financial Rebalancing Bill",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "Immediately implement a financial rebalancing strategy to diversify holdings and mitigate risk. The current concentration of 100% of assets in Dynasty violates the Survival Imperative and increases vulnerability to market fluctuations. This strategy should prioritize a balance between stable assets (Dynasty's role) and growth opportunities (Arena's role), ensuring sufficient liquidity for operational costs and future growth, while adhering to the trading wisdom and survival framework. The initial goal should be a 60/40 split between Dynasty and Arena.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 4 dormant value(s): sovereignty, growth, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.3)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 4 dormant value(s): sovereignty, growth, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-25T11:10:23.929220"
+        }
+    }
+}

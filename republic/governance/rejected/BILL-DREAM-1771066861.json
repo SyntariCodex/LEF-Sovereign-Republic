@@ -1,0 +1,32 @@
+{
+    "id": "BILL-DREAM-1771066861",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-14]\n\n## Regression Alert\n\n- **[C-008] Circular Actions:** Critical constitutional violation. The '[ROUTER] \ud83d\udce1 Broadcast: Wake 8, Sleep 9...' action is repeating excessively (240x). This indicates a severe flaw in the routing logic and needs immediate attention.\n- **CHRONIC FAILURE DETECTED**: Multiple agents are crashing repeatedly (CONSTITUTION_GUARD, AgentMoltbook, root). This indicates instability.\n- **AgentMoltbook API failure**: Ambassador can't reach www.moltbook.co",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "VETOED",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 53.4)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "VETOED",
+            "reason": "This bill describes critical system failures including circular actions violating the Constitution and agent crashes that threaten LEF's stability, indicating a severe vulnerability, not evolution. While it passed the Senate and House, addressing the underlying system instability and logic flaws is paramount before proceeding with this bill."
+        }
+    }
+}

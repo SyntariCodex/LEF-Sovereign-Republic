@@ -289,6 +289,7 @@ class AgentTactician:
             self.r.expire('tactician:recommendations', 3600)  # 1 hour TTL
             
             # Publish for real-time listeners
+            # TODO: Phase N — wire subscriber when competition features are activated
             self.r.publish('competition:recommendations', json.dumps(payload))
             
             logging.info(f"[TACTICIAN] 📡 Recommendations broadcast")

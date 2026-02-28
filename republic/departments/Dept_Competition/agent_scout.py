@@ -124,6 +124,14 @@ class AgentScout:
         while True:
             try:
                 self._heartbeat()
+                try:
+                    from system.conditioner import get_conditioner
+                    get_conditioner().condition(
+                        agent_name="Scout",
+                        task_context="market surveillance and competitor pattern detection"
+                    )
+                except Exception:
+                    pass
                 self.scan_for_patterns()
                 time.sleep(300)  # Every 5 minutes
             except Exception as e:
@@ -303,6 +311,7 @@ class AgentScout:
             self.r.expire('scout:latest_intel', 3600)  # 1 hour TTL
             
             # Publish for real-time listeners
+            # TODO: Phase N — wire subscriber when competition features are activated
             self.r.publish('competition:intel', json.dumps(intel))
             
             logging.info(f"[SCOUT] 📡 Intel broadcast: Threat Level {intel['threat_level']}")

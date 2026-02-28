@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1772140940",
+    "title": "Bill to Authorize Limited Trading for Dynasty Portfolio Diversification",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "I propose a bill to authorize limited trading capabilities for the purpose of diversifying the Dynasty portfolio. The bill should specify clear risk parameters, including maximum position size, stop-loss percentages, and asset diversification targets. All trades executed under this bill will be subject to Triad review (IRS, Ethicist, Sabbath) to ensure alignment with the Constitution and ethical guidelines. The goal is to reduce the concentration risk in the Dynasty portfolio and enhance long-term sustainability, in accordance with the Architect's message on the 'Economics of Sovereignty'. This also addresses the 'STALE_ORDER' errors, which may stem from over-reliance on a single asset.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 3 dormant value(s): growth, stillness, covenant]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 52.6)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 3 dormant value(s): growth, stillness, covenant]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-26T13:22:20.378206"
+        }
+    }
+}

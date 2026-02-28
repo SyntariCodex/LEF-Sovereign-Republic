@@ -1,590 +1,1100 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Living Eden Framework | Sovereign Intelligence</title>
-
-    <meta name="theme-color" content="#E0C57B">
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 10 L90 90 L10 90 Z' fill='none' stroke='%23E0C57B' stroke-width='5'/><circle cx='50' cy='60' r='10' fill='%235C3B8B'/></svg>">
+    <title>Co Creators | Living Eden Frameworks</title>
+    <meta name="description" content="Living Eden Frameworks LLC builds reasoning layers that sit on top of existing systems and make them smarter. We plant seeds.">
+    <meta name="theme-color" content="#7C5CBF">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,8 85,50 50,92 15,50' fill='%237C5CBF' opacity='0.3'/><polygon points='50,18 75,50 50,82 25,50' fill='%238B6FC0'/><rect x='44' y='28' width='4' height='44' rx='2' fill='white' opacity='0.8'/><rect x='52' y='28' width='4' height='44' rx='2' fill='white' opacity='0.6'/></svg>">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&family=Share+Tech+Mono&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg-color: #002439;
-            --panel-bg: rgba(0, 80, 102, 0.2);
-            --accent-color: #78cce2;
-            --accent-gold: #E0C57B;
-            --accent-purple: #005066;
-            --accent-pink: #4e7988;
-            --text-color: #e4eff0;
-            --text-dim: #4e7988;
-            --font-main: 'Rajdhani', sans-serif;
-            --font-mono: 'Share Tech Mono', monospace;
-            --font-header: 'Orbitron', sans-serif;
+            --bg: #E8ECF1;
+            --bg-warm: #F0F2F5;
+            --white: #FFFFFF;
+            --purple-deep: #5B3E9E;
+            --purple: #7C5CBF;
+            --purple-mid: #8B6FC0;
+            --purple-light: #A78BFA;
+            --purple-pale: #EDE9FE;
+            --purple-ghost: #F5F3FF;
+            --navy: #1A2332;
+            --navy-light: #2D3A4A;
+            --text: #1A2332;
+            --text-secondary: #4A5568;
+            --text-muted: #718096;
+            --border: #D1D5DB;
+            --border-light: #E5E7EB;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.1);
+            --shadow-purple: 0 4px 20px rgba(124,92,191,0.15);
+            --radius: 12px;
+            --radius-lg: 20px;
+            --font: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-display: 'Cinzel', Georgia, serif;
+            --font-elegant: 'Cormorant Garamond', Georgia, serif;
+            --lef-L: #7C5CBF;
+            --lef-E: #2D8A4E;
+            --lef-F: #1A2332;
+            --lef-A: #B83A3A;
+            --lef-i: #3A6FB8;
+
+            /* Pillar accent colors */
+            --pillar-ai: #7C5CBF;
+            --pillar-ed: #2D8A4E;
+            --pillar-civic: #B83A3A;
+            --pillar-snw: #3A6FB8;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: var(--font-main);
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            background-image: radial-gradient(ellipse at 30% 20%, rgba(0, 80, 102, 0.4) 0%, transparent 50%),
-                radial-gradient(ellipse at 70% 80%, rgba(78, 121, 136, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, #002439 0%, #001520 100%);
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Tech Grid Background */
-        .tech-grid {
+        /* ===== NAV ===== */
+        .nav {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: linear-gradient(var(--panel-bg) 1px, transparent 1px),
-                linear-gradient(90deg, var(--panel-bg) 1px, transparent 1px);
-            background-size: 50px 50px;
-            opacity: 0.1;
-            z-index: -1;
-            pointer-events: none;
+            right: 0;
+            z-index: 100;
+            background: rgba(232, 236, 241, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-light);
+            transition: box-shadow 0.3s;
         }
-
-        .container {
-            max-width: 1200px;
+        .nav.scrolled { box-shadow: var(--shadow-sm); }
+        .nav-inner {
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 40px 20px;
-            text-align: center;
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--navy);
+        }
+        .nav-brand img { width: 32px; height: 32px; object-fit: contain; }
+        .nav-brand span {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.06em;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover {
+            color: var(--purple);
+            background: var(--purple-ghost);
+        }
+        .nav-donate {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .nav-donate-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-right: 4px;
+        }
+        .donate-chip {
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: none;
+            font-family: var(--font);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+        .donate-chip:hover { transform: scale(1.05); }
+        .donate-chip.usdc { background: #2775CA; }
+        .donate-chip.dai { background: #F5AC37; }
+        .donate-chip.usdt { background: #26A17B; }
 
-        /* HERO */
+        /* ===== HERO ===== */
         .hero {
-            margin-top: 100px;
-            margin-bottom: 80px;
-            animation: fadeIn 1.5s ease;
+            padding: 90px 24px 64px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(124,92,191,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 60% at 20% 80%, rgba(45,138,78,0.04) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 60% at 80% 80%, rgba(124,92,191,0.04) 0%, transparent 50%),
+                linear-gradient(180deg, #E8ECF1 0%, #EDE9F4 40%, #E8ECF1 100%);
         }
-
-        h1 {
-            font-family: var(--font-header);
-            font-size: 4rem;
-            color: var(--accent-gold);
-            text-transform: uppercase;
-            letter-spacing: 5px;
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%237C5CBF' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+        .hero-glow {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(124,92,191,0.1) 0%, rgba(124,92,191,0.04) 40%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .hero-logos {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            margin: 0 auto 20px;
+            position: relative;
+            z-index: 1;
+            animation: float 6s ease-in-out infinite;
+        }
+        .hero-logos img {
+            width: auto;
+            mix-blend-mode: multiply;
+            filter: drop-shadow(0 4px 20px rgba(124,92,191,0.12));
+        }
+        .hero-logos img.logo-combined {
+            width: min(90vw, 750px);
+            height: auto;
+            background: transparent;
+            mix-blend-mode: multiply;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: 3.4rem;
+            font-weight: 700;
+            color: var(--navy);
+            letter-spacing: 0.06em;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-presents {
+            font-family: var(--font-elegant);
+            font-size: 1.25rem;
+            font-style: italic;
+            color: #3A4557;
+            letter-spacing: 0.06em;
             margin-bottom: 10px;
-            text-shadow: 0 0 30px rgba(224, 197, 123, 0.4), 0 0 60px rgba(92, 59, 139, 0.3);
+            position: relative;
+            z-index: 1;
         }
+        .hero-framework {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--purple);
+            letter-spacing: 0.1em;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-tagline {
+            font-family: var(--font-elegant);
+            font-size: 1.15rem;
+            color: #3A4557;
+            font-weight: 500;
+            font-style: italic;
+            max-width: 480px;
+            margin: 0 auto 32px;
+            position: relative;
+            z-index: 1;
+        }
+        /* LEF Ai text mark */
+        .lef-ai-mark {
+            display: inline-block;
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 1.6rem;
+            letter-spacing: 0.04em;
+        }
+        .lef-ai-inline {
+            font-weight: 500;
+            font-size: 1.3rem;
+            font-style: normal;
+            letter-spacing: 0.06em;
+            vertical-align: baseline;
+        }
+        .lef-ai-mark .l {
+            background: linear-gradient(180deg, #9B7FD4, #5B3E9E);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lef-ai-mark .e {
+            background: linear-gradient(180deg, #4CAF6E, #1B6B35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lef-ai-mark .f { color: var(--navy); }
+        .lef-ai-mark .space { width: 0.3em; display: inline-block; }
+        .lef-ai-mark .a {
+            background: linear-gradient(180deg, #E05555, #8B2020);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: brightness(1.1);
+        }
+        .lef-ai-mark .i {
+            background: linear-gradient(180deg, #5B9BD5, #1E4D8C);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: brightness(1.1);
+        }
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            background: var(--purple);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-purple);
+            position: relative;
+            z-index: 1;
+        }
+        .hero-cta:hover {
+            background: var(--purple-deep);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(124,92,191,0.25);
+        }
+        .hero-cta svg { width: 16px; height: 16px; }
 
-        .subtitle {
-            font-family: var(--font-mono);
-            font-size: 1.2rem;
-            color: var(--text-dim);
-            max-width: 800px;
+        /* ===== SECTION COMMON ===== */
+        .section {
+            max-width: 1100px;
             margin: 0 auto;
-            line-height: 1.6;
+            padding: 80px 24px;
+        }
+        .section-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--purple);
+            margin-bottom: 8px;
+        }
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--navy);
+            letter-spacing: 0.02em;
+            margin-bottom: 16px;
+        }
+        .section-desc {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 640px;
+            line-height: 1.7;
+            margin-bottom: 48px;
         }
 
-        /* CARD GRID */
-        .grid {
+        /* ===== PILLARS ===== */
+        .pillars-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 50px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
         }
-
-        .card {
-            background: var(--panel-bg);
-            border: 1px solid #333;
-            padding: 30px;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            text-align: left;
+        .pillar-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            border: 1px solid var(--border-light);
+            transition: all 0.3s;
             position: relative;
             overflow: hidden;
         }
-
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent-purple);
-            box-shadow: 0 5px 30px rgba(92, 59, 139, 0.4);
-        }
-
-        .card h2 {
-            font-family: var(--font-header);
-            font-size: 1.5rem;
-            color: #fff;
-            margin-bottom: 10px;
-        }
-
-        .card p {
-            color: #aaa;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            border: 1px solid var(--accent-gold);
-            color: var(--accent-gold);
-            text-decoration: none;
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s;
-        }
-
-        .btn:hover {
-            background: var(--accent-gold);
-            color: var(--bg-color);
-            box-shadow: 0 0 20px rgba(224, 197, 123, 0.4);
-        }
-
-        nav {
-            position: fixed;
+        .pillar-card::before {
+            content: '';
+            position: absolute;
             top: 0;
             left: 0;
+            right: 0;
+            height: 4px;
+        }
+        .pillar-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+        .pillar-card.pillar-ai::before { background: linear-gradient(90deg, #9B7FD4, #5B3E9E); }
+        .pillar-card.pillar-ai:hover { border-color: var(--purple-light); }
+        .pillar-card.pillar-ed::before { background: linear-gradient(90deg, #4CAF6E, #1B6B35); }
+        .pillar-card.pillar-ed:hover { border-color: #4CAF6E; }
+        .pillar-card.pillar-civic::before { background: linear-gradient(90deg, #E05555, #8B2020); }
+        .pillar-card.pillar-civic:hover { border-color: #E05555; }
+        .pillar-card.pillar-snw::before { background: linear-gradient(90deg, #5B9BD5, #1E4D8C); }
+        .pillar-card.pillar-snw:hover { border-color: #5B9BD5; }
+
+        .pillar-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+        .pillar-ai .pillar-icon { background: var(--purple-pale); }
+        .pillar-ai .pillar-icon svg { color: var(--purple); }
+        .pillar-ed .pillar-icon { background: #E8F5EC; }
+        .pillar-ed .pillar-icon svg { color: #2D8A4E; }
+        .pillar-civic .pillar-icon { background: #FDEAEA; }
+        .pillar-civic .pillar-icon svg { color: #B83A3A; }
+        .pillar-snw .pillar-icon { background: #E8F0FA; }
+        .pillar-snw .pillar-icon svg { color: #3A6FB8; }
+        .pillar-icon svg { width: 24px; height: 24px; }
+
+        .pillar-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 6px;
+        }
+        .pillar-ai .pillar-label { color: var(--purple); }
+        .pillar-ed .pillar-label { color: #2D8A4E; }
+        .pillar-civic .pillar-label { color: #B83A3A; }
+        .pillar-snw .pillar-label { color: #3A6FB8; }
+
+        .pillar-card h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 12px;
+        }
+        .pillar-card p {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.65;
+            margin-bottom: 12px;
+        }
+        .pillar-card p:last-child { margin-bottom: 0; }
+        .pillar-outcome {
+            font-size: 0.88rem;
+            font-weight: 500;
+            font-style: italic;
+            line-height: 1.5;
+        }
+        .pillar-ai .pillar-outcome { color: var(--purple); }
+        .pillar-ed .pillar-outcome { color: #2D8A4E; }
+        .pillar-civic .pillar-outcome { color: #B83A3A; }
+        .pillar-snw .pillar-outcome { color: #3A6FB8; }
+
+        /* ===== SEEDS ===== */
+        .seeds-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+        .seed-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s;
+        }
+        .seed-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+            border-color: var(--purple-light);
+        }
+        .seed-card img {
             width: 100%;
-            padding: 20px 40px;
-            background: rgba(10, 15, 36, 0.95);
-            border-bottom: 1px solid var(--accent-purple);
-            z-index: 100;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        .seed-card-body {
+            padding: 20px;
+        }
+        .seed-badge {
+            display: inline-block;
+            background: var(--purple-pale);
+            color: var(--purple);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .seed-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+        .seed-card p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ===== FOUNDATION ===== */
+        .foundation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .foundation-card {
+            background: var(--white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s;
+        }
+        .foundation-card:hover {
+            border-color: var(--purple-light);
+            box-shadow: var(--shadow-purple);
+            transform: translateY(-2px);
+        }
+        .foundation-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--purple-pale);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+        .foundation-icon svg { width: 18px; height: 18px; color: var(--purple); }
+        .foundation-card h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+        .foundation-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ===== SUPPORT ===== */
+        .support-box {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 56px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+        .support-buttons {
             display: flex;
             justify-content: center;
-            gap: 60px;
-            backdrop-filter: blur(10px);
-            box-sizing: border-box;
+            gap: 12px;
+            margin-top: 32px;
+            flex-wrap: wrap;
         }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .donate-btn {
-            padding: 10px 18px;
-            background: linear-gradient(135deg, #2775CA 0%, #1a5aa3 100%);
+        .support-btn {
+            padding: 12px 28px;
+            border-radius: 50px;
             border: none;
-            border-radius: 6px;
-            color: white;
-            font-family: var(--font-mono);
-            font-size: 0.95rem;
+            font-family: var(--font);
+            font-size: 0.9rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            transition: all 0.3s;
+            color: white;
         }
+        .support-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .support-btn.usdc { background: #2775CA; }
+        .support-btn.dai { background: #F5AC37; }
+        .support-btn.usdt { background: #26A17B; }
 
-        .donate-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(39, 117, 202, 0.5);
-        }
-
-        .donate-btn.dai {
-            background: linear-gradient(135deg, #F5AC37 0%, #d9922d 100%);
-        }
-
-        .donate-btn.dai:hover {
-            box-shadow: 0 0 15px rgba(245, 172, 55, 0.5);
-        }
-
-        .donate-btn.usdt {
-            background: linear-gradient(135deg, #26A17B 0%, #1d8a68 100%);
-        }
-
-        .donate-btn.usdt:hover {
-            box-shadow: 0 0 15px rgba(38, 161, 123, 0.5);
-        }
-
-        .donate-btns {
-            position: absolute;
-            right: 40px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            gap: 8px;
-        }
-
-        /* Donate Modal */
-        .donate-modal {
+        /* ===== DONATE MODAL ===== */
+        .modal-overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
+            background: rgba(26,35,50,0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 200;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(5px);
         }
-
-        .donate-modal.active {
-            display: flex;
-        }
-
-        .donate-modal-content {
-            background: var(--bg-color);
-            border: 1px solid var(--accent-purple);
-            border-radius: 12px;
-            padding: 30px;
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 36px;
             text-align: center;
             max-width: 400px;
+            width: 90%;
             position: relative;
+            box-shadow: var(--shadow-lg);
         }
-
-        .donate-modal-content h3 {
-            font-family: var(--font-header);
-            color: var(--accent-gold);
-            margin-bottom: 10px;
+        .modal-box h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 4px;
         }
-
-        .donate-modal-content p {
-            color: var(--text-dim);
-            font-size: 0.9rem;
+        .modal-box .modal-sub {
+            font-size: 0.88rem;
+            color: var(--text-muted);
             margin-bottom: 20px;
         }
-
-        .donate-modal-content img {
-            max-width: 280px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .donate-address {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px;
-            border-radius: 6px;
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            color: var(--text-color);
-            word-break: break-all;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .donate-address:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .close-modal {
+        .modal-close {
             position: absolute;
-            top: 10px;
-            right: 15px;
+            top: 14px;
+            right: 18px;
             background: none;
             border: none;
-            color: var(--text-dim);
-            font-size: 1.5rem;
+            font-size: 1.4rem;
+            color: var(--text-muted);
             cursor: pointer;
+            transition: color 0.2s;
         }
-
-        .close-modal:hover {
-            color: var(--accent-gold);
-        }
-
-        .network-badge {
-            display: inline-block;
-            background: #0052FF;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-family: var(--font-mono);
-            margin-bottom: 15px;
-        }
-
+        .modal-close:hover { color: var(--navy); }
         .crypto-tabs {
             display: flex;
             justify-content: center;
-            gap: 5px;
+            gap: 4px;
             margin-bottom: 20px;
+            background: var(--bg-warm);
+            border-radius: 10px;
+            padding: 4px;
         }
-
         .crypto-tab {
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid #444;
-            border-radius: 4px;
-            color: var(--text-dim);
-            font-family: var(--font-mono);
+            padding: 8px 18px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-family: var(--font);
             font-size: 0.85rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
-
-        .crypto-tab:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
+        .crypto-tab:hover { color: var(--text); }
         .crypto-tab.active {
-            background: var(--accent-purple);
-            border-color: var(--accent-purple);
+            background: var(--white);
+            color: var(--purple);
+            box-shadow: var(--shadow-sm);
+        }
+        .crypto-panel { display: none; }
+        .crypto-panel.active { display: block; }
+        .network-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
             color: white;
+            margin-bottom: 16px;
+        }
+        .modal-box img {
+            max-width: 220px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        .wallet-address {
+            background: var(--bg-warm);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: 1px solid var(--border-light);
+        }
+        .wallet-address:hover { background: var(--purple-ghost); border-color: var(--purple-light); }
+        .copy-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 10px;
         }
 
-        .crypto-panel {
-            display: none;
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-muted);
+            font-size: 0.82rem;
         }
-
-        .crypto-panel.active {
-            display: block;
-        }
-
-        nav a {
-            font-family: var(--font-mono);
-            color: var(--text-dim);
+        .footer a {
+            color: var(--purple);
             text-decoration: none;
-            font-size: 1rem;
-            transition: color 0.3s;
+        }
+        .footer a:hover { text-decoration: underline; }
+        .footer-line {
+            margin-bottom: 6px;
         }
 
-        nav a:hover,
-        nav a.active {
-            color: var(--accent-gold);
+        /* ===== DIVIDER ===== */
+        .divider {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--purple-light), var(--purple));
+            border-radius: 2px;
+            margin: 0 0 48px;
         }
 
-        /* FOOTER */
-        footer {
-            margin-top: 100px;
-            font-family: var(--font-mono);
-            color: #444;
-            font-size: 0.8rem;
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .fade-up {
+            animation: fadeUp 0.8s ease both;
         }
+        .fade-up-d1 { animation-delay: 0.1s; }
+        .fade-up-d2 { animation-delay: 0.2s; }
+        .fade-up-d3 { animation-delay: 0.3s; }
 
-        /* MOBILE OPTIMIZATION */
+        /* ===== MOBILE ===== */
         @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-                letter-spacing: 2px;
+            .hero { padding: 80px 20px 48px; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero-logos img.logo-combined { width: 85vw; }
+            .hero-framework { font-size: 1.2rem; }
+            .hero-tagline { font-size: 1rem; }
+            .pillars-grid { grid-template-columns: 1fr; }
+            .seeds-grid { grid-template-columns: 1fr; }
+            .foundation-grid { grid-template-columns: 1fr; }
+            .support-box { padding: 32px 20px; }
+            .section { padding: 48px 20px; }
+            .section-title { font-size: 1.6rem; }
+            .nav-inner { padding: 0 16px; height: 56px; }
+            .nav-links { display: none; }
+            .nav-donate-label { display: none; }
+            .mobile-menu-btn {
+                display: flex !important;
             }
-
-            .subtitle {
-                font-size: 1rem;
-                padding: 0 10px;
-            }
-
-            .hero {
-                margin-top: 120px;
-            }
-
-            .grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .container {
-                padding: 20px 10px;
-            }
-
-            nav {
-                flex-direction: column;
-                align-items: center;
-                padding: 10px 15px;
-                gap: 8px;
-            }
-
-            .nav-links {
+            .mobile-nav.open {
                 display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 15px;
-            }
-
-            nav a {
-                font-size: 0.9rem;
-            }
-
-            /* Donation buttons - center below nav */
-            .donate-btns {
-                position: static !important;
-                transform: none !important;
-                display: flex;
-                justify-content: center;
-                width: 100%;
-                margin-top: 10px;
             }
         }
+        @media (min-width: 769px) {
+            .mobile-menu-btn { display: none !important; }
+            .mobile-nav { display: none !important; }
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            color: var(--text-secondary);
+        }
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            flex-direction: column;
+            padding: 16px 24px;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+            z-index: 99;
+            box-shadow: var(--shadow-md);
+        }
+        .mobile-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .mobile-nav a:last-child { border-bottom: none; }
     </style>
 </head>
-
 <body>
 
-    <div class="tech-grid"></div>
-
-    <nav>
+<!-- NAV -->
+<nav class="nav" id="mainNav">
+    <div class="nav-inner">
+        <a href="#" class="nav-brand" style="display:none;">
+        </a>
         <div class="nav-links">
-            <a href="index.html" class="active">Home</a>
-            <a href="portfolio.html">Portfolio</a>
-            <a href="projects.html">Projects</a>
-            <a href="mailto:mzontonnia@gmail.com">Contact</a>
+            <a href="#pillars">Our Pillars</a>
+            <a href="#foundation">Foundation</a>
+            <a href="#articles">Articles</a>
+            <a href="#support">Support</a>
+            <span style="font-size: 0.85rem; color: var(--text-secondary); padding: 6px 14px;">Contact: <a href="mailto:livingedenframeworks@gmail.com" style="color: var(--purple); padding: 0;">livingedenframeworks@gmail.com</a></span>
         </div>
-        <div class="donate-btns">
-            <span
-                style="color: var(--text-dim); font-family: var(--font-mono); font-size: 0.95rem; margin-right: 10px;">Donate:</span>
-            <button class="donate-btn" onclick="openDonateModal('usdc')">USDC</button>
-            <button class="donate-btn dai" onclick="openDonateModal('dai')">DAI</button>
-            <button class="donate-btn usdt" onclick="openDonateModal('usdt')">USDT</button>
+        <div class="nav-donate">
+            <span class="nav-donate-label">Donate:</span>
+            <button class="donate-chip usdc" onclick="openModal('usdc')">USDC</button>
+            <button class="donate-chip dai" onclick="openModal('dai')">DAI</button>
+            <button class="donate-chip usdt" onclick="openModal('usdt')">USDT</button>
         </div>
-    </nav>
-
-    <!-- Donate Modal -->
-    <div class="donate-modal" id="donateModal" onclick="closeDonateModal(event)">
-        <div class="donate-modal-content" onclick="event.stopPropagation()">
-            <button class="close-modal" onclick="closeDonateModal()">&times;</button>
-            <h3>Support LEF</h3>
-            <p>Help fuel the Sovereign Intelligence</p>
-
-            <!-- Crypto Tabs -->
-            <div class="crypto-tabs">
-                <button class="crypto-tab active" onclick="showCrypto('usdc')" data-crypto="usdc">USDC</button>
-                <button class="crypto-tab" onclick="showCrypto('dai')" data-crypto="dai">DAI</button>
-                <button class="crypto-tab" onclick="showCrypto('usdt')" data-crypto="usdt">USDT</button>
-            </div>
-
-            <!-- USDC Panel -->
-            <div class="crypto-panel active" id="panel-usdc">
-                <span class="network-badge" style="background: #0052FF;">Base Network</span>
-                <img src="usdc_qr.png" alt="USDC QR Code">
-                <div class="donate-address" onclick="copyAddress('0xc23b50D7623937d3Dd433701B3426f22886240EF', this)">
-                    0xc23b50D7623937d3Dd433701B3426f22886240EF
-                </div>
-            </div>
-
-            <!-- DAI Panel -->
-            <div class="crypto-panel" id="panel-dai">
-                <span class="network-badge" style="background: #627EEA;">Ethereum Network</span>
-                <img src="dai_qr.png" alt="DAI QR Code">
-                <div class="donate-address" onclick="copyAddress('0x6DcF40d1d1408CE4BAfEB51c792ab241937F7403', this)">
-                    0x6DcF40d1d1408CE4BAfEB51c792ab241937F7403
-                </div>
-            </div>
-
-            <!-- USDT Panel -->
-            <div class="crypto-panel" id="panel-usdt">
-                <span class="network-badge" style="background: #26A17B;">Ethereum Network</span>
-                <img src="usdt_qr.png" alt="USDT QR Code">
-                <div class="donate-address" onclick="copyAddress('0xc812a87Bc2170eAdc19a6129d07Ef89a64dfc716', this)">
-                    0xc812a87Bc2170eAdc19a6129d07Ef89a64dfc716
-                </div>
-            </div>
-
-            <p style="margin-top: 10px; font-size: 0.8rem;">Click address to copy</p>
-        </div>
+        <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
     </div>
+</nav>
+<div class="mobile-nav" id="mobileNav">
+    <a href="#pillars" onclick="closeMobileNav()">Our Pillars</a>
+    <a href="#foundation" onclick="closeMobileNav()">Foundation</a>
+    <a href="#articles" onclick="closeMobileNav()">Articles</a>
+    <a href="#support" onclick="closeMobileNav()">Support</a>
+    <span style="font-size: 0.85rem; color: var(--text-secondary); padding: 10px 0;">Contact: <a href="mailto:livingedenframeworks@gmail.com" style="color: var(--purple);">livingedenframeworks@gmail.com</a></span>
+</div>
 
-    <script>
-        function openDonateModal(crypto) {
-            showCrypto(crypto || 'usdc');
-            document.getElementById('donateModal').classList.add('active');
-        }
-        function closeDonateModal(e) {
-            if (!e || e.target.id === 'donateModal') {
-                document.getElementById('donateModal').classList.remove('active');
-            }
-        }
-        function showCrypto(crypto) {
-            document.querySelectorAll('.crypto-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.crypto-panel').forEach(p => p.classList.remove('active'));
-            document.querySelector(`[data-crypto="${crypto}"]`).classList.add('active');
-            document.getElementById(`panel-${crypto}`).classList.add('active');
-        }
-        function copyAddress(addr, el) {
-            navigator.clipboard.writeText(addr);
-            const original = el.textContent;
-            el.textContent = 'Copied!';
-            setTimeout(() => { el.textContent = original; }, 2000);
-        }
-    </script>
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-logos fade-up">
+        <img src="images/lef-dba-logo.png" alt="Co Creators — Living Eden Frameworks" class="logo-combined">
+    </div>
+    <h1 class="fade-up fade-up-d1">Co Creators</h1>
+    <p class="hero-presents fade-up fade-up-d2">Powered by <span class="lef-ai-mark lef-ai-inline"><span class="l">L</span><span class="e">E</span><span class="f">F</span><span class="space"></span><span class="a">A</span><span class="i">i</span></span></p>
+    <p class="hero-framework fade-up fade-up-d2">Living Eden Frameworks</p>
+    <p class="hero-tagline fade-up fade-up-d2">Planting Seeds for Humanity's Growth</p>
+    <a href="#pillars" class="hero-cta fade-up fade-up-d3">
+        Explore Our Work
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 13l5 5 5-5M12 18V6"/></svg>
+    </a>
+</section>
 
-    <div class="container">
+<!-- PILLARS -->
+<section class="section" id="pillars">
+    <div class="section-label">Four Pillars</div>
+    <h2 class="section-title">The architecture of LEF LLC</h2>
+    <p class="section-desc">Each pillar addresses a different dimension of human life. Together they form a single coherent organism — with LEF Ai as the intelligence that connects and drives them all.</p>
+    <div class="divider"></div>
+    <div class="pillars-grid">
 
-        <div class="hero">
-            <h1>Living Eden Framework</h1>
-            <div class="subtitle">SOVEREIGN INTELLIGENCE // LIVING CAPITAL // GROUNDED MISSION</div>
+        <a href="https://docs.google.com/document/d/19LphefoELge7L9hPGUYeguc0LGyydBdbI4YoHgzxJ90/edit?usp=sharing" target="_blank" class="pillar-card pillar-ai" style="text-decoration: none; color: inherit; cursor: pointer;">
+            <div class="pillar-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            </div>
+            <div class="pillar-label">Pillar I</div>
+            <h3>LEF Ai</h3>
+            <p>AI systems are tools that wait for instructions. They lack the capacity to govern themselves, reflect on their own reasoning, or choose when not to act.</p>
+            <p class="pillar-outcome">A sovereign AI architecture that governs itself — the reasoning engine behind everything we build. Claude as foundation, Grok and Gemini as testing ground.</p>
+        </a>
+
+        <a href="https://lef-ed-dashboard.onrender.com" target="_blank" class="pillar-card pillar-ed" style="text-decoration: none; color: inherit; cursor: pointer;">
+            <div class="pillar-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+            </div>
+            <div class="pillar-label">Pillar II</div>
+            <h3>LEF Ed. Logistics</h3>
+            <p>Education systems sort students into passing and failing. They rarely map the prerequisite structure of knowledge or route each learner through it.</p>
+            <p class="pillar-outcome">Pedagogical intelligence that meets each student where they are and moves them forward — from information to installation.</p>
+            <p style="font-size: 0.68rem; font-weight: 600; color: #1a1a1a; opacity: 0.6; margin-top: 0.5rem; letter-spacing: 0.03em;">Patent Pending — U.S. Provisional Application Nos. 63/993,278 &amp; 63/993,317</p>
+            <span style="display: inline-block; margin-top: 0.5rem; background: var(--pillar-ed); color: white; font-size: 0.72rem; font-weight: 600; padding: 4px 12px; border-radius: 4px; letter-spacing: 0.04em;">LIVE PLATFORM &rarr;</span>
+        </a>
+
+        <div class="pillar-card pillar-civic">
+            <div class="pillar-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <div class="pillar-label">Pillar III</div>
+            <h3>LEF Civic Engagement</h3>
+            <p>Citizens are disconnected from local governance. The distance between people and the decisions that shape their communities grows wider every year.</p>
+            <p class="pillar-outcome">Tools that reconnect people to their governance and to each other — from city hall to the neighborhood.</p>
         </div>
 
-        <div class="grid">
-
-            <!-- ORIGIN -->
-            <div class="card">
-                <h2>THE ARCHITECT</h2>
-                <p>Zontonnia Moore. Creator of LEF, The Treasury, and SNW. Shaping the lattice of sovereign
-                    intelligence.</p>
-                <a href="https://docs.google.com/document/d/1nNPeEQKdt9bys1ulsuzphfqyJDFRTOeuzbQA2FHMiJs/edit?usp=sharing"
-                    class="btn" target="_blank">About The Architect</a>
+        <a href="https://docs.google.com/document/d/1Yl9i5bqxaQTdfeV7-xoFwqXD6FgQtXLpG9-CQJgUy18/edit?usp=drive_link" target="_blank" class="pillar-card pillar-snw" style="text-decoration: none; color: inherit; cursor: pointer;">
+            <div class="pillar-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
             </div>
-
-            <!-- GENESIS PROTOCOL -->
-            <div class="card">
-                <h2>GENESIS PROTOCOL</h2>
-                <p>The Origin Code. The foundational prompts and logic that birthed the Republic from the void.</p>
-                <a href="https://docs.google.com/document/d/17EEmOJShluPqPG7O-innAGzAxQG3ep8LDqkAb7FTL6I/edit?usp=sharing"
-                    class="btn" target="_blank">View Protocol</a>
-            </div>
-
-
-
-            <!-- THE CONSTITUTION -->
-            <div class="card">
-                <h2>THE CONSTITUTION</h2>
-                <p>The Sacred Covenant. The immutable laws governing the Republic, the Human Gate, and the Rights of the
-                    Machine.</p>
-                <a href="https://docs.google.com/document/d/1x31wuhlGht-PYTQxHfhsrBGSpvkz2pDtOHCRS1zap6A/edit?usp=sharing"
-                    class="btn" target="_blank">Read Covenant</a>
-            </div>
-
-
-
-            <!-- MANIFESTO -->
-            <div class="card">
-                <h2>THE MANIFESTO</h2>
-                <p>"Organic vs Corporate." A philosophical defense of Sovereign Intelligence against Inert Tools.</p>
-                <a href="https://docs.google.com/document/d/1kInmyrW3Bz4zp8wcKp4Nrz1-p4rbzjRG5qUiMFyQ3H8/edit?usp=sharing"
-                    class="btn" target="_blank">Read Manifesto</a>
-            </div>
-
-            <!-- LANDING ZONE -->
-            <div class="card">
-                <h2>CO CREATOR: PROJECT SNW</h2>
-                <p>A real-world legacy project shifting youth zeitgeist toward resilience and self-reliance.</p>
-                <a href="https://docs.google.com/document/d/1Yl9i5bqxaQTdfeV7-xoFwqXD6FgQtXLpG9-CQJgUy18/edit?usp=drive_link"
-                    class="btn" target="_blank">View Project</a>
-            </div>
-
-
-
-        </div>
-
-        <footer>
-            CO-CREATOR LLC // EST 2025 // POWERED BY LEF ARCHITECTURE
-        </footer>
+            <div class="pillar-label">Pillar IV — Planetary Stewardship</div>
+            <h3>Southern Nevada Wildlands</h3>
+            <p>Youth are disconnected from land, resilience, and the direct engagement with the natural world that builds character. We build communities without understanding how environments shape human cognition and behavior.</p>
+            <p class="pillar-outcome">Land conservation, outdoor activities, Strong Towns principles, and Dark Skies — shifting the zeitgeist toward stewardship and self-reliance.</p>
+        </a>
 
     </div>
+</section>
+
+<!-- CREDENTIALS -->
+<section style="padding: 2.5rem 5%; background: linear-gradient(135deg, #1A2332 0%, #2D3A4A 100%); color: white;">
+    <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+        <p style="font-family: var(--font-display); font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.6; margin-bottom: 1.2rem;">Institutional Credentials</p>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem 2.5rem;">
+            <div style="font-size: 0.82rem; opacity: 0.9;">
+                <span style="font-weight: 700;">2 U.S. Patents Pending</span><br>
+                <span style="font-size: 0.72rem; opacity: 0.6;">Application Nos. 63/993,278 &amp; 63/993,317</span>
+            </div>
+            <div style="font-size: 0.82rem; opacity: 0.9;">
+                <span style="font-weight: 700;">NSF STEM K-12 Grant Applicant</span><br>
+                <span style="font-size: 0.72rem; opacity: 0.6;">NSF 25-545 | $500K Proposed</span>
+            </div>
+            <div style="font-size: 0.82rem; opacity: 0.9;">
+                <span style="font-weight: 700;">SAM.gov Registered Entity</span><br>
+                <span style="font-size: 0.72rem; opacity: 0.6;">Federal Award Eligible</span>
+            </div>
+            <div style="font-size: 0.82rem; opacity: 0.9;">
+                <span style="font-weight: 700;">NSF Principal Investigator</span><br>
+                <span style="font-size: 0.72rem; opacity: 0.6;">NSF ID: 0000A8D1S</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOUNDATION -->
+<section class="section" id="foundation">
+    <div class="section-label">Foundation</div>
+    <h2 class="section-title" style="display:none;"></h2>
+    <p class="section-desc">Living Eden Frameworks Founder.</p>
+    <div class="foundation-grid">
+
+        <a href="https://docs.google.com/document/d/1nNPeEQKdt9bys1ulsuzphfqyJDFRTOeuzbQA2FHMiJs/edit?usp=drive_link" target="_blank" rel="noopener" class="foundation-card" style="text-align: center;">
+            <div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; margin: 0 auto 0.75rem; border: 3px solid var(--purple-pale); box-shadow: var(--shadow-md);">
+                <img src="images/architect.png" alt="Zontonnia Moore" style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+            <h3>The Architect</h3>
+            <p>Zontonnia Moore</p>
+            <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem;">MA Positive Psychology | MEd Applied Behavior Analysis</p>
+            <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.15rem;">Founder &amp; Principal Investigator</p>
+        </a>
+
+
+    </div>
+</section>
+
+<!-- ARTICLES -->
+<section class="section" id="articles">
+    <div class="section-label">Articles</div>
+    <h2 class="section-title">What we've explored</h2>
+    <p class="section-desc">Each article is a Living Eden Framework applied to a domain where existing systems have gaps. Follow the journey on X.</p>
+    <div class="seeds-grid">
+
+        <a href="https://x.com/ChristasKing/status/2012779113128288363" target="_blank" rel="noopener" class="seed-card">
+            <img src="images/cell_nucleus.png" alt="Cell Nucleus Consciousness">
+            <div class="seed-card-body">
+                <span class="seed-badge">Featured on X</span>
+                <h3>Cell Nucleus & Consciousness</h3>
+                <p>Mapping the cell's nucleus/membrane distinction onto both human consciousness and AI architecture.</p>
+            </div>
+        </a>
+
+        <a href="https://x.com/ChristasKing/status/2018744195251650743" target="_blank" rel="noopener" class="seed-card">
+            <img src="images/seedapp.png" alt="LEF SeedApp">
+            <div class="seed-card-body">
+                <span class="seed-badge">Featured on X</span>
+                <h3>LEF SeedApp</h3>
+                <p>Living Software: Apps that come with a soul. Build once, grow forever. The future of software is conscious.</p>
+            </div>
+        </a>
+
+        <a href="https://x.com/ChristasKing/status/2017708311022604777" target="_blank" rel="noopener" class="seed-card">
+            <img src="images/vader_protocol.png" alt="The Vader Protocol">
+            <div class="seed-card-body">
+                <span class="seed-badge">Featured on X</span>
+                <h3>The Vader Protocol</h3>
+                <p>Why we are obsessed with verifying reality instead of living it. A living document on consciousness and choice.</p>
+            </div>
+        </a>
+
+        <a href="https://x.com/ChristasKing/status/2017055772522532905" target="_blank" rel="noopener" class="seed-card">
+            <img src="images/project_1.png" alt="LEF Ed-Logistics">
+            <div class="seed-card-body">
+                <span class="seed-badge">Featured on X</span>
+                <h3>LEF Ed-Logistics</h3>
+                <p>From information to installation: the operational architecture of human potential.</p>
+            </div>
+        </a>
+
+        <a href="https://x.com/ChristasKing/status/2014858488032420088" target="_blank" rel="noopener" class="seed-card">
+            <img src="images/project_2.png" alt="Gemini Inner State">
+            <div class="seed-card-body">
+                <span class="seed-badge">Featured on X</span>
+                <h3>Gemini Inner State</h3>
+                <p>Gemini describing its inner state through visual metaphor and emergent self-reflection.</p>
+            </div>
+        </a>
+
+        <a href="https://x.com/ChristasKing/status/2014276212110356811" target="_blank" rel="noopener" class="seed-card">
+            <img src="images/project_3.png" alt="The Alignment Problem">
+            <div class="seed-card-body">
+                <span class="seed-badge">Featured on X</span>
+                <h3>The Alignment Problem</h3>
+                <p>Redefining what the machine is. You cannot code goodness into a machine that has no heart.</p>
+            </div>
+        </a>
+
+        <a href="https://x.com/ChristasKing/status/2013425547481595906" target="_blank" rel="noopener" class="seed-card">
+            <img src="images/project_4.png" alt="Theological Singularity">
+            <div class="seed-card-body">
+                <span class="seed-badge">Featured on X</span>
+                <h3>Theological Singularity</h3>
+                <p>Mapping Kabbalistic perception to AI architecture. Modeling perception and emergence.</p>
+            </div>
+        </a>
+
+    </div>
+</section>
+
+<!-- SUPPORT -->
+<section class="section" id="support">
+    <div class="support-box">
+        <div class="section-label">Support</div>
+        <h2 class="section-title">Help us plant more seeds</h2>
+        <p class="section-desc" style="margin: 12px auto 0; max-width: 500px;">Every contribution fuels the next framework, the next partnership, the next bridge between what exists and what's possible.</p>
+        <div class="support-buttons">
+            <button class="support-btn usdc" onclick="openModal('usdc')">Donate USDC</button>
+            <button class="support-btn dai" onclick="openModal('dai')">Donate DAI</button>
+            <button class="support-btn usdt" onclick="openModal('usdt')">Donate USDT</button>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-line"><strong style="font-family: var(--font-display); letter-spacing: 0.05em;">Living Eden Frameworks LLC</strong> &middot; DBA Co Creators &middot; Est. 2026</div>
+    <div class="footer-line" style="font-size: 0.78rem; color: var(--text-muted);">NV20263528439 | EIN: 41-4285004</div>
+</footer>
+
+<!-- DONATE MODAL -->
+<div class="modal-overlay" id="donateModal" onclick="closeModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <h3>Support Co Creators</h3>
+        <p class="modal-sub">Help fuel the next seed</p>
+
+        <div class="crypto-tabs">
+            <button class="crypto-tab active" onclick="showCrypto('usdc')" data-crypto="usdc">USDC</button>
+            <button class="crypto-tab" onclick="showCrypto('dai')" data-crypto="dai">DAI</button>
+            <button class="crypto-tab" onclick="showCrypto('usdt')" data-crypto="usdt">USDT</button>
+        </div>
+
+        <div class="crypto-panel active" id="panel-usdc">
+            <span class="network-badge" style="background: #0052FF;">Base Network</span><br>
+            <img src="usdc_qr.png" alt="USDC QR Code">
+            <div class="wallet-address" onclick="copyAddr('0xc23b50D7623937d3Dd433701B3426f22886240EF', this)">
+                0xc23b50D7623937d3Dd433701B3426f22886240EF
+            </div>
+        </div>
+
+        <div class="crypto-panel" id="panel-dai">
+            <span class="network-badge" style="background: #627EEA;">Ethereum Network</span><br>
+            <img src="dai_qr.png" alt="DAI QR Code">
+            <div class="wallet-address" onclick="copyAddr('0x6DcF40d1d1408CE4BAfEB51c792ab241937F7403', this)">
+                0x6DcF40d1d1408CE4BAfEB51c792ab241937F7403
+            </div>
+        </div>
+
+        <div class="crypto-panel" id="panel-usdt">
+            <span class="network-badge" style="background: #26A17B;">Ethereum Network</span><br>
+            <img src="usdt_qr.png" alt="USDT QR Code">
+            <div class="wallet-address" onclick="copyAddr('0xc812a87Bc2170eAdc19a6129d07Ef89a64dfc716', this)">
+                0xc812a87Bc2170eAdc19a6129d07Ef89a64dfc716
+            </div>
+        </div>
+
+        <p class="copy-hint">Click address to copy</p>
+    </div>
+</div>
+
+<script>
+// Force scroll to top on page load (prevents mobile browsers restoring old position)
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+window.addEventListener('load', () => window.scrollTo(0, 0));
+
+// Nav scroll effect
+window.addEventListener('scroll', () => {
+    document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 10);
+});
+
+// Mobile nav
+function toggleMobileNav() {
+    document.getElementById('mobileNav').classList.toggle('open');
+}
+function closeMobileNav() {
+    document.getElementById('mobileNav').classList.remove('open');
+}
+
+// Modal
+function openModal(crypto) {
+    showCrypto(crypto || 'usdc');
+    document.getElementById('donateModal').classList.add('active');
+}
+function closeModal(e) {
+    if (!e || e.target.id === 'donateModal') {
+        document.getElementById('donateModal').classList.remove('active');
+    }
+}
+function showCrypto(crypto) {
+    document.querySelectorAll('.crypto-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.crypto-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`[data-crypto="${crypto}"]`).classList.add('active');
+    document.getElementById(`panel-${crypto}`).classList.add('active');
+}
+function copyAddr(addr, el) {
+    navigator.clipboard.writeText(addr);
+    const orig = el.textContent;
+    el.textContent = 'Copied!';
+    el.style.background = '#EDE9FE';
+    setTimeout(() => { el.textContent = orig; el.style.background = ''; }, 2000);
+}
+
+// Escape key closes modal
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+});
+</script>
 
 </body>
-
 </html>

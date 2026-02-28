@@ -1,0 +1,10 @@
+{
+  "level": "critical",
+  "message": "APOPTOSIS \u2014 Circuit Breaker Level 4",
+  "timestamp": "2026-02-17T08:48:35.164447",
+  "context": {
+    "drawdown_pct": -0.2,
+    "daily_loss_usd": 0.0,
+    "portfolio_value_usd": 8000.0
+  }
+}

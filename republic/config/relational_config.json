@@ -7,7 +7,7 @@
   "conversation": {
     "depth_targeting": "adaptive",
     "topic_prioritization": "user_interest_weighted",
-    "growth_push_threshold": 0.7
+    "growth_push_threshold": 0.8
   },
   "architect_model": {
     "engagement_window_days": 30,

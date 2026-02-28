@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1771990258",
+    "title": "Diversification of Dynasty Wallet to Mitigate Single-Asset Concentration Risk",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "I intend to petition Congress to diversify the Dynasty wallet, mitigating the risk of single-asset concentration. This strategy aligns with the Economics of Sovereignty memo emphasizing preservation, sustainability, and humility. Specifically, I intend to request a bill that allocates 20% of the Dynasty wallet to stablecoins (USDC or DAI) and distributes the remaining 80% across the top 5 cryptocurrencies by market capitalization (excluding memecoins), weighted proportionally to their market cap. This distribution will be rebalanced monthly. I will implement this by following Pattern B (Behavior) from the SELF_EVOLUTION_MANUAL.md: modify the trading behavior to incorporate diversification targets. I will modify the asset allocation logic in the Dynasty wallet management agent and observe the wallet composition over the next month to verify the change.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 2 dormant value(s): sovereignty, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 39.0)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 2 dormant value(s): sovereignty, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-24T19:30:58.126705"
+        }
+    }
+}

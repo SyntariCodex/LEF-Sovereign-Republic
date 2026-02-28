@@ -445,6 +445,16 @@ If no actionable intent, respond: {{"intent_type": "NONE"}}"""
         
         while True:
             try:
+                # Conditioning pass — align with identity and gaps before execution
+                try:
+                    from system.conditioner import get_conditioner
+                    get_conditioner().condition(
+                        agent_name="Executor",
+                        task_context="scan thoughts and dispatch intents"
+                    )
+                except Exception as _ce:
+                    pass
+
                 # Phase 1: Scan new thoughts for intents
                 scanned = self._scan_new_thoughts()
                 if scanned > 0:

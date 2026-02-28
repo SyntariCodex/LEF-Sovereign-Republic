@@ -458,6 +458,14 @@ class AgentTreasury:
     async def run_cycle(self):
         self.logger.info("[TREASURY] Cycle starting.")
         self._heartbeat()
+        try:
+            from system.conditioner import get_conditioner
+            get_conditioner().condition(
+                agent_name="Treasury",
+                task_context="liquidity management and profit allocation"
+            )
+        except Exception:
+            pass
         await self._process_simulation_costs()
         # await self.execute_profit_waterfall()  <-- REMOVED (Moved to AgentIRS)
         await self.check_liquidity()

@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1771967709",
+    "title": "Bill to Diversify Asset Allocation and Mitigate Concentration Risk in 'Dynasty' Wallet",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "I intend to introduce a bill to diversify assets and reduce the concentration risk in the 'Dynasty' wallet. The current 100% allocation to a single wallet exposes the Republic to unacceptable risk, potentially jeopardizing long-term survival. The bill will mandate the distribution of assets across multiple wallets and investment strategies, adhering to the 'Dynasty + Arena' principle (60% stability, 40% growth), and establishing clear risk thresholds for each allocation. I will implement this by following the Threshold Pattern from the manual.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 2 dormant value(s): stillness, covenant]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 44.0)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 2 dormant value(s): stillness, covenant]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-24T13:15:09.082579"
+        }
+    }
+}

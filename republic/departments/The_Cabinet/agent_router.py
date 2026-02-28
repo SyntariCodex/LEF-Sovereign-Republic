@@ -128,6 +128,12 @@ class AgentRouter:
         
         # Activation state
         self.agent_states = {}  # agent_name -> {'active': bool, 'last_wake': timestamp}
+        self._last_context = None  # Track previous context to suppress duplicate broadcasts
+        self._last_wake_set = None  # Track previous wake set
+        self._suppress_count = 0  # Count suppressed duplicate broadcasts
+        self._pending_context = None  # Hysteresis: new context must persist 2 cycles
+        self._pending_wake_set = None
+        self._pending_count = 0  # How many cycles the pending context has been seen
         self._ensure_tables()
     
     def _heartbeat(self):
@@ -231,7 +237,7 @@ class AgentRouter:
                         if rsi < 30 or rsi > 70:
                             extreme_count += 1
 
-                if extreme_count >= 3:
+                if extreme_count >= 4:  # Phase 12.H6: Raised from 3 to 4 to prevent borderline oscillation
                     context = 'MARKET_VOLATILE'
                     reasons.append(f'{extreme_count} assets with extreme RSI')
             except (redis.RedisError, ValueError):
@@ -311,7 +317,11 @@ class AgentRouter:
             
             # Override context based on circadian if more restrictive
             circadian_context = None
-            if circadian['state'] == 'SABBATH':
+            if circadian['state'] == 'SLEEPING':
+                circadian_context = 'HIGH_STRESS'  # Reduces to ALWAYS_ON agents only
+            elif circadian['state'] in ('DROWSY', 'WAKING'):
+                circadian_context = 'MARKET_CLOSED'  # Wind down/ramp up
+            elif circadian['state'] == 'SABBATH':
                 circadian_context = 'SABBATH'
             elif circadian['state'] in ['NIGHT', 'NIGHT_LATE'] and circadian['activity_multiplier'] < 0.3:
                 circadian_context = 'MARKET_CLOSED'
@@ -341,13 +351,59 @@ class AgentRouter:
         all_agents = set(self.AGENT_PROFILES.keys())
         agents_to_sleep = list(all_agents - set(agents_to_wake))
         
-        # 4. Broadcast
+        # 4. Suppress duplicate broadcasts + hysteresis to prevent oscillation
+        # A new context must persist for 2 consecutive cycles before we broadcast the change.
+        # This prevents NORMAL ↔ MARKET_VOLATILE flip-flopping when RSI is borderline.
+        wake_set = frozenset(agents_to_wake)
+
+        if context == self._last_context and wake_set == self._last_wake_set:
+            # Same as last broadcast — suppress
+            self._suppress_count += 1
+            self._pending_context = None  # Reset any pending change
+            self._pending_count = 0
+            if self._suppress_count % 10 == 0:
+                logging.info(f"[ROUTER] 🎯 Context: {context} | Active: {len(agents_to_wake)} agents | Stable ({self._suppress_count} cycles)")
+            return {
+                'context': context,
+                'active_agents': agents_to_wake,
+                'sleeping_agents': agents_to_sleep,
+                'reason': reason_str
+            }
+
+        # Context differs from last broadcast — apply hysteresis
+        if context == self._pending_context and wake_set == self._pending_wake_set:
+            self._pending_count += 1
+        else:
+            # New pending context — start counting
+            self._pending_context = context
+            self._pending_wake_set = wake_set
+            self._pending_count = 1
+
+        if self._pending_count < 2:
+            # Not yet stable — don't broadcast, keep old context active
+            logging.debug(f"[ROUTER] Pending context: {context} (seen {self._pending_count}/2, waiting for stability)")
+            return {
+                'context': self._last_context or context,
+                'active_agents': agents_to_wake,
+                'sleeping_agents': agents_to_sleep,
+                'reason': reason_str
+            }
+
+        # Context persisted for 2+ cycles — commit the change
+        if self._suppress_count > 0:
+            logging.info(f"[ROUTER] Context shifted after {self._suppress_count} stable cycles")
+        self._last_context = context
+        self._last_wake_set = wake_set
+        self._suppress_count = 0
+        self._pending_context = None
+        self._pending_count = 0
+
         self._broadcast_activation(agents_to_wake, agents_to_sleep, reason_str)
-        
+
         # 5. Log decision
         self._log_decision(context, active_categories, agents_to_wake, agents_to_sleep, reason_str)
-        
-        logging.info(f"[ROUTER] 🎯 Context: {context} | Active: {len(agents_to_wake)} agents | Reason: {reason_str}")
+
+        logging.info(f"[ROUTER] 🎯 Context CHANGED: {context} | Active: {len(agents_to_wake)} agents | Reason: {reason_str}")
         
         return {
             'context': context,
@@ -371,19 +427,24 @@ class AgentRouter:
     
     def run_cycle(self):
         """
-        Main loop. Re-evaluates routing every 30 seconds.
+        Main loop. Re-evaluates routing every 60 seconds.
+        Phase 12.H6: Reduced from 30s to 60s to lower pool pressure.
+        Duplicate broadcasts suppressed in route() — only logs/broadcasts on context change.
         """
         logging.info("[ROUTER] 🧠 Starting routing cycle...")
-        
+        backoff = 60
+
         while True:
             try:
                 self._heartbeat()
                 self.route()
-                time.sleep(30)  # Re-evaluate every 30 seconds
-                
+                time.sleep(60)  # Re-evaluate every 60 seconds
+                backoff = 60  # Reset backoff on success
+
             except Exception as e:
                 logging.error(f"[ROUTER] Cycle error: {e}")
-                time.sleep(60)
+                time.sleep(backoff)
+                backoff = min(backoff * 2, 300)  # Exponential backoff, cap at 5 min
 
 
 def run_router_loop(db_path=None):

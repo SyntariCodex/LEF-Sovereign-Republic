@@ -125,11 +125,15 @@ class AgentScribe:
             else:
                 status = "🚨 OVERLOADED"
             
-            # Log summary
-            print(f"[SCRIBE] 📊 WAQ Health: {status} | "
+            # Log summary — only print to console when there's a problem
+            health_msg = (f"[SCRIBE] 📊 WAQ Health: {status} | "
                   f"Queues: C={critical} P={priority} N={normal} L={logs} | "
                   f"Processed: {self.writes_processed} (C:{self.critical_processed} P:{self.priority_processed}) | "
                   f"Failed: {self.writes_failed}")
+            if total_pending >= 10 or self.writes_failed > 0:
+                print(health_msg)
+            else:
+                logging.debug(health_msg)
 
             # Publish to Redis for external monitoring
             self.redis_client.set("scribe:health", json.dumps({

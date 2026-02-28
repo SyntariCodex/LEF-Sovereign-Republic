@@ -1,0 +1,200 @@
+{
+  "ee969e2f-216a-45d5-926c-1d02be15564b": {
+    "bill_id": "ee969e2f-216a-45d5-926c-1d02be15564b",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-02-22T15:02:15.827396",
+    "ends_at": "2026-02-23T15:02:15.827398",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "metacognition.cycle_interval_seconds"
+  },
+  "a57b0c3f-fc64-423f-a7cf-530f3e05597e": {
+    "bill_id": "a57b0c3f-fc64-423f-a7cf-530f3e05597e",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-02-22T15:02:15.927040",
+    "ends_at": "2026-02-23T15:02:15.927041",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "conversation.growth_push_threshold"
+  },
+  "afcd2dfa-f748-4b5f-95de-5855fe494960": {
+    "bill_id": "afcd2dfa-f748-4b5f-95de-5855fe494960",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-02-23T23:21:01.536258",
+    "ends_at": "2026-02-24T23:21:01.536259",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "memory_retriever.max_consciousness_items"
+  },
+  "6e032ac8-d57b-49e5-9780-4c39da2bc234": {
+    "bill_id": "6e032ac8-d57b-49e5-9780-4c39da2bc234",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-02-25T01:21:37.223451",
+    "ends_at": "2026-02-26T01:21:37.223452",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "ARENA.assets"
+  },
+  "84d2e57b-59cd-4002-aef8-73e638ccfb57": {
+    "bill_id": "84d2e57b-59cd-4002-aef8-73e638ccfb57",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-02-25T01:21:37.279544",
+    "ends_at": "2026-02-26T01:21:37.279546",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "learned_lessons"
+  },
+  "bffc64bc-7bc4-4e18-a37c-8ae442f12053": {
+    "bill_id": "bffc64bc-7bc4-4e18-a37c-8ae442f12053",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-02-25T15:48:01.032740",
+    "ends_at": "2026-02-26T15:48:01.032741",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "memory_retriever.max_consciousness_items"
+  },
+  "a024f2ba-b155-4434-aa23-d44f033391e1": {
+    "bill_id": "a024f2ba-b155-4434-aa23-d44f033391e1",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-02-25T16:26:20.517251",
+    "ends_at": "2026-02-26T16:26:20.517252",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "memory_retriever.max_consciousness_items"
+  },
+  "500d62e7-6a99-4770-a568-12692a641492": {
+    "bill_id": "500d62e7-6a99-4770-a568-12692a641492",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-02-25T16:26:20.545594",
+    "ends_at": "2026-02-26T16:26:20.545596",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "learned_lessons"
+  },
+  "0daa7455-4b4a-45f8-a793-8a98c63c903d": {
+    "bill_id": "0daa7455-4b4a-45f8-a793-8a98c63c903d",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-02-25T19:26:33.979459",
+    "ends_at": "2026-02-26T19:26:33.979460",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "memory_retriever.max_consciousness_items"
+  },
+  "a437feab-9381-4118-a06b-e95f22b1feee": {
+    "bill_id": "a437feab-9381-4118-a06b-e95f22b1feee",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-02-26T01:26:47.555775",
+    "ends_at": "2026-02-27T01:26:47.555776",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "memory_retriever.max_consciousness_items"
+  },
+  "636e0158-6f99-46c9-8e38-8407042657fd": {
+    "bill_id": "636e0158-6f99-46c9-8e38-8407042657fd",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-02-26T05:26:54.517611",
+    "ends_at": "2026-02-27T05:26:54.517612",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "memory_retriever.max_consciousness_items"
+  }
+}

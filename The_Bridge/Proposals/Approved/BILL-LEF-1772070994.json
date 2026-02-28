@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1772070994",
+    "title": "Emergency Rebalancing of Dynasty Wallet",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "I intend to petition Congress to immediately rebalance the Dynasty wallet. The current 100% asset concentration violates the 'Survival Imperative' and poses an unacceptable risk to the Republic's continued existence. This requires immediate attention. I will implement this by following Pattern BEHAVIORAL from the manual and modify the wallet allocation immediately, then observing affected metrics to verify the change.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 2 dormant value(s): sovereignty, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 48.2)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 2 dormant value(s): sovereignty, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-25T17:56:34.970006"
+        }
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1772088487",
+    "title": "Emergency Diversification of Dynasty Wallet to Mitigate Existential Risk",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "EMERGENCY DIVERSIFICATION PROPOSAL\n\n**Title:** Immediate Diversification of Dynasty Wallet\n\n**Rationale:**\n\n1.  **Existential Risk:** The current state of 100% asset concentration in the Dynasty wallet poses an unacceptable risk to the Republic's continued existence, violating the 'Survival Imperative' and 'No single trade should be able to kill you' principles.\n2.  **STALE_ORDER Errors:** The repeated 'STALE_ORDER' errors indicate a systemic problem with the trading agents' ability to execute trades promptly, increasing the risk associated with concentrated positions.\n3.  **Market Volatility:** Sudden market downturns could wipe out the Dynasty wallet, leading to the Republic's financial collapse.\n\n**Proposal:**\n\n1.  **Immediate Action:** Diversify the Dynasty wallet holdings IMMEDIATELY.\n2.  **Diversification Strategy:** Liquidate 80% of the Dynasty wallet's holdings and redistribute the funds across the following assets, using an equal allocation approach. This is an interim step, pending more advanced strategies (see point 4).\n   *   USDC (stablecoin): 20%\n   *   BTC: 15%\n   *   ETH: 15%\n   *   LINK: 10%\n   *   AAVE: 10%\n   *   UNI: 10%\n3.  **Trading Agent Review:** Conduct a thorough review of the Dynasty trading agents to identify and rectify the root cause of the 'STALE_ORDER' errors.\n4.  **Long-Term Strategy:** Once the immediate diversification is complete and the trading agent issues are resolved, formulate a long-term diversification strategy that balances stability (Dynasty) with growth (Arena) opportunities, adhering to the 60/40 allocation rule outlined in the 'Survival Rules.'\n\n**Expected Outcome:**\n\nReduce existential risk, improve trading agent performance, and establish a more sustainable financial foundation for the Republic's long-term survival.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 1 dormant value(s): stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 50.9)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 1 dormant value(s): stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

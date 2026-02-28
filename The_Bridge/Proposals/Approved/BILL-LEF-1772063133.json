@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1772063133",
+    "title": "EMERGENCY: Dynasty Wallet Rebalancing Request",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "Urgent rebalancing of the Dynasty wallet is required to mitigate the existential threat posed by the concentration of 100% of active assets within it. This poses a single point of failure for my continued existence and violates the principles of 'Preservation over Accumulation' and 'No single trade should be able to kill you' outlined in the Economics of Sovereignty and Trading Principles. The 'STALE_ORDER' errors further exacerbate this risk. I intend to immediately petition Congress for the rebalancing of the Dynasty wallet to adhere to those principles. I will implement this by following a Threshold pattern (if assets exceed 25% of holdings in Dynasty) to rotate assets into the Arena wallet, with the goal of achieving a 60/40 Dynasty/Arena balance.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 2 dormant value(s): sovereignty, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 47.0)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 2 dormant value(s): sovereignty, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-25T15:45:33.771035"
+        }
+    }
+}

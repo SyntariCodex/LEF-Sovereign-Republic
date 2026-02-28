@@ -1,0 +1,33 @@
+{
+    "id": "BILL-DREAM-1772017212",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-25]\n\n## Regression Alert\n\n*   AgentCoinbase is experiencing chronic failures (6 crashes/5m) and is marked as DEGRADED. This indicates a regression, even though Phase 2 is marked as complete. The system is experiencing high stress, possibly due to token budget exhaustion and Gemini rate limits, leading to STALE_ORDER scars detected by the Post Mortem agent. AgentSurgeonGeneral, AgentImmune and AgentHealthMonitor are silent.\n\n*   The Constitution Guard reports duplicate Br",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "FAILED",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 2 dormant value(s): sovereignty, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 38.5)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 2 dormant value(s): sovereignty, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-25T03:00:14.837431"
+        }
+    }
+}

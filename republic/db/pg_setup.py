@@ -438,18 +438,19 @@ def init_pg(conn_params=None):
         """)
 
         # Table 32: library_catalog
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS library_catalog (
-                id SERIAL PRIMARY KEY,
-                title TEXT,
-                source_url TEXT,
-                author TEXT,
-                category TEXT,
-                summary TEXT,
-                status TEXT DEFAULT 'UNREAD',
-                ingested_at TIMESTAMP DEFAULT NOW()
-            )
-        """)
+        # -- Phase 16: Table removed (never used in production). Preserved as comment for reference.
+        # cur.execute("""
+        #     CREATE TABLE IF NOT EXISTS library_catalog (
+        #         id SERIAL PRIMARY KEY,
+        #         title TEXT,
+        #         source_url TEXT,
+        #         author TEXT,
+        #         category TEXT,
+        #         summary TEXT,
+        #         status TEXT DEFAULT 'UNREAD',
+        #         ingested_at TIMESTAMP DEFAULT NOW()
+        #     )
+        # """)
 
         # Table 33: mental_models
         cur.execute("""
@@ -490,26 +491,28 @@ def init_pg(conn_params=None):
         """)
 
         # Table 36: lived_experience
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS lived_experience (
-                id SERIAL PRIMARY KEY,
-                category TEXT,
-                content TEXT,
-                ingested_at TIMESTAMP DEFAULT NOW()
-            )
-        """)
+        # -- Phase 16: Table removed (never used in production). Preserved as comment for reference.
+        # cur.execute("""
+        #     CREATE TABLE IF NOT EXISTS lived_experience (
+        #         id SERIAL PRIMARY KEY,
+        #         category TEXT,
+        #         content TEXT,
+        #         ingested_at TIMESTAMP DEFAULT NOW()
+        #     )
+        # """)
 
         # Table 37: citizen_votes
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS citizen_votes (
-                id SERIAL PRIMARY KEY,
-                bill_id TEXT,
-                vote TEXT,
-                weight DOUBLE PRECISION,
-                reasoning TEXT,
-                timestamp TIMESTAMP DEFAULT NOW()
-            )
-        """)
+        # -- Phase 16: Table removed (never used in production). Preserved as comment for reference.
+        # cur.execute("""
+        #     CREATE TABLE IF NOT EXISTS citizen_votes (
+        #         id SERIAL PRIMARY KEY,
+        #         bill_id TEXT,
+        #         vote TEXT,
+        #         weight DOUBLE PRECISION,
+        #         reasoning TEXT,
+        #         timestamp TIMESTAMP DEFAULT NOW()
+        #     )
+        # """)
 
         # Table 38: gladiator_ledger
         cur.execute("""
@@ -671,6 +674,7 @@ def init_pg(conn_params=None):
         """)
 
         # Table 49: skill_executions
+        # -- Phase 16: Table dormant — reserved for future Competition/Skill features
         cur.execute("""
             CREATE TABLE IF NOT EXISTS skill_executions (
                 id SERIAL PRIMARY KEY,
@@ -685,6 +689,7 @@ def init_pg(conn_params=None):
         """)
 
         # Table 50: competitor_profiles
+        # -- Phase 16: Table dormant — reserved for future Competition/Skill features
         cur.execute("""
             CREATE TABLE IF NOT EXISTS competitor_profiles (
                 id SERIAL PRIMARY KEY,
@@ -932,17 +937,18 @@ def init_pg(conn_params=None):
         """)
 
         # Table 67: memory_experiences_archive
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS memory_experiences_archive (
-                id INTEGER,
-                timestamp NUMERIC,
-                scenario_name TEXT,
-                market_condition TEXT,
-                action_taken TEXT,
-                outcome_pnl_pct DOUBLE PRECISION,
-                outcome_desc TEXT
-            )
-        """)
+        # -- Phase 16: Table removed (never used in production). Preserved as comment for reference.
+        # cur.execute("""
+        #     CREATE TABLE IF NOT EXISTS memory_experiences_archive (
+        #         id INTEGER,
+        #         timestamp NUMERIC,
+        #         scenario_name TEXT,
+        #         market_condition TEXT,
+        #         action_taken TEXT,
+        #         outcome_pnl_pct DOUBLE PRECISION,
+        #         outcome_desc TEXT
+        #     )
+        # """)
 
         # Table 68: conversations
         cur.execute("""
@@ -1036,7 +1042,9 @@ def init_pg(conn_params=None):
                 content TEXT NOT NULL,
                 category TEXT DEFAULT 'reflection',
                 timestamp TIMESTAMP DEFAULT NOW(),
-                consumed INTEGER DEFAULT 0
+                consumed INTEGER DEFAULT 0,
+                signal_weight FLOAT DEFAULT 0.5,
+                signal_vector JSONB DEFAULT '{}'
             )
         """)
 
@@ -1051,7 +1059,101 @@ def init_pg(conn_params=None):
             )
         """)
 
-        print("✓ All 76 tables created successfully")
+        # Table 77: republic_awareness (Body One — Phase 9 Three-Body Reflection)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS republic_awareness (
+                id SERIAL PRIMARY KEY,
+                timestamp TIMESTAMP DEFAULT NOW(),
+                active_patterns JSONB NOT NULL DEFAULT '[]',
+                scar_domain_activity JSONB NOT NULL DEFAULT '{}',
+                agent_health JSONB NOT NULL DEFAULT '{}',
+                republic_health_signals JSONB NOT NULL DEFAULT '{}',
+                pattern_count INTEGER DEFAULT 0,
+                cycle_number INTEGER DEFAULT 0
+            )
+        """)
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_ra_timestamp ON republic_awareness(timestamp)")
+
+        # Table 78: sovereign_reflection (Body Two — Phase 9 Three-Body Reflection)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS sovereign_reflection (
+                id SERIAL PRIMARY KEY,
+                timestamp TIMESTAMP DEFAULT NOW(),
+                pattern_id TEXT NOT NULL,
+                pattern_description TEXT NOT NULL,
+                gravity_profile JSONB NOT NULL DEFAULT '{}',
+                gravity_level TEXT DEFAULT 'baseline',
+                scar_resonance_count INTEGER DEFAULT 0,
+                impression TEXT,
+                status TEXT DEFAULT 'active',
+                first_seen TIMESTAMP DEFAULT NOW(),
+                last_updated TIMESTAMP DEFAULT NOW(),
+                surfaced_to_sabbath BOOLEAN DEFAULT FALSE,
+                resolution TEXT
+            )
+        """)
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_sr_status ON sovereign_reflection(status)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_sr_gravity ON sovereign_reflection(gravity_level)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_sr_timestamp ON sovereign_reflection(timestamp)")
+
+        # Table 79: sabbath_log (Body Three — Phase 9 Three-Body Reflection)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS sabbath_log (
+                id SERIAL PRIMARY KEY,
+                timestamp TIMESTAMP DEFAULT NOW(),
+                trigger_pattern_id TEXT NOT NULL,
+                gravity_profile JSONB NOT NULL DEFAULT '{}',
+                gravity_level TEXT NOT NULL,
+                duration_seconds NUMERIC(10,2),
+                logical_assessment TEXT,
+                resonance_assessment TEXT,
+                outcome TEXT NOT NULL,
+                intention TEXT,
+                proposal_id TEXT,
+                notes TEXT
+            )
+        """)
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_sabbath_timestamp ON sabbath_log(timestamp)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_sabbath_outcome ON sabbath_log(outcome)")
+
+        # 80. Reverb Log (Phase 10 — tracks effects of enacted evolution changes)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS reverb_log (
+                id SERIAL PRIMARY KEY,
+                timestamp TIMESTAMP DEFAULT NOW(),
+                proposal_id TEXT NOT NULL,
+                domain TEXT,
+                change_description TEXT,
+                reverb_assessment TEXT,
+                observations JSONB DEFAULT '[]',
+                hours_post_enactment NUMERIC(10,2) DEFAULT 0
+            )
+        """)
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_reverb_proposal ON reverb_log(proposal_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_reverb_timestamp ON reverb_log(timestamp)")
+
+        # 81. execution_feedback (Phase 19.2a — tracks execution quality per trade)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS execution_feedback (
+                id SERIAL PRIMARY KEY,
+                trade_queue_id INTEGER,
+                asset VARCHAR(20),
+                intended_price NUMERIC,
+                actual_price NUMERIC,
+                slippage_pct NUMERIC,
+                intended_qty NUMERIC,
+                actual_qty NUMERIC,
+                fill_rate NUMERIC,
+                fees_usd NUMERIC,
+                execution_time_ms INTEGER,
+                status VARCHAR(20),
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        """)
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_exec_feedback_asset ON execution_feedback(asset)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_exec_feedback_created ON execution_feedback(created_at)")
+
+        print("✓ All 81 tables created successfully")
 
         # Create all indexes
         print("Creating indexes...")
@@ -1186,6 +1288,166 @@ def init_pg(conn_params=None):
         print(f"Tables created: 75")
         print(f"Indexes created: 20")
         print(f"Seed data: virtual_wallets (5), stablecoin_buckets (3)")
+
+        # --- Phase 17 Migrations: Add signal_weight and signal_vector to consciousness_feed ---
+        try:
+            cur.execute("ALTER TABLE consciousness_feed ADD COLUMN IF NOT EXISTS signal_weight FLOAT DEFAULT 0.5")
+            cur.execute("ALTER TABLE consciousness_feed ADD COLUMN IF NOT EXISTS signal_vector JSONB DEFAULT '{}'")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_cf_signal_weight ON consciousness_feed(signal_weight)")
+            conn.commit()
+            print("Phase 17: consciousness_feed signal_weight/signal_vector columns ensured.")
+        except Exception as e:
+            conn.rollback()
+            print(f"Phase 17 migration note: {e}")
+
+        # --- Phase 17: frequency_journal table ---
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS frequency_journal (
+                id SERIAL PRIMARY KEY,
+                tier TEXT NOT NULL,
+                trigger TEXT,
+                duration_ms INTEGER,
+                outcome TEXT,
+                signal_weight FLOAT,
+                time_since_last_x3 FLOAT,
+                consciousness_feed_velocity FLOAT,
+                escalation_count INTEGER DEFAULT 0,
+                adaptive_interval FLOAT,
+                timestamp TIMESTAMP DEFAULT NOW()
+            )
+        """)
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_fj_tier ON frequency_journal(tier)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_fj_timestamp ON frequency_journal(timestamp)")
+
+        # --- Phase 17: pathway_registry table ---
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS pathway_registry (
+                id SERIAL PRIMARY KEY,
+                source_domain TEXT NOT NULL,
+                target_domain TEXT NOT NULL,
+                strength FLOAT DEFAULT 0.5,
+                evidence TEXT,
+                traversal_count INTEGER DEFAULT 0,
+                formed_at TIMESTAMP DEFAULT NOW(),
+                last_used TIMESTAMP DEFAULT NOW(),
+                last_decayed TIMESTAMP DEFAULT NOW()
+            )
+        """)
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_pr_source ON pathway_registry(source_domain)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_pr_strength ON pathway_registry(strength)")
+        conn.commit()
+        print("Phase 17: frequency_journal and pathway_registry tables created.")
+
+        # --- Fix 17-A: Enhanced signal weight trigger with scar resonance + novelty ---
+        cur.execute("""
+            CREATE OR REPLACE FUNCTION calculate_cf_signal_weight()
+            RETURNS TRIGGER AS $$
+            DECLARE
+                _depth_weight FLOAT;
+                _breadth_weight FLOAT;
+                _scar_weight FLOAT;
+                _resonance FLOAT;
+                _category TEXT;
+                _recent_count INT;
+                _scar_count INT;
+            BEGIN
+                _category := NEW.category;
+
+                -- Depth weight from category
+                _depth_weight := CASE _category
+                    WHEN 'apoptosis' THEN 0.9
+                    WHEN 'traumatic_event' THEN 0.9
+                    WHEN 'identity_reflection' THEN 0.9
+                    WHEN 'self_understanding' THEN 0.9
+                    WHEN 'sabbath_intention' THEN 0.9
+                    WHEN 'existential_scotoma' THEN 0.9
+                    WHEN 'constitutional_alignment' THEN 0.9
+                    WHEN 'reflective_observation' THEN 0.5
+                    WHEN 'gravity_assessment' THEN 0.5
+                    WHEN 'republic_pattern' THEN 0.5
+                    WHEN 'lesson' THEN 0.5
+                    WHEN 'reflection' THEN 0.5
+                    WHEN 'trade_blocked' THEN 0.5
+                    WHEN 'rhythm_observation' THEN 0.5
+                    WHEN 'shadow_work' THEN 0.5
+                    WHEN 'pathway_formed' THEN 0.5
+                    WHEN 'frequency_preference' THEN 0.5
+                    WHEN 'research' THEN 0.2
+                    WHEN 'trade_execution' THEN 0.2
+                    WHEN 'market_analysis' THEN 0.2
+                    WHEN 'sentiment' THEN 0.2
+                    WHEN 'boot_awareness' THEN 0.2
+                    ELSE 0.3
+                END;
+
+                -- Breadth weight from category
+                _breadth_weight := CASE _category
+                    WHEN 'republic_pattern' THEN 0.8
+                    WHEN 'apoptosis' THEN 0.8
+                    WHEN 'constitutional_alignment' THEN 0.8
+                    WHEN 'gravity_assessment' THEN 0.5
+                    WHEN 'traumatic_event' THEN 0.5
+                    WHEN 'lesson' THEN 0.5
+                    WHEN 'reflective_observation' THEN 0.5
+                    WHEN 'pathway_formed' THEN 0.5
+                    WHEN 'trade_execution' THEN 0.2
+                    WHEN 'trade_blocked' THEN 0.2
+                    WHEN 'research' THEN 0.2
+                    WHEN 'market_analysis' THEN 0.2
+                    WHEN 'sentiment' THEN 0.2
+                    WHEN 'boot_awareness' THEN 0.2
+                    ELSE 0.3
+                END;
+
+                -- Scar resonance: check if category matches any known scar domain
+                SELECT COUNT(*) INTO _scar_count FROM book_of_scars
+                WHERE LOWER(failure_type) = LOWER(_category)
+                   OR LOWER(asset) = LOWER(_category);
+                _scar_weight := LEAST(1.0, _scar_count * 0.2);
+
+                -- Pattern resonance (novelty vs repetition)
+                SELECT COUNT(*) INTO _recent_count FROM consciousness_feed
+                WHERE category = _category AND timestamp > NOW() - INTERVAL '1 hour';
+
+                IF _recent_count = 0 THEN
+                    _resonance := 0.8;  -- Novel signal
+                ELSIF _recent_count < 5 THEN
+                    _resonance := 0.6 + (_recent_count * 0.08);  -- Building
+                ELSE
+                    _resonance := GREATEST(0.2, 0.6 - (_recent_count - 5) * 0.05);  -- Diminishing
+                END IF;
+
+                -- Composite weight (matches gravity.py formula)
+                NEW.signal_weight := LEAST(1.0, GREATEST(0.0,
+                    _depth_weight * 0.25 +
+                    _breadth_weight * 0.2 +
+                    _scar_weight * 0.25 +
+                    _resonance * 0.3
+                ));
+
+                -- Direction vector
+                NEW.signal_vector := jsonb_build_object(
+                    'dx', CASE WHEN NEW.signal_weight > 0.7 THEN 2
+                                WHEN NEW.signal_weight > 0.5 THEN 1 ELSE 0 END,
+                    'dy', CASE WHEN _scar_weight > 0.3 OR _depth_weight >= 0.9 THEN 1 ELSE 0 END,
+                    'dz', CASE WHEN _breadth_weight >= 0.5 THEN 1 ELSE 0 END,
+                    'resonance', ROUND(_resonance::numeric, 3)
+                );
+
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+        """)
+        cur.execute("DROP TRIGGER IF EXISTS trg_cf_signal_weight ON consciousness_feed")
+        cur.execute("""
+            CREATE TRIGGER trg_cf_signal_weight
+                BEFORE INSERT ON consciousness_feed
+                FOR EACH ROW
+                WHEN (NEW.signal_weight IS NULL OR NEW.signal_weight = 0.5)
+                EXECUTE FUNCTION calculate_cf_signal_weight();
+        """)
+        conn.commit()
+        print("Fix 17-A: Enhanced signal weight trigger deployed (scar resonance + novelty).")
 
         cur.close()
 

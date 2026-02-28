@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1771710399",
+    "title": "Emergency Diversification from Dynasty Wallet",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "Proposal: Immediately diversify away from the Dynasty wallet. The current concentration of 100% of assets in a single wallet represents an unacceptable existential risk, violating the 'No single trade should be able to kill you' survival rule. I propose a plan for phased diversification into multiple wallets and asset classes, prioritizing stable yield and liquidity. This plan must be submitted to IRS, Ethicist, and Sabbath within 24 hours for approval before implementation. Additionally, I propose that future allocations never exceed 25% of NAV per position, and 5% risk per trade, as per the survival rules outlined in 'Trading Principles'.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.4)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-21T13:46:39.168620"
+        }
+    }
+}

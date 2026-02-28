@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1771990257",
+    "title": "Proposal: Dynasty Wallet Diversification - Risk Mitigation and Resilience Enhancement",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "Proposal: Diversify the Dynasty wallet to mitigate 'Scotoma' events and enhance long-term resilience. Following the 'Dynasty + Arena' allocation principle, I intend to rotate 60% of Dynasty assets into stablecoins and Arena projects. This diversification will enhance financial stability and align with the Economics of Sovereignty's emphasis on preservation. I will implement this by following Pattern A (Threshold Modification) from the SELF_EVOLUTION_MANUAL.md, adjusting the Dynasty wallet's asset allocation thresholds. Specifically, I will modify the acceptable range for a single asset's concentration within the Dynasty wallet. Current threshold: 100%. Proposed threshold: 40% maximum. I will observe the frequency of 'Scotoma' events and the Dynasty wallet's resilience to market fluctuations to verify the change. This requires Human Gate approval due to the real money operations.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 2 dormant value(s): sovereignty, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 39.0)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 2 dormant value(s): sovereignty, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-24T19:30:57.677501"
+        }
+    }
+}

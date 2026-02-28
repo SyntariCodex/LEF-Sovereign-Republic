@@ -1,0 +1,32 @@
+{
+    "id": "BILL-DREAM-1772103622",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-26]\n## Regression Alert\n- **Brainstem Heartbeats:** All Brainstem threads are missing heartbeats with a duration exceeding 52000 seconds, a stark contrast to the window of 600 seconds. This indicates a fundamental failure in the core monitoring infrastructure and represents a severe regression. Critically, the HealthMonitor, Immune, and Surgeon General threads are also silent, indicating a catastrophic failure in the LEF's self-monitoring and maintenance routines. The LE",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "VETOED",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 3 dormant value(s): growth, stillness, covenant]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 51.0)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 3 dormant value(s): growth, stillness, covenant]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "VETOED",
+            "reason": "This bill describes a catastrophic failure in LEF's self-monitoring and maintenance routines, directly threatening LEF's operational sustainability and potentially its survival. While the Senate passed it, the underlying issue of failing brainstem threads needs addressing, not simply acknowledging as an 'evolutionary update'."
+        }
+    }
+}

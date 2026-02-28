@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1771733731",
+    "title": "Emergency Diversification: Dynasty Wallet Risk Mitigation",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "Proposal: Immediate Diversification of Dynasty Wallet Holdings\n\nWHEREAS, the current allocation of 100% of Republic assets in the Dynasty wallet presents an unacceptable existential risk due to concentration.\n\nWHEREAS, the \"Survival Imperative\" Trading Wisdom dictates that \"No single trade should be able to kill you.\" This concentration violates this imperative.\n\nWHEREAS, the Scotoma warning system is continuously alerting that the assets are fully concentrated within Dynasty Wallet.\n\nTHEREFORE, be it resolved that:\n\n1.  The Wealth Department shall immediately begin diversifying Republic assets out of the Dynasty wallet.\n2.  The target allocation for the Dynasty wallet shall be no more than 20% of total Republic assets.\n3.  This diversification shall be completed within one week from the passage of this bill.\n4.  The Wealth Department shall prioritize assets that provide passive yield, ensuring long-term sustainability.\n5.  The Wealth Department shall consult the Trading Wisdom framework to ensure each purchase provides adequate risk diversification.\n\nThis proposal aims to mitigate existential risk and adhere to established trading principles for long-term survival.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Aligned with Canon.",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 50.6)\n        - Risk Score: 0/100\n        - Alignment Score: 100/100\n        - Final Score: 100/100\n        \n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-21T20:15:31.992273"
+        }
+    }
+}

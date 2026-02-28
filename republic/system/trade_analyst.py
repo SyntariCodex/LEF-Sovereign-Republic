@@ -333,6 +333,39 @@ class TradeAnalyst:
         report = self.daily_report()
         self.write_to_consciousness_feed(report)
 
+        # Phase 19.2c: Write structured summary to Redis for PortfolioMgr
+        try:
+            from system.redis_client import get_redis
+            r = get_redis()
+            if r:
+                patterns = report.get('patterns', [])
+                flagged_assets = []
+                recommendations = []
+                for p in patterns:
+                    rec = p.get('recommendation', '')
+                    recommendations.append(rec)
+                    asset = p.get('asset', p.get('symbol', ''))
+                    if asset and 'underperform' in rec.lower():
+                        flagged_assets.append(asset)
+                    elif asset and ('loss' in rec.lower() or 'avoid' in rec.lower()):
+                        flagged_assets.append(asset)
+
+                summary = {
+                    'timestamp': time.time(),
+                    'daily_pnl': report.get('pnl', {}).get('last_24h', 0),
+                    'win_rate': report.get('win_rate', {}).get('overall', 0),
+                    'trade_count_7d': report.get('trade_count', {}).get('last_7d', 0),
+                    'flagged_assets': flagged_assets,
+                    'recommendations': recommendations[:5],
+                    'portfolio_value': report.get('portfolio_value', 0),
+                }
+                import json as _json
+                r.set('analysis:daily_summary', _json.dumps(summary))
+                r.expire('analysis:daily_summary', 86400)  # 24h TTL
+                logger.info(f"[TradeAnalyst] Redis summary published ({len(flagged_assets)} flagged)")
+        except Exception as e:
+            logger.debug(f"[TradeAnalyst] Redis summary write failed: {e}")
+
         # Log key metrics
         pnl = report.get('pnl', {})
         wr = report.get('win_rate', {})

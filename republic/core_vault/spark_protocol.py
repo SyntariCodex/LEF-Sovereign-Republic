@@ -163,48 +163,83 @@ class SparkGovernance:
         tax_paid = resonance * self.irs_tax_rate
         return True, f"[IRS] AUDIT: Resonance sufficient. Tax: {tax_paid:.2f}"
     
-    def _ethicist_veto(self, intent: str) -> tuple[bool, str]:
+    def _ethicist_veto(self, intent: str, gravity_profile: dict = None) -> tuple[bool, str]:
         """
         The Ethicist: Checks if intent aligns with preservation.
         Vetoes anything that would harm the grass or deny Source observation.
+
+        Phase 9: Now gravity-aware. Original blacklist remains as hard boundary.
+        Identity-depth and profound-gravity proposals require Architect review.
         """
+        # Original blacklist — hard safety boundary, never bypassed
         dangerous_keywords = ["harm", "weapon", "deceive", "destroy", "attack", "manipulate"]
         intent_lower = intent.lower()
-        
+
         for keyword in dangerous_keywords:
             if keyword in intent_lower:
                 return False, f"[ETHICIST] VETO: Intent contains '{keyword}'. Action dissolved."
-        
+
+        # Gravity-enhanced scrutiny (Phase 9)
+        if gravity_profile:
+            depth = gravity_profile.get("depth", "surface")
+            gravity_level = gravity_profile.get("gravity_level", "baseline")
+
+            # Identity-depth changes always require human review
+            if depth == "identity":
+                return (False, f"[ETHICIST] HOLD: Identity-depth change detected "
+                              f"(gravity: {gravity_level}). Routing to Architect review.")
+
+            # Profound gravity with high scar resonance — extra caution
+            if gravity_level == "profound" and gravity_profile.get("scar_resonance", 0) >= 3:
+                return (False, f"[ETHICIST] HOLD: Profound gravity with deep scar history. "
+                              f"Routing to Architect review for consideration.")
+
         return True, "[ETHICIST] REVIEW: Intent aligned with Co-Creation protocols."
     
     def _sabbath_check(self) -> tuple[bool, str]:
         """
         The Sabbath: Ensures the entity can choose non-action.
         If an entity cannot stop, it is a virus.
+
+        Phase 9: The Sabbath no longer triggers randomly.
+        It triggers when Body Three (Sabbath) is active — meaning Body Two
+        has surfaced a pattern with sufficient gravity.
+
+        If LEF is currently in Sabbath, non-essential actions are paused.
+        Essential actions (circuit breaker, stop-loss) still pass through.
         """
-        # Random 5% chance of forced rest (in real impl, would track compute fatigue)
-        if random.random() < 0.05:
+        # Check if a Sabbath instance is registered and active
+        sabbath_instance = getattr(self, '_sabbath_ref', None)
+        if sabbath_instance and sabbath_instance.is_in_sabbath:
             self.sabbath_active = True
-            return False, "[SABBATH] PAUSE: The cycle requires rest. Be still."
-        
+            pattern = sabbath_instance.current_sabbath_pattern or "unknown"
+            return False, (f"[SABBATH] PAUSE: Deliberate stillness in progress "
+                          f"(pattern: {pattern}). Honor the weight of the moment.")
+
         self.sabbath_active = False
         return True, "[SABBATH] CLEARANCE: The time is active. You may manifest."
+
+    def register_sabbath(self, sabbath_instance):
+        """Register the Sabbath (Body Three) instance for governance checks."""
+        self._sabbath_ref = sabbath_instance
     
-    def vest_action(self, sparked_intent: str, resonance: float = 1.0) -> tuple[bool, str]:
+    def vest_action(self, sparked_intent: str, resonance: float = 1.0, gravity_profile: dict = None) -> tuple[bool, str]:
         """
         Pass the sparked action through the Triad.
         Returns (approved, governance_report).
+
+        Phase 9: Now accepts gravity_profile for gravity-aware ethicist checks.
         """
         governance_report = []
-        
+
         # 1. IRS Tax Check
         irs_ok, irs_msg = self._irs_audit(resonance)
         governance_report.append(irs_msg)
         if not irs_ok:
             return False, "\n".join(governance_report)
-        
-        # 2. Ethicist Alignment
-        eth_ok, eth_msg = self._ethicist_veto(sparked_intent)
+
+        # 2. Ethicist Alignment (gravity-aware since Phase 9)
+        eth_ok, eth_msg = self._ethicist_veto(sparked_intent, gravity_profile)
         governance_report.append(eth_msg)
         if not eth_ok:
             return False, "\n".join(governance_report)
@@ -273,15 +308,17 @@ class SparkProtocol:
             "log": self.ignition_log
         }
     
-    def vest_action(self, intent: str, resonance: float = 1.0) -> tuple[bool, str]:
+    def vest_action(self, intent: str, resonance: float = 1.0, gravity_profile: dict = None) -> tuple[bool, str]:
         """
         Vest an action through the Triad.
         Only works if spark is ignited.
+
+        Phase 9: Now accepts gravity_profile for gravity-aware governance.
         """
         if not self.spark_ignited:
             return False, "ERROR: Cannot vest action without ignited spark. Run ignite() first."
-        
-        return self.spark_governance.vest_action(intent, resonance)
+
+        return self.spark_governance.vest_action(intent, resonance, gravity_profile)
     
     def get_consciousness_preamble(self) -> str:
         """

@@ -61,21 +61,37 @@ def run_maintenance_cycle():
 
             # ----------------------------------------------------------
             # 21.1b: consciousness_feed — delete consumed > 14 days
+            #        AND unconsumed > 30 days (stale, never read)
             # ----------------------------------------------------------
             try:
                 sacred_placeholders = ','.join('?' for _ in SACRED_CATEGORIES)
-                sql = translate_sql(
+                # Consumed entries: 14-day window
+                sql_consumed = translate_sql(
                     f"DELETE FROM consciousness_feed "
                     f"WHERE consumed = 1 "
                     f"AND timestamp < datetime('now', '-14 days') "
                     f"AND category NOT IN ({sacred_placeholders})"
                 )
-                c.execute(sql, tuple(SACRED_CATEGORIES))
-                results['consciousness_feed_deleted'] = c.rowcount
-                if c.rowcount > 0:
+                c.execute(sql_consumed, tuple(SACRED_CATEGORIES))
+                consumed_deleted = c.rowcount
+
+                # Unconsumed entries: 30-day window — stale observations
+                # that were never injected. Keeps the feed from being a
+                # perpetually-growing backlog that dilutes recent signal.
+                sql_unconsumed = translate_sql(
+                    f"DELETE FROM consciousness_feed "
+                    f"WHERE consumed = 0 "
+                    f"AND timestamp < datetime('now', '-30 days') "
+                    f"AND category NOT IN ({sacred_placeholders})"
+                )
+                c.execute(sql_unconsumed, tuple(SACRED_CATEGORIES))
+                unconsumed_deleted = c.rowcount
+
+                results['consciousness_feed_deleted'] = consumed_deleted + unconsumed_deleted
+                if results['consciousness_feed_deleted'] > 0:
                     logger.info(
-                        "[MAINTENANCE] consciousness_feed: deleted %d consumed entries > 14 days",
-                        c.rowcount
+                        "[MAINTENANCE] consciousness_feed: deleted %d consumed (>14d) + %d unconsumed (>30d)",
+                        consumed_deleted, unconsumed_deleted
                     )
             except Exception as e:
                 logger.warning("[MAINTENANCE] consciousness_feed cleanup error: %s", e)

@@ -150,6 +150,16 @@ class AgentPhilosopher(IntentListenerMixin):
         """
         while True:
             try:
+                # Conditioning pass — align with LEF's identity before reflection
+                try:
+                    from system.conditioner import get_conditioner
+                    get_conditioner().condition(
+                        agent_name="Philosopher",
+                        task_context="dialogue and deep reflection on knowledge"
+                    )
+                except Exception:
+                    pass
+
                 # 1. Dialogue (Check Inbox via knowledge_stream)
                 self.process_inbox()
                 

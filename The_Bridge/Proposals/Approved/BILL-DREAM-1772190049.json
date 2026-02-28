@@ -1,0 +1,33 @@
+{
+    "id": "BILL-DREAM-1772190049",
+    "type": "EVOLUTION",
+    "title": "Evolutionary update from Dream State",
+    "description": "# Dream Journal [2026-02-27]\n\n## Regression Alert\n\nThe logs show numerous heartbeat misses across almost all threads, including core components like AgentRouter and AgentLEF (though they recover quickly).  Additionally, the Brainstem throws a lot of \"Thread missed heartbeat\" errors, pointing to potential stability issues or resource constraints. Critically, the health agents (SurgeonGeneral, Immune, HealthMonitor) are consistently silent, suggesting a failure in the health monitoring subsystem, ",
+    "technical_spec": {
+        "changes": [],
+        "description": "See Dream Journal for details."
+    },
+    "status": "FAILED",
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 2 dormant value(s): sovereignty, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 46.7)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 2 dormant value(s): sovereignty, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-27T03:00:56.773113"
+        }
+    }
+}

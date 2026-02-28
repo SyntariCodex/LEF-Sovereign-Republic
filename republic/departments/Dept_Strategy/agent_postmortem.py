@@ -326,6 +326,71 @@ class AgentPostMortem:
         
         return [dict(s) for s in scars]
     
+    def _synthesize_chronic_scars(self, threshold: int = 100):
+        """
+        When a scar has been repeated >= threshold times, it has become
+        chronic structural knowledge rather than an active alert.
+
+        Action:
+          1. Write a distilled wisdom entry to lef_wisdom (or consciousness_feed).
+          2. Reset times_repeated to 1 — the scar stays as a reminder, but
+             the count no longer inflates dashboards or outcome scoring.
+
+        This converts repetitive trauma accumulation into growth signal.
+        """
+        try:
+            from db.db_helper import db_connection, translate_sql
+        except ImportError:
+            return 0
+
+        synthesized = 0
+        try:
+            with db_connection() as conn:
+                c = conn.cursor()
+                c.execute(translate_sql(
+                    "SELECT id, asset, failure_type, lesson, times_repeated "
+                    "FROM book_of_scars WHERE times_repeated >= ?"
+                ), (threshold,))
+                chronic = c.fetchall()
+
+                for row in chronic:
+                    scar_id = row[0] if not hasattr(row, 'keys') else row['id']
+                    asset    = row[1] if not hasattr(row, 'keys') else row['asset']
+                    f_type   = row[2] if not hasattr(row, 'keys') else row['failure_type']
+                    lesson   = row[3] if not hasattr(row, 'keys') else row['lesson']
+                    count    = row[4] if not hasattr(row, 'keys') else row['times_repeated']
+
+                    wisdom_text = (
+                        f"Chronic scar synthesized: {asset}/{f_type} repeated {count}× "
+                        f"— this is structural, not transient. "
+                        f"Original lesson: {lesson}"
+                    )
+
+                    # Write to consciousness_feed as distilled wisdom
+                    c.execute(translate_sql(
+                        "INSERT INTO consciousness_feed "
+                        "(agent_name, content, category, signal_weight) "
+                        "VALUES (?, ?, ?, ?)"
+                    ), ("PostMortem", wisdom_text, "wisdom_extraction", 0.9))
+
+                    # Reset counter — scar persists as reminder, count starts fresh
+                    c.execute(translate_sql(
+                        "UPDATE book_of_scars SET times_repeated = 1, "
+                        "last_seen = NOW() WHERE id = ?"
+                    ), (scar_id,))
+
+                    synthesized += 1
+                    logging.info(
+                        "[POST_MORTEM] 🧬 Chronic scar synthesized: %s/%s (was x%d) → wisdom",
+                        asset, f_type, count
+                    )
+
+                conn.commit()
+        except Exception as e:
+            logging.debug("[POST_MORTEM] Scar synthesis error (non-fatal): %s", e)
+
+        return synthesized
+
     def get_critical_scars(self):
         """Get all CRITICAL severity scars for dashboard/alerting."""
         conn = self._get_db_connection()
@@ -376,6 +441,11 @@ class AgentPostMortem:
 
                 if new_scars > 0:
                     logging.info(f"[POST_MORTEM] 📖 Wrote {new_scars} new scars to book_of_scars.")
+
+                # Synthesize chronic scars — compress x100+ repeats into wisdom
+                synthesized = self._synthesize_chronic_scars(threshold=100)
+                if synthesized > 0:
+                    logging.info(f"[POST_MORTEM] 🧬 Synthesized {synthesized} chronic scars into wisdom.")
 
                 # Check for critical patterns
                 critical = self.get_critical_scars()
