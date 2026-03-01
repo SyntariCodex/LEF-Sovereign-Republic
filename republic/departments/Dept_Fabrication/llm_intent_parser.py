@@ -151,7 +151,10 @@ Return ONLY valid JSON matching the schema."""
         
         client = anthropic.Anthropic(api_key=self.api_key)
         
-        response = client.messages.create(
+        from system.llm_router import call_with_timeout
+        response = call_with_timeout(
+            client.messages.create,
+            timeout_seconds=120,
             model="claude-sonnet-4-20250514",
             max_tokens=1024,
             system=self.SYSTEM_PROMPT,
@@ -159,9 +162,11 @@ Return ONLY valid JSON matching the schema."""
                 {"role": "user", "content": f"Parse this design request:\n\n{request}"}
             ]
         )
-        
+
         # Extract JSON from response
-        text = response.content[0].text
+        text = response.content[0].text if response else None
+        if not text:
+            return {}
         return self._extract_json(text)
     
     def _parse_openai(self, request: str) -> Dict:

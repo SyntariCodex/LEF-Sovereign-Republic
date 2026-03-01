@@ -221,7 +221,12 @@ FAILURE PATTERN:
                     )
                 if response_text is None and self.client:
                     try:
-                        response = self.client.models.generate_content(model=self.model_id, contents=prompt)
+                        from system.llm_router import call_with_timeout
+                        response = call_with_timeout(
+                            self.client.models.generate_content,
+                            timeout_seconds=120,
+                            model=self.model_id, contents=prompt
+                        )
                         response_text = response.text.strip() if response and response.text else None
                     except Exception as _e:
                         import logging
@@ -341,7 +346,12 @@ Write a single concise trading insight. Start with "IN {condition.upper()}:" fol
                     )
                 if response_text is None and self.client:
                     try:
-                        response = self.client.models.generate_content(model=self.model_id, contents=prompt)
+                        from system.llm_router import call_with_timeout
+                        response = call_with_timeout(
+                            self.client.models.generate_content,
+                            timeout_seconds=120,
+                            model=self.model_id, contents=prompt
+                        )
                         response_text = response.text.strip() if response and response.text else None
                     except Exception as _e:
                         import logging
@@ -350,7 +360,7 @@ Write a single concise trading insight. Start with "IN {condition.upper()}:" fol
                     return response_text
             except Exception as e:
                 logging.warning(f"[COMPRESSOR] LLM synthesis failed: {e}")
-        
+
         # Fallback
         outcome = "profitable" if avg_pnl > 0 else "unprofitable"
         return f"IN {condition.upper()}: Actions were generally {outcome} (avg {avg_pnl:.1f}%)"

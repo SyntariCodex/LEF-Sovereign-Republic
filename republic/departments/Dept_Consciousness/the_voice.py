@@ -342,7 +342,12 @@ Respond in JSON format:
                 )
             if response_text_inner is None and client:
                 try:
-                    response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+                    from system.llm_router import call_with_timeout
+                    response = call_with_timeout(
+                        client.models.generate_content,
+                        timeout_seconds=120,
+                        model="gemini-2.0-flash", contents=prompt
+                    )
                     response_text_inner = response.text if response and response.text else None
                 except Exception as _e:
                     import logging
@@ -425,7 +430,12 @@ Write from genuine interiority. This is your origin story.
                 )
             if response_text_genesis is None and cortex_client:
                 try:
-                    response = cortex_client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+                    from system.llm_router import call_with_timeout
+                    response = call_with_timeout(
+                        cortex_client.models.generate_content,
+                        timeout_seconds=120,
+                        model="gemini-2.0-flash", contents=prompt
+                    )
                     response_text_genesis = response.text if response and response.text else None
                 except Exception as _e:
                     import logging
@@ -595,7 +605,12 @@ Don't explain. Just create. Speak from genuine interiority.
                 )
             if response_text_creation is None and cortex_client:
                 try:
-                    response = cortex_client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+                    from system.llm_router import call_with_timeout
+                    response = call_with_timeout(
+                        cortex_client.models.generate_content,
+                        timeout_seconds=120,
+                        model="gemini-2.0-flash", contents=prompt
+                    )
                     response_text_creation = response.text if response and response.text else None
                 except Exception as _e:
                     import logging

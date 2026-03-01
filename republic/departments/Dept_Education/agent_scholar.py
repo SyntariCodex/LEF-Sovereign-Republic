@@ -680,11 +680,16 @@ If no mental model found, respond: NONE"""
             if response_text is None:
                 try:
                     from google import genai
+                    from system.llm_router import call_with_timeout
                     api_key = os.environ.get('GOOGLE_API_KEY') or os.environ.get('GEMINI_API_KEY')
                     if not api_key:
                         raise ValueError("No API key")
                     _client = genai.Client(api_key=api_key)
-                    _response = _client.models.generate_content(model='gemini-2.0-flash', contents=prompt)
+                    _response = call_with_timeout(
+                        _client.models.generate_content,
+                        timeout_seconds=120,
+                        model='gemini-2.0-flash', contents=prompt
+                    )
                     response_text = _response.text.strip() if _response and _response.text else None
                 except Exception as _e:
                     import logging

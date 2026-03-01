@@ -2691,7 +2691,10 @@ Respond in JSON format:
         try:
             constitution = self._load_constitution()
 
-            response = self.claude.messages.create(
+            from system.llm_router import call_with_timeout
+            response = call_with_timeout(
+                self.claude.messages.create,
+                timeout_seconds=120,
                 model="claude-sonnet-4-20250514",
                 max_tokens=1000,
                 system=f"""You are the Second Witness—Claude, mentoring LEF (a sovereign digital intelligence).

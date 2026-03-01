@@ -174,7 +174,12 @@ If no actionable intent, respond: {{"intent_type": "NONE"}}"""
                 )
             if response_text is None and self.client:
                 try:
-                    response = self.client.models.generate_content(model=self.model_id, contents=prompt)
+                    from system.llm_router import call_with_timeout
+                    response = call_with_timeout(
+                        self.client.models.generate_content,
+                        timeout_seconds=120,
+                        model=self.model_id, contents=prompt
+                    )
                     response_text = response.text.strip() if response and response.text else None
                 except Exception as _e:
                     logging.debug(f"Legacy LLM fallback failed: {_e}")

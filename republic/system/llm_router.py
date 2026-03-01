@@ -352,3 +352,46 @@ def get_router() -> LLMRouter:
         if _router_instance is None:
             _router_instance = LLMRouter()
     return _router_instance
+
+
+def call_with_timeout(fn, *args, timeout_seconds: int = 120, **kwargs):
+    """
+    Call any LLM API callable with a hard wall-clock timeout.
+
+    Wraps fn(*args, **kwargs) in a ThreadPoolExecutor so a hung network
+    connection cannot block the calling thread indefinitely.  Returns the
+    function's return value on success, or None on timeout / exception.
+
+    Usage (Gemini fallback):
+        response = call_with_timeout(
+            client.models.generate_content,
+            timeout_seconds=120,
+            model=model_id, contents=prompt
+        )
+        text = response.text.strip() if response and response.text else None
+
+    Usage (Claude fallback):
+        result = call_with_timeout(
+            client.messages.create,
+            timeout_seconds=120,
+            model=model_id, max_tokens=2048,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        text = result.content[0].text.strip() if result and result.content else None
+    """
+    try:
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(fn, *args, **kwargs)
+            return future.result(timeout=timeout_seconds)
+    except FuturesTimeoutError:
+        logger.warning(
+            "[LLMRouter] call_with_timeout: %s timed out after %ds",
+            getattr(fn, '__name__', str(fn)), timeout_seconds
+        )
+        return None
+    except Exception as e:
+        logger.warning(
+            "[LLMRouter] call_with_timeout: %s raised %s: %s",
+            getattr(fn, '__name__', str(fn)), type(e).__name__, e
+        )
+        return None
