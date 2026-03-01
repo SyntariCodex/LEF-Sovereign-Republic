@@ -52,3 +52,5 @@ Hackathon.txt
 
 # === NODE ===
 node_modules/
+.env
+republic/.env
