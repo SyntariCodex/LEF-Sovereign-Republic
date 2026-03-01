@@ -54,3 +54,5 @@ Hackathon.txt
 node_modules/
 .env
 republic/.env
+.env
+republic/.env
