@@ -42,7 +42,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Use centralized db_helper for connection pooling
 try:
-    from db.db_helper import db_connection, translate_sql
+    from db.db_helper import db_connection, translate_sql, table_exists
 except ImportError:
     from contextlib import contextmanager
     import sqlite3 as _sqlite3
@@ -188,12 +188,7 @@ class AgentCoinMgr:
             c = conn.cursor()
 
             # Check if table exists (backend-aware)
-            backend = os.getenv('DATABASE_BACKEND', 'sqlite')
-            if backend == 'postgresql':
-                c.execute("SELECT tablename FROM pg_tables WHERE tablename = 'market_universe'")
-            else:
-                c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='market_universe'")
-            if not c.fetchone():
+            if not table_exists(c, 'market_universe'):
                 logging.warning("[COIN_MGR] market_universe table not found. Creating skeleton.")
                 c.execute("""
                     CREATE TABLE IF NOT EXISTS market_universe (

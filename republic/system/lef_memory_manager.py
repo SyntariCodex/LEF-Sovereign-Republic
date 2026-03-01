@@ -18,6 +18,15 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
+try:
+    from db.db_helper import table_exists as _table_exists, translate_sql as _translate_sql
+except ImportError:
+    def _table_exists(cursor, table_name):  # noqa: E306
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+        return cursor.fetchone() is not None
+    def _translate_sql(sql):  # noqa: E306
+        return sql
+
 # Phase 43.3: Identity checkpoint integration
 try:
     from system.identity_checkpoint import get_checkpointer, check_and_recover_identity
@@ -234,11 +243,11 @@ def compile_self_summary(db_path=None) -> dict:
 
         # --- Consciousness status from consciousness_feed ---
         try:
-            cursor.execute("""
+            cursor.execute(_translate_sql("""
                 SELECT COUNT(*), GROUP_CONCAT(DISTINCT category)
                 FROM consciousness_feed
                 WHERE timestamp > ?
-            """, (six_hours_ago,))
+            """), (six_hours_ago,))
             row = cursor.fetchone()
             feed_count = row[0] if row else 0
             categories = row[1] if row else ""

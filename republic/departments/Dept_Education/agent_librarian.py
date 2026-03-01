@@ -20,8 +20,11 @@ from datetime import datetime
 
 # Use centralized db_helper for connection pooling
 try:
-    from db.db_helper import db_connection
+    from db.db_helper import db_connection, table_exists
 except ImportError:
+    def table_exists(cursor, table_name):  # noqa: E306
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+        return cursor.fetchone() is not None
     from contextlib import contextmanager
     import sqlite3 as _sqlite3
     @contextmanager
@@ -256,8 +259,7 @@ class AgentLibrarian:
                 c = conn.cursor()
                 
                 # Check if compressed_wisdom table exists
-                c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='compressed_wisdom'")
-                if not c.fetchone():
+                if not table_exists(c, 'compressed_wisdom'):
                     return
                 
                 # Fetch all wisdom entries

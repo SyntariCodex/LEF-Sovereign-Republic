@@ -26,7 +26,7 @@ import os
 
 # Use centralized db_helper for connection pooling
 try:
-    from db.db_helper import db_connection, translate_sql
+    from db.db_helper import db_connection, translate_sql, table_exists, is_postgresql
 except ImportError:
     from contextlib import contextmanager
     import sqlite3 as _sqlite3
@@ -1689,11 +1689,10 @@ class CoinbaseAgent(IntentListenerMixin):
                     
                     # Check tables (backend-aware)
                     import os as _os
-                    _backend = _os.getenv('DATABASE_BACKEND', 'sqlite')
-                    if _backend == 'postgresql':
+                    if is_postgresql():
                         cursor_debug.execute("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
                     else:
-                        cursor_debug.execute("SELECT name FROM sqlite_master WHERE type='table';")
+                        cursor_debug.execute("SELECT name FROM sqlite_master WHERE type='table'")
                     tables = cursor_debug.fetchall()
                     SafeLogger.info(f"DEBUG: Tables found: {[t[0] for t in tables]}")
                     

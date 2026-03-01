@@ -15,6 +15,13 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
+try:
+    from db.db_helper import table_exists as _table_exists
+except ImportError:
+    def _table_exists(cursor, table_name):  # noqa: E306
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+        return cursor.fetchone() is not None
+
 # Path Discovery
 BASE_DIR = Path(__file__).parent.parent
 DB_PATH = os.getenv('DB_PATH', str(BASE_DIR / 'republic.db'))
@@ -169,8 +176,7 @@ class HippocampusHealth:
             c = conn.cursor()
             
             # Check if table exists
-            c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='compressed_wisdom'")
-            if not c.fetchone():
+            if not _table_exists(c, 'compressed_wisdom'):
                 result["issues"].append("compressed_wisdom table not found")
                 conn.close()
                 return result

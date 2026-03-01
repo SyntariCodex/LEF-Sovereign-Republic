@@ -72,6 +72,37 @@ def is_postgresql() -> bool:
     return DATABASE_BACKEND == 'postgresql'
 
 
+def table_exists(cursor, table_name: str) -> bool:
+    """
+    Cross-DB table existence check. Auto-detects cursor type:
+    - psycopg2 cursor  → information_schema.tables (PostgreSQL)
+    - sqlite3 cursor   → sqlite_master (SQLite)
+
+    Safe to call on any cursor without knowing the backend. Replaces all
+    bare 'SELECT name FROM sqlite_master' table-existence patterns.
+
+    Usage:
+        from db.db_helper import table_exists
+        if not table_exists(cursor, 'my_table'):
+            return  # table not created yet
+    """
+    try:
+        if 'psycopg2' in getattr(type(cursor), '__module__', ''):
+            cursor.execute(
+                "SELECT 1 FROM information_schema.tables "
+                "WHERE table_schema = 'public' AND table_name = %s",
+                (table_name,)
+            )
+        else:
+            cursor.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+                (table_name,)
+            )
+        return cursor.fetchone() is not None
+    except Exception:
+        return False
+
+
 def translate_sql(sql: str) -> str:
     """
     Translate SQLite-specific SQL to PostgreSQL-compatible SQL.

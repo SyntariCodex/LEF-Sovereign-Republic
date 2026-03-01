@@ -18,8 +18,11 @@ from pathlib import Path
 
 # Use centralized db_helper for connection pooling
 try:
-    from db.db_helper import db_connection
+    from db.db_helper import db_connection, table_exists
 except ImportError:
+    def table_exists(cursor, table_name):  # noqa: E306
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+        return cursor.fetchone() is not None
     from contextlib import contextmanager
     import sqlite3 as _sqlite3
     @contextmanager
@@ -143,8 +146,7 @@ class AgentInfo:
             with db_connection(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
                 c = conn.cursor()
-                c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='strategic_targets'")
-                if not c.fetchone(): return # No targets yet
+                if not table_exists(c, 'strategic_targets'): return  # No targets yet
                 
                 c.execute("SELECT address FROM strategic_targets")
                 targets = [r['address'] for r in c.fetchall()]

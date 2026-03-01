@@ -25,6 +25,13 @@ import os
 from datetime import datetime, timedelta
 from typing import Dict, Optional
 
+try:
+    from db.db_helper import table_exists as _table_exists
+except ImportError:
+    def _table_exists(cursor, table_name):  # noqa: E306
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+        return cursor.fetchone() is not None
+
 # Path setup
 from pathlib import Path
 BASE_DIR = Path(__file__).parent.parent
@@ -172,8 +179,7 @@ class EmotionalGate:
             c = conn.cursor()
             
             # Check if table exists
-            c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='lef_monologue'")
-            if not c.fetchone():
+            if not _table_exists(c, 'lef_monologue'):
                 conn.close()
                 return []
             
@@ -227,8 +233,7 @@ class EmotionalGate:
             conn = sqlite3.connect(self.db_path, timeout=30.0)
             c = conn.cursor()
             
-            c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='book_of_scars'")
-            if not c.fetchone():
+            if not _table_exists(c, 'book_of_scars'):
                 conn.close()
                 return []
             
@@ -320,8 +325,7 @@ class EmotionalGate:
             c = conn.cursor()
 
             # Check if system_state table exists
-            c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='system_state'")
-            if not c.fetchone():
+            if not _table_exists(c, 'system_state'):
                 conn.close()
                 return
 
@@ -358,8 +362,7 @@ class EmotionalGate:
             c = conn.cursor()
 
             # Ensure system_state exists
-            c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='system_state'")
-            if c.fetchone():
+            if _table_exists(c, 'system_state'):
                 c.execute(
                     "INSERT OR REPLACE INTO system_state (key, value) VALUES (?, ?)",
                     ('emotional_state', json.dumps(snapshot))

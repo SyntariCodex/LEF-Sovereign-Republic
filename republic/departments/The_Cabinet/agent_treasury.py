@@ -16,7 +16,7 @@ from utils.notifier import Notifier
 
 # Use centralized db_helper for connection pooling
 try:
-    from db.db_helper import db_connection, translate_sql
+    from db.db_helper import db_connection, translate_sql, table_exists
 except ImportError:
     from contextlib import contextmanager
     import sqlite3 as _sqlite3
@@ -411,12 +411,7 @@ class AgentTreasury:
             with db_connection(self.db_path) as conn:
                 c = conn.cursor()
                 # Check if table exists (backend-aware)
-                backend = os.getenv('DATABASE_BACKEND', 'sqlite')
-                if backend == 'postgresql':
-                    c.execute("SELECT tablename FROM pg_tables WHERE tablename = 'trade_signals'")
-                else:
-                    c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='trade_signals'")
-                if not c.fetchone(): return
+                if not table_exists(c, 'trade_signals'): return
 
                 c.execute("SELECT rowid, source, target, signal_type, token FROM trade_signals")
                 signals = c.fetchall()
