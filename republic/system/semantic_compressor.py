@@ -21,10 +21,12 @@ from contextlib import contextmanager
 
 # Phase 12.H7: Use centralized db_helper for PG-compatible connections
 try:
-    from db.db_helper import db_connection as _db_connection
+    from db.db_helper import db_connection as _db_connection, translate_sql
     _USE_DB_HELPER = True
 except ImportError:
     _USE_DB_HELPER = False
+    def translate_sql(sql: str) -> str:  # noqa: E306
+        return sql
 
 # Try to import Google GenAI for compression
 try:
@@ -143,22 +145,39 @@ class SemanticCompressor:
         """
         conn = self._get_connection()
         try:
-            # Find repeated failure patterns
-            cursor = conn.execute("""
-                SELECT failure_type, asset, lesson, COUNT(*) as count,
-                       GROUP_CONCAT(id) as source_ids
-                FROM book_of_scars
-                WHERE id NOT IN (
-                    SELECT CAST(value AS INTEGER) 
-                    FROM json_each(
-                        (SELECT COALESCE(GROUP_CONCAT(source_ids), '[]') 
-                         FROM compressed_wisdom 
-                         WHERE source_type = 'book_of_scars')
-                    )
-                )
-                GROUP BY failure_type, asset
-                HAVING COUNT(*) >= ?
-            """, (min_repeats,))
+            # Get already-compressed IDs in Python — avoids json_each (SQLite-only function)
+            already_compressed: set = set()
+            prev = conn.execute(translate_sql(
+                "SELECT source_ids FROM compressed_wisdom WHERE source_type = 'book_of_scars'"
+            ))
+            for row in prev.fetchall():
+                ids_val = row['source_ids'] if hasattr(row, 'keys') else row[0]
+                if ids_val:
+                    for id_str in str(ids_val).split(','):
+                        try:
+                            already_compressed.add(int(id_str.strip()))
+                        except ValueError:
+                            pass
+
+            # Find repeated failure patterns not yet compressed
+            if already_compressed:
+                ph = ','.join(['?'] * len(already_compressed))
+                cursor = conn.execute(translate_sql(f"""
+                    SELECT failure_type, asset, lesson, COUNT(*) as count,
+                           GROUP_CONCAT(id) as source_ids
+                    FROM book_of_scars
+                    WHERE id NOT IN ({ph})
+                    GROUP BY failure_type, asset
+                    HAVING COUNT(*) >= ?
+                """), (*already_compressed, min_repeats))
+            else:
+                cursor = conn.execute(translate_sql("""
+                    SELECT failure_type, asset, lesson, COUNT(*) as count,
+                           GROUP_CONCAT(id) as source_ids
+                    FROM book_of_scars
+                    GROUP BY failure_type, asset
+                    HAVING COUNT(*) >= ?
+                """), (min_repeats,))
             
             patterns = cursor.fetchall()
             wisdom_created = 0
@@ -253,22 +272,38 @@ FAILURE PATTERN:
         conn = self._get_connection()
         try:
             cutoff = datetime.now() - timedelta(hours=window_hours)
-            
+
+            # Get already-compressed IDs in Python — avoids json_each (SQLite-only function)
+            already_compressed: set = set()
+            prev = conn.execute(translate_sql(
+                "SELECT source_ids FROM compressed_wisdom WHERE source_type = 'memory_experiences'"
+            ))
+            for row in prev.fetchall():
+                ids_val = row['source_ids'] if hasattr(row, 'keys') else row[0]
+                if ids_val:
+                    for id_str in str(ids_val).split(','):
+                        try:
+                            already_compressed.add(int(id_str.strip()))
+                        except ValueError:
+                            pass
+
             # Get recent unprocessed experiences
-            cursor = conn.execute("""
-                SELECT id, scenario_name, market_condition, action_taken, 
-                       outcome_pnl_pct, outcome_desc
-                FROM memory_experiences
-                WHERE timestamp > ?
-                AND id NOT IN (
-                    SELECT CAST(value AS INTEGER)
-                    FROM json_each(
-                        (SELECT COALESCE(GROUP_CONCAT(source_ids), '[]')
-                         FROM compressed_wisdom
-                         WHERE source_type = 'memory_experiences')
-                    )
-                )
-            """, (cutoff.isoformat(),))
+            if already_compressed:
+                ph = ','.join(['?'] * len(already_compressed))
+                cursor = conn.execute(translate_sql(f"""
+                    SELECT id, scenario_name, market_condition, action_taken,
+                           outcome_pnl_pct, outcome_desc
+                    FROM memory_experiences
+                    WHERE timestamp > ?
+                    AND id NOT IN ({ph})
+                """), (cutoff.isoformat(), *already_compressed))
+            else:
+                cursor = conn.execute(translate_sql("""
+                    SELECT id, scenario_name, market_condition, action_taken,
+                           outcome_pnl_pct, outcome_desc
+                    FROM memory_experiences
+                    WHERE timestamp > ?
+                """), (cutoff.isoformat(),))
             
             experiences = cursor.fetchall()
             
