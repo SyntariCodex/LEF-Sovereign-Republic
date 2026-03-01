@@ -21,13 +21,14 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        if [ -f fulcrum/requirements.txt ]; then pip install -r fulcrum/requirements.txt; fi
-        
+        pip install pytest
+        if [ -f republic/requirements.txt ]; then pip install -r republic/requirements.txt; fi
+
     - name: Run Tests
       # We add the current directory to PYTHONPATH so local imports work
       run: |
         export PYTHONPATH=$PYTHONPATH:.
-        pytest tests/ -v
+        pytest republic/tests/ -v
         
   docker-build:
     runs-on: ubuntu-latest
