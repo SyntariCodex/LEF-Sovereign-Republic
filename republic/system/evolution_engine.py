@@ -774,6 +774,31 @@ class EvolutionEngine:
         key_path = proposal.get('config_key', '')
         new_value = proposal.get('new_value')
 
+        # Phase 51.1: Hard ceiling for consciousness_feed max_items — governance cannot exceed it
+        if new_value is not None and 'max_items' in str(key_path).lower():
+            try:
+                import json as _ceiling_json
+                import os as _ceiling_os
+                _cfg_abs = str(PROJECT_DIR / 'config' / 'config.json')
+                with open(_cfg_abs) as _ceiling_f:
+                    _ceiling_cfg = _ceiling_json.load(_ceiling_f)
+                _ceiling = int(
+                    _ceiling_cfg.get('agents', {})
+                               .get('consciousness_feed', {})
+                               .get('max_items_ceiling', 30)
+                )
+                _int_val = int(new_value)
+                if _int_val > _ceiling:
+                    logger.warning(
+                        "[EVOLUTION] 🚧 Consciousness ceiling: %s requested %d "
+                        "but architectural ceiling is %d. Capping.",
+                        key_path, _int_val, _ceiling
+                    )
+                    new_value = _ceiling
+                    proposal['new_value'] = _ceiling
+            except Exception:
+                pass  # ceiling check is best-effort; don't block enactment
+
         if not config_path or not key_path:
             logger.error(f"[EVOLUTION] Missing config_path or config_key in proposal {proposal.get('id')}")
             return False

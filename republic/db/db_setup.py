@@ -670,6 +670,24 @@ def init_db(db_path=None):
     # Phase 21.1b: Composite index for consciousness_feed cleanup queries
     c.execute("CREATE INDEX IF NOT EXISTS idx_cf_cleanup ON consciousness_feed(consumed, timestamp, category)")
 
+    # Phase 51.1: Consciousness Archive — long-term store for rotated entries
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS consciousness_archive (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            original_id INTEGER NOT NULL,
+            agent_name TEXT NOT NULL,
+            content TEXT NOT NULL,
+            category TEXT DEFAULT 'reflection',
+            original_timestamp TEXT,
+            signal_weight REAL DEFAULT 0.5,
+            signal_vector TEXT DEFAULT '{}',
+            archived_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    c.execute("CREATE INDEX IF NOT EXISTS idx_ca_agent ON consciousness_archive(agent_name)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_ca_category ON consciousness_archive(category)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_ca_original_ts ON consciousness_archive(original_timestamp)")
+
     # Phase 21.1c: Indexes for agent_logs (high-volume table, needs fast queries)
     c.execute("CREATE INDEX IF NOT EXISTS idx_agent_logs_source ON agent_logs(source)")
     c.execute("CREATE INDEX IF NOT EXISTS idx_agent_logs_level ON agent_logs(level)")

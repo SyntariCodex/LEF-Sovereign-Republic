@@ -125,6 +125,10 @@ class Brainstem:
         self._gap_report_counter = 0
         self._GAP_REPORT_INTERVAL = 60  # scans between gap summaries
 
+        # Phase 51.1: Consciousness feed rotation counter (runs every 60 scans ≈ 30 min)
+        self._janitor_counter = 0
+        self._JANITOR_INTERVAL = 60
+
         # Register self
         _brainstem_instance = self
 
@@ -792,6 +796,16 @@ class Brainstem:
         except Exception as e:
             logger.debug("[BRAINSTEM] Gap awareness report failed (non-fatal): %s", e)
 
+    def _run_consciousness_janitor(self):
+        """Phase 51.1: Archive old consumed consciousness_feed entries (non-fatal)."""
+        try:
+            from system.consciousness_janitor import archive_old_entries
+            archive_old_entries()
+        except ImportError:
+            pass
+        except Exception as e:
+            logger.debug("[BRAINSTEM] Consciousness janitor failed (non-fatal): %s", e)
+
     def _scan(self):
         """Run a single Brainstem scan cycle."""
         self._check_heartbeats()
@@ -805,6 +819,12 @@ class Brainstem:
         if self._gap_report_counter >= self._GAP_REPORT_INTERVAL:
             self._gap_report_counter = 0
             self._report_gap_awareness()
+
+        # Phase 51.1: Consciousness feed rotation
+        self._janitor_counter += 1
+        if self._janitor_counter >= self._JANITOR_INTERVAL:
+            self._janitor_counter = 0
+            self._run_consciousness_janitor()
 
     def _immortal_loop(self):
         """

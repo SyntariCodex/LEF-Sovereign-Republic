@@ -38,7 +38,12 @@
   "agents": {
     "sentinel_scan_interval": 10,
     "master_listen_interval": 0.5,
-    "coinbase_queue_check_interval": 5
+    "coinbase_queue_check_interval": 5,
+    "consciousness_feed": {
+      "max_items": 15,
+      "max_items_ceiling": 30,
+      "archive_after_days": 7
+    }
   },
   "trading_mode": {
     "current": "paper",

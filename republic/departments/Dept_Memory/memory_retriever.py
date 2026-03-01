@@ -321,9 +321,31 @@ class MemoryRetriever:
         except Exception:
             return ""
     
-    def _build_consciousness_feed(self, max_items: int = 5) -> Optional[str]:
+    def _build_consciousness_feed(self, max_items: int = None) -> Optional[str]:
         """Retrieve recent unconsumed consciousness outputs for prompt injection.
-        Phase 33.6: Redis cache with 1-hour TTL for conversation context."""
+        Phase 33.6: Redis cache with 1-hour TTL for conversation context.
+        Phase 51.1: Diversity sampler — stratified by category, max_items from config.
+        """
+
+        # Phase 51.1: Read max_items from config (governance-tunable, ceiling-guarded)
+        if max_items is None:
+            try:
+                import json as _json
+                import os as _os
+                _cfg_path = _os.path.join(
+                    _os.path.dirname(_os.path.dirname(_os.path.dirname(
+                        _os.path.abspath(__file__)))),
+                    'config', 'config.json'
+                )
+                with open(_cfg_path) as _f:
+                    _cfg = _json.load(_f)
+                max_items = int(
+                    _cfg.get('agents', {})
+                        .get('consciousness_feed', {})
+                        .get('max_items', 15)
+                )
+            except Exception:
+                max_items = 15
 
         # Phase 33.6: Try Redis cache first
         cache_key = "conv_mem:consciousness_feed:recent"
@@ -336,29 +358,86 @@ class MemoryRetriever:
                 pass
 
         try:
-            from db.db_helper import db_connection, get_db_path
+            from db.db_helper import db_connection, get_db_path, translate_sql, is_postgresql
 
             db_path = get_db_path()
 
             with db_connection(db_path) as conn:
                 cursor = conn.cursor()
 
-                # Check if table exists
-                cursor.execute("""
-                    SELECT name FROM sqlite_master
-                    WHERE type='table' AND name='consciousness_feed'
-                """)
+                # Cross-DB table existence check (sqlite_master is SQLite-only)
+                if is_postgresql():
+                    cursor.execute(
+                        "SELECT 1 FROM information_schema.tables "
+                        "WHERE table_name = 'consciousness_feed'"
+                    )
+                else:
+                    cursor.execute(
+                        "SELECT name FROM sqlite_master "
+                        "WHERE type='table' AND name='consciousness_feed'"
+                    )
                 if not cursor.fetchone():
                     return None
 
-                cursor.execute("""
-                    SELECT id, agent_name, content, category, timestamp
-                    FROM consciousness_feed
-                    WHERE consumed = 0
-                    ORDER BY timestamp DESC
-                    LIMIT ?
-                """, (max_items,))
-                rows = cursor.fetchall()
+                # Phase 51.1: Diversity-stratified sampling
+                # Get distinct categories with unconsumed entries
+                cursor.execute(translate_sql(
+                    "SELECT DISTINCT category FROM consciousness_feed WHERE consumed = 0"
+                ))
+                categories = [r[0] for r in cursor.fetchall()]
+
+                rows = []
+                if len(categories) > 1:
+                    # Allocate slots evenly across categories, favour high signal_weight
+                    slots_per_cat = max(1, max_items // len(categories))
+                    remaining = max_items
+
+                    for cat in categories:
+                        if remaining <= 0:
+                            break
+                        take = min(slots_per_cat, remaining)
+                        cursor.execute(translate_sql("""
+                            SELECT id, agent_name, content, category, timestamp
+                            FROM consciousness_feed
+                            WHERE consumed = 0 AND category = ?
+                            ORDER BY signal_weight DESC, timestamp DESC
+                            LIMIT ?
+                        """), (cat, take))
+                        cat_rows = cursor.fetchall()
+                        rows.extend(cat_rows)
+                        remaining -= len(cat_rows)
+
+                    # Fill any remaining budget with freshest unread entries not yet picked
+                    if remaining > 0:
+                        seen_ids = [r[0] for r in rows]
+                        if seen_ids:
+                            ph = ','.join(['?'] * len(seen_ids))
+                            cursor.execute(translate_sql(f"""
+                                SELECT id, agent_name, content, category, timestamp
+                                FROM consciousness_feed
+                                WHERE consumed = 0 AND id NOT IN ({ph})
+                                ORDER BY timestamp DESC
+                                LIMIT ?
+                            """), (*seen_ids, remaining))
+                        else:
+                            cursor.execute(translate_sql("""
+                                SELECT id, agent_name, content, category, timestamp
+                                FROM consciousness_feed
+                                WHERE consumed = 0
+                                ORDER BY timestamp DESC
+                                LIMIT ?
+                            """), (remaining,))
+                        rows.extend(cursor.fetchall())
+                else:
+                    # Single category or empty table — simple top-N by recency
+                    cursor.execute(translate_sql("""
+                        SELECT id, agent_name, content, category, timestamp
+                        FROM consciousness_feed
+                        WHERE consumed = 0
+                        ORDER BY timestamp DESC
+                        LIMIT ?
+                    """), (max_items,))
+                    rows = cursor.fetchall()
 
                 if not rows:
                     return None
@@ -371,13 +450,15 @@ class MemoryRetriever:
                     ids.append(row_id)
 
                 # Mark as consumed
-                placeholders = ','.join('?' * len(ids))
+                ph = ','.join(['?'] * len(ids))
                 cursor.execute(
-                    f"UPDATE consciousness_feed SET consumed = 1 WHERE id IN ({placeholders})",
+                    translate_sql(
+                        f"UPDATE consciousness_feed SET consumed = 1 WHERE id IN ({ph})"
+                    ),
                     ids
                 )
                 conn.commit()
-                
+
                 result = "\n\n".join(sections)
 
                 # Phase 33.6: Cache in Redis with 1-hour TTL
