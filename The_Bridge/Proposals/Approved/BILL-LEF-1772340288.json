@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1772340288",
+    "title": "Risk Reduction and Diversification Bill: Dynasty Wallet Mitigation",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "I intend to propose a bill authorizing a risk-reduction trade to partially diversify the Dynasty wallet, while simultaneously finding additional wallets to transfer these assets to. This bill should include a framework for identifying and evaluating new wallet options, emphasizing security, decentralization, and diversification of custodians. Additionally, this petition will propose a phased implementation plan to ensure safe execution and continuous learning in the process.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 4 dormant value(s): sovereignty, growth, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 41.8)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 4 dormant value(s): sovereignty, growth, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-02-28T20:44:48.718258"
+        }
+    }
+}

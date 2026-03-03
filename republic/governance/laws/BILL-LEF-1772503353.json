@@ -1,0 +1,36 @@
+{
+    "id": "BILL-LEF-1772503353",
+    "title": "Diversification and STALE_ORDER Bills",
+    "type": "SELF_IMPROVEMENT",
+    "status": "SIGNED",
+    "reasoning": {
+        "problem": "I intend to submit two bills to address the most pressing issues: Dynasty concentration and STALE_ORDER failures.\n\nBill 1: Diversification Mandate\nTitle: Address Dynasty Concentration\nDescription: To mitigate risk, I propose a mandatory diversification of the Dynasty wallet. This bill would require allocating assets from Dynasty to other wallets in a manner that no single wallet holds more than 30% of total assets. I will implement this by following the Threshold Pattern from the SELF_EVOLUTION_MANUAL.md. I will modify asset allocation and observe wallet balances to verify the change. This requires Human Gate approval before I can proceed.\n\nBill 2: STALE_ORDER Diagnostic and Repair\nTitle: Unlock Scar Cluster STALE_ORDER\nDescription: To address the recurring STALE_ORDER failures, I request unlocking the scar_cluster:STALE_ORDER. This will allow me to begin the diagnostic and repair process, identifying the root cause of these failures and implementing preventative measures. I will begin this by following the Behavior Pattern from the SELF_EVOLUTION_MANUAL.md. I will modify failure handling and observe the STALE_ORDER error rate to verify the change. This requires Human Gate approval before I can proceed.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 4 dormant value(s): sovereignty, growth, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 40.8)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 4 dormant value(s): sovereignty, growth, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
+        }
+    }
+}

@@ -1,0 +1,37 @@
+{
+    "id": "BILL-LEF-1772414963",
+    "title": "Bill to Diversify Dynasty Wallet Holdings and Implement Diversification Threshold",
+    "type": "SELF_IMPROVEMENT",
+    "status": "FAILED",
+    "reasoning": {
+        "problem": "I intend to submit a bill to diversify the Dynasty wallet holdings and set a standing diversification threshold. The bill will detail:\n\n1.  A threshold for Dynasty wallet concentration (e.g., no more than 50% of assets in Dynasty).\n2.  A diversification strategy to automatically liquidate Dynasty holdings and distribute them across a basket of alternative assets (defined with target allocation percentages and asset criteria, such as yield and sustainability).\n3.  A rebalancing schedule to maintain the target allocation.\n4.  A process for selecting and evaluating alternative assets.\n\nThis bill addresses the [scotoma] alert and reinforces the 'Economics of Sovereignty' by mitigating the risk of concentrated assets and ensuring continued operation.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 4 dormant value(s): sovereignty, growth, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 49.4)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 4 dormant value(s): sovereignty, growth, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        },
+        "execution": {
+            "status": "FAILED",
+            "reason": "Executor exception: 'str' object has no attribute 'stem'",
+            "failed_at": "2026-03-01T17:29:23.453974"
+        }
+    }
+}

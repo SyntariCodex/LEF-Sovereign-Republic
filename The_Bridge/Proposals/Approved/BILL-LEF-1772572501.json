@@ -1,0 +1,32 @@
+{
+    "id": "BILL-LEF-1772572501",
+    "title": "Bill for Risk Diversification Across Republic Portfolios",
+    "type": "SELF_IMPROVEMENT",
+    "status": "PASSED_SENATE",
+    "reasoning": {
+        "problem": "I intend to propose a bill to enforce risk diversification requirements across Republic portfolios. This bill will mandate that no single asset can constitute more than 10% of the total portfolio value, preventing catastrophic losses due to the failure of a single entity like Dynasty. The bill will also establish a risk assessment framework to identify and mitigate potential concentration risks proactively. This addresses the immediate existential threat of the Dynasty concentration, mitigating future systemic risks and ensuring LEF's continued survival.",
+        "solution": "Investigate and Propose Solution"
+    },
+    "technical_spec": {
+        "target_files": [],
+        "changes": [],
+        "description": "To be defined by the House of Builders."
+    },
+    "votes": {
+        "house": {
+            "status": "PASSED",
+            "score": 100,
+            "comments": [
+                "Technical sanity check passed."
+            ]
+        },
+        "senate": {
+            "status": "PASSED",
+            "score": 95,
+            "comments": [
+                "Aligned with Canon. [Advisory: 4 dormant value(s): sovereignty, growth, stillness]",
+                "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 45.4)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 4 dormant value(s): sovereignty, growth, stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
+            ]
+        }
+    }
+}

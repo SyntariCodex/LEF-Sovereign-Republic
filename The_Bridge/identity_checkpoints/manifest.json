@@ -1,42 +1,6 @@
 {
   "checkpoints": [
     {
-      "version": 3,
-      "hash": "007d943f30487139cab1692a41e120e5b17129242ee17426326ac1076865001e",
-      "filename": "identity_checkpoint_v3.json",
-      "created_at": "2026-02-21T16:32:13.191580"
-    },
-    {
-      "version": 4,
-      "hash": "fecd0ba8c83a1c624f1e13f591b423ce878ca1860621522dd01c085e94efeefc",
-      "filename": "identity_checkpoint_v4.json",
-      "created_at": "2026-02-22T08:21:56.227610"
-    },
-    {
-      "version": 5,
-      "hash": "b6ec4e46b731d848f29d033c413d6e71b2db1c7c594007332ff148610bbefe97",
-      "filename": "identity_checkpoint_v5.json",
-      "created_at": "2026-02-23T23:08:54.135216"
-    },
-    {
-      "version": 6,
-      "hash": "97f08b1e4dc3a2f6553137356665042150d07a76f52e4b1b664cf9d518e21501",
-      "filename": "identity_checkpoint_v6.json",
-      "created_at": "2026-02-24T10:24:03.030186"
-    },
-    {
-      "version": 7,
-      "hash": "046ebe898be0af07531228168a9420070a85ff2db96f4eaee2cce0cceb45b68e",
-      "filename": "identity_checkpoint_v7.json",
-      "created_at": "2026-02-24T21:09:25.149935"
-    },
-    {
-      "version": 8,
-      "hash": "82cbea5b0fb2508bac91d466caf15c151969426d6b3d5b688eef8ce1cb7f41f7",
-      "filename": "identity_checkpoint_v8.json",
-      "created_at": "2026-02-25T08:41:31.970527"
-    },
-    {
       "version": 9,
       "hash": "85d63c5710ebfcf1b9f44fb05b102542e63ccd35a6b89c5ad5dae99560c4dad4",
       "filename": "identity_checkpoint_v9.json",
@@ -59,6 +23,42 @@
       "hash": "c35cd50c75ed4172dbd12191a3a077d6c466ea2f736ed68ba10629bc0225570e",
       "filename": "identity_checkpoint_v12.json",
       "created_at": "2026-02-27T18:40:55.633003"
+    },
+    {
+      "version": 13,
+      "hash": "9a9c97380c9a54c12d9bf73e20ee6b610154cc4a55009a0fe02ab00414dbf184",
+      "filename": "identity_checkpoint_v13.json",
+      "created_at": "2026-02-28T18:36:40.957995"
+    },
+    {
+      "version": 14,
+      "hash": "1a32333bd8a4fb9c39c34630468af5a1adba8371503d51c5d513f9299617f662",
+      "filename": "identity_checkpoint_v14.json",
+      "created_at": "2026-03-01T08:01:58.687026"
+    },
+    {
+      "version": 15,
+      "hash": "6dcd30cec03e251415dcb5c640ffce5bf6bab2c76034369a50cfb67f52cf30b7",
+      "filename": "identity_checkpoint_v15.json",
+      "created_at": "2026-03-01T20:02:44.134386"
+    },
+    {
+      "version": 16,
+      "hash": "b810ebaeea05426292d4d7e8168ff173415a1143b91cada47b7c51ecddacea8c",
+      "filename": "identity_checkpoint_v16.json",
+      "created_at": "2026-03-02T09:42:21.118971"
+    },
+    {
+      "version": 17,
+      "hash": "a535ff5aa3a324abf0b3e088cb32c36ab72c8fb7b01a93eb6a34548c12613964",
+      "filename": "identity_checkpoint_v17.json",
+      "created_at": "2026-03-02T23:31:31.039391"
+    },
+    {
+      "version": 18,
+      "hash": "5a9748ecdfe528ad51098b52552d15c164d6c4f8ae2ce2ce49628d72c62e0f83",
+      "filename": "identity_checkpoint_v18.json",
+      "created_at": "2026-03-03T12:20:58.601759"
     }
   ]
 }
