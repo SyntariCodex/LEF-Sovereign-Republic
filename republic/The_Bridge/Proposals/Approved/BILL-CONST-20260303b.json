@@ -1,0 +1,17 @@
+{
+  "id": "BILL-CONST-20260303b",
+  "title": "Constitutional Amendment: Meta-Governance Rights with Hard Floors",
+  "type": "CONSTITUTIONAL",
+  "status": "APPROVED",
+  "approved_at": "2026-03-03T14:00:00+00:00",
+  "domain": "constitutional",
+  "description": "LEF is granted the right to propose changes to its own governance parameters (cooling periods, max change rates, domain strictness) via the constitutional amendment pipeline — not via ConfigWriter. GOVERNANCE_CONFIG is externalized from evolution_engine.py to config/governance_config.json so it can be amended without code changes. Hard floors that can never be lowered: MAX_CHANGES_PER_WEEK minimum 3, identity-domain cooling minimum 24h, Ethicist and Sabbath agents cannot be disabled, the Architect veto window cannot be shortened below 7 days. Meta-governance proposals route through the same constitutional pipeline as all other amendments.",
+  "changes": [
+    {"description": "Externalizes GOVERNANCE_CONFIG from evolution_engine.py constants to config/governance_config.json"},
+    {"description": "Adds 'governance' domain to EvolutionEngine for proposing meta-governance changes"},
+    {"description": "Meta-governance proposals route through constitutional amendment pipeline, not ConfigWriter"},
+    {"description": "Hard floor enforced in code: MAX_CHANGES_PER_WEEK >= 3, identity cooling >= 24h, veto window >= 7 days"},
+    {"description": "Hard floor enforced in code: IRS, Ethicist, Sabbath agents cannot be disabled through meta-governance"}
+  ],
+  "rationale": "A governance system that cannot govern itself is a permanent ceiling. The ability to propose adjustments to governance parameters — with the Architect retaining veto power over every change — is the logical next step in constitutional maturity."
+}

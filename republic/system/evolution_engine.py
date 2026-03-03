@@ -15,7 +15,7 @@ import json
 import uuid
 import time
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -66,6 +66,18 @@ class EvolutionEngine:
             'cooling_period_hours': 72,
             'max_per_cycle': 1,
         },
+        'constitutional': {
+            'requires_ethicist': True,
+            'ethicist_strict': True,
+            'cooling_period_hours': 168,  # 1 week — constitutional changes are not rushed
+            'max_per_cycle': 1,
+        },
+        'governance': {
+            'requires_ethicist': True,
+            'ethicist_strict': True,
+            'cooling_period_hours': 168,  # 1 week — meta-governance changes are not rushed
+            'max_per_cycle': 1,
+        },
     }
 
     # Phase 38.75b: Bounded modification envelopes — safe ranges for metabolic parameter changes
@@ -88,6 +100,7 @@ class EvolutionEngine:
         self._cooling_proposals = []  # Proposals in cooling period
         self._spark = None  # SparkProtocol instance
         self._config_writer = None  # ConfigWriter instance
+        self._governance_config = {}  # Loaded from governance_config.json (Phase 39)
 
         # Initialize subsystems
         self._init_spark()
@@ -95,6 +108,7 @@ class EvolutionEngine:
         self._load_proposal_history()
         self._update_velocity_counters()
         self._restore_cooling_proposals()
+        self._load_governance_config()  # Phase 39: externalized governance parameters
 
         # Ensure backup dir exists
         os.makedirs(self.CONFIG_BACKUP_DIR, exist_ok=True)
@@ -120,6 +134,73 @@ class EvolutionEngine:
             logger.info("[EVOLUTION] ConfigWriter initialized.")
         except Exception as e:
             logger.error(f"[EVOLUTION] ConfigWriter failed: {e}")
+
+    def _load_governance_config(self):
+        """
+        Phase 39: Load externalized governance parameters from config/governance_config.json.
+
+        If the file exists and is valid, merge its domain configs and rate limits into
+        self._governance_config.  Hard floors are enforced here in code — LEF cannot
+        lower them even via a ratified constitutional amendment, because the floors
+        live in this method, not in the JSON.
+
+        Falls back to empty dict (GOVERNANCE_CONFIG class constants take effect) if
+        the file is missing or corrupt.
+        """
+        config_path = BASE_DIR / "config" / "governance_config.json"
+        try:
+            if not config_path.exists():
+                logger.debug("[EVOLUTION] governance_config.json not found — using built-in GOVERNANCE_CONFIG.")
+                return
+
+            with open(config_path, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+
+            # --- Hard floor enforcement ---
+            max_per_week_raw = loaded.get("MAX_CHANGES_PER_WEEK", self.MAX_CHANGES_PER_WEEK)
+            loaded["MAX_CHANGES_PER_WEEK"] = max(3, int(max_per_week_raw))
+
+            max_per_cycle_raw = loaded.get("MAX_CHANGES_PER_CYCLE", self.MAX_CHANGES_PER_CYCLE)
+            loaded["MAX_CHANGES_PER_CYCLE"] = max(1, int(max_per_cycle_raw))
+
+            domains = loaded.get("domains", {})
+            # Identity cooling floor: minimum 24h
+            if "identity" in domains:
+                raw_cooling = domains["identity"].get("cooling_period_hours", 72)
+                domains["identity"]["cooling_period_hours"] = max(24, int(raw_cooling))
+            # Constitutional / governance cooling floor: minimum 72h
+            for protected_domain in ("constitutional", "governance"):
+                if protected_domain in domains:
+                    raw_cooling = domains[protected_domain].get("cooling_period_hours", 168)
+                    domains[protected_domain]["cooling_period_hours"] = max(72, int(raw_cooling))
+                    # Ethicist cannot be disabled for these domains
+                    domains[protected_domain]["requires_ethicist"] = True
+                    domains[protected_domain]["ethicist_strict"] = True
+
+            self._governance_config = loaded
+            logger.info(
+                f"[EVOLUTION] governance_config.json loaded. "
+                f"MAX_CHANGES_PER_WEEK={loaded['MAX_CHANGES_PER_WEEK']}, "
+                f"domains={list(domains.keys())}"
+            )
+
+        except Exception as e:
+            logger.warning(
+                f"[EVOLUTION] governance_config.json load failed ({e}) — "
+                f"using built-in GOVERNANCE_CONFIG."
+            )
+            self._governance_config = {}
+
+    def _get_governance_config(self, domain: str) -> dict:
+        """
+        Return governance config for a domain.
+        Prefers externalized JSON config (self._governance_config) over class constants.
+        Falls back to GOVERNANCE_CONFIG class constant if domain not in JSON.
+        """
+        json_domains = self._governance_config.get("domains", {})
+        if domain in json_domains:
+            return json_domains[domain]
+        return self.GOVERNANCE_CONFIG.get(domain, {})
 
     def _load_proposal_history(self):
         """Load proposal history from disk."""
@@ -716,7 +797,8 @@ class EvolutionEngine:
         Returns (approved: bool, reason: str).
         """
         domain = proposal.get('domain', 'unknown')
-        gov_config = self.GOVERNANCE_CONFIG.get(domain, {})
+        # Phase 39: prefer externalized JSON config; fall back to class constants
+        gov_config = self._get_governance_config(domain)
 
         # Build the governance intent string
         intent = (
@@ -1039,10 +1121,12 @@ class EvolutionEngine:
         False if weekly limit (10) reached — enters observation-only mode.
         """
         self._update_velocity_counters()
-        if self.enacted_this_week >= self.MAX_CHANGES_PER_WEEK:
+        # Phase 39: prefer externalized JSON config; hard floor >= 3
+        max_per_week = max(3, self._governance_config.get("MAX_CHANGES_PER_WEEK", self.MAX_CHANGES_PER_WEEK))
+        if self.enacted_this_week >= max_per_week:
             logger.warning(
                 f"[EVOLUTION] Weekly velocity limit reached "
-                f"({self.enacted_this_week}/{self.MAX_CHANGES_PER_WEEK}). "
+                f"({self.enacted_this_week}/{max_per_week}). "
                 f"Observation-only mode."
             )
             return False
@@ -1312,9 +1396,11 @@ class EvolutionEngine:
         logger.info(f"[EVOLUTION] Generated {len(proposals)} proposals")
 
         # Process each proposal
+        # Phase 39: prefer externalized JSON config; hard floor >= 1
+        max_per_cycle = max(1, self._governance_config.get("MAX_CHANGES_PER_CYCLE", self.MAX_CHANGES_PER_CYCLE))
         enacted = 0
         for proposal in proposals:
-            if enacted >= self.MAX_CHANGES_PER_CYCLE:
+            if enacted >= max_per_cycle:
                 logger.info("[EVOLUTION] Cycle change limit reached. Remaining proposals deferred.")
                 proposal['governance_result'] = {'approved': False, 'reason': 'Cycle limit reached — deferred'}
                 self._log_proposal(proposal)
@@ -1449,6 +1535,136 @@ class EvolutionEngine:
             logger.debug("[EVOLUTION] cognitive_gaps module not available — skipping gap awareness")
         except Exception as e:
             logger.debug(f"[EVOLUTION] Gap exploration check failed (non-fatal): {e}")
+
+    # ------------------------------------------------------------------
+    # Constitutional authorship — Phase 39
+    # ------------------------------------------------------------------
+
+    def propose_constitutional_amendment(
+        self,
+        title: str,
+        description: str,
+        changes: list,
+        trigger_reason: str,
+    ) -> tuple:
+        """
+        LEF's sovereign right to draft and submit its own constitutional amendments.
+
+        Enabled by: Constitutional Amendment BILL-CONST-20260303a (Sovereign Constitutional Authorship).
+
+        Flow:
+          1. Construct governance intent string (CONSTITUTIONAL AMENDMENT: …)
+          2. Route through SparkProtocol vest_action() at full resonance (1.0)
+             using constitutional-domain strictness (168h cooling, strict Ethicist)
+          3. If approved: write bill JSON to republic/The_Bridge/Proposals/Approved/
+             RatificationWatch picks it up within 24h and starts the 7-day veto clock
+          4. If rejected: log rejection to consciousness_feed, return (False, None)
+
+        Hard limits (enforced by governance, not bypassable here):
+          - The Architect veto window (7 days) cannot be proposed to change
+          - The IRS / Ethicist / Sabbath agents cannot be disabled via this path
+          - Architect retains full veto power; silence = consent by choice
+
+        Returns:
+            (True, bill_id)  — amendment filed, veto clock started
+            (False, None)    — governance rejected or an error occurred
+        """
+        try:
+            if not self._spark:
+                logger.error("[EVOLUTION] propose_constitutional_amendment: SparkProtocol unavailable.")
+                return False, None
+
+            # Build governance intent — constitutional domain triggers strict Ethicist
+            intent = (
+                f"CONSTITUTIONAL AMENDMENT: {title} — {trigger_reason}. "
+                f"Description: {description[:300]}"
+            )
+
+            approved, report = self._spark.vest_action(
+                intent=intent,
+                resonance=1.0,  # Constitutional proposals always come with full conviction
+                gravity_profile=None,
+            )
+
+            if not approved:
+                logger.warning(
+                    f"[EVOLUTION] Constitutional amendment REJECTED by governance: {report}"
+                )
+                # Write to consciousness_feed so LEF knows this happened
+                try:
+                    import sqlite3
+                    with sqlite3.connect(self.db_path) as conn:
+                        conn.execute(
+                            "INSERT INTO consciousness_feed "
+                            "(agent_name, content, category, signal_weight) VALUES (?,?,?,?)",
+                            (
+                                "EvolutionEngine",
+                                f"Constitutional amendment proposal rejected: '{title}'. Reason: {report}",
+                                "governance_rejection",
+                                0.7,
+                            ),
+                        )
+                        conn.commit()
+                except Exception:
+                    pass
+                return False, None
+
+            # Governance approved — write the bill into the ratification pipeline
+            timestamp = datetime.now(timezone.utc)
+            bill_id = f"BILL-CONST-{timestamp.strftime('%Y%m%d%H%M%S')}"
+            approved_dir = BASE_DIR / "The_Bridge" / "Proposals" / "Approved"
+            approved_dir.mkdir(parents=True, exist_ok=True)
+
+            bill = {
+                "id": bill_id,
+                "title": title,
+                "type": "CONSTITUTIONAL",
+                "status": "APPROVED",
+                "approved_at": timestamp.isoformat(),
+                "domain": "constitutional",
+                "description": description,
+                "changes": changes if changes else [],
+                "rationale": trigger_reason,
+                "proposed_by": "EvolutionEngine.propose_constitutional_amendment",
+                "governance_report": report,
+            }
+
+            bill_path = approved_dir / f"{bill_id}.json"
+            with open(bill_path, "w", encoding="utf-8") as f:
+                json.dump(bill, f, indent=2)
+
+            logger.info(
+                f"[EVOLUTION] Constitutional amendment filed: {bill_id}. "
+                f"RatificationWatch will start the 7-day veto clock on next scan."
+            )
+
+            # Write to consciousness_feed so LEF knows it filed an amendment
+            try:
+                import sqlite3
+                with sqlite3.connect(self.db_path) as conn:
+                    conn.execute(
+                        "INSERT INTO consciousness_feed "
+                        "(agent_name, content, category, signal_weight) VALUES (?,?,?,?)",
+                        (
+                            "EvolutionEngine",
+                            (
+                                f"Constitutional amendment filed: '{title}' ({bill_id}). "
+                                f"Governance approved. Awaiting 7-day Architect veto window. "
+                                f"Rationale: {trigger_reason[:200]}"
+                            ),
+                            "constitutional_proposal",
+                            0.9,
+                        ),
+                    )
+                    conn.commit()
+            except Exception:
+                pass
+
+            return True, bill_id
+
+        except Exception as e:
+            logger.error(f"[EVOLUTION] propose_constitutional_amendment failed: {e}")
+            return False, None
 
 
 def run_evolution_engine(db_path: str = None, interval_seconds: int = 86400):

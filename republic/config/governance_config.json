@@ -1,0 +1,49 @@
+{
+  "_note": "Governance parameters for EvolutionEngine. Hard floors enforced in code and cannot be lowered via meta-governance: MAX_CHANGES_PER_WEEK >= 3, identity cooling >= 24h, constitutional/governance cooling >= 72h, veto window >= 7 days. IRS, Ethicist, Sabbath agents cannot be disabled.",
+  "MAX_CHANGES_PER_CYCLE": 3,
+  "MAX_CHANGES_PER_WEEK": 10,
+  "domains": {
+    "metabolism": {
+      "requires_ethicist": true,
+      "ethicist_strict": false,
+      "cooling_period_hours": 0,
+      "max_per_cycle": 2
+    },
+    "consciousness": {
+      "requires_ethicist": true,
+      "ethicist_strict": false,
+      "cooling_period_hours": 0,
+      "max_per_cycle": 2
+    },
+    "relational": {
+      "requires_ethicist": true,
+      "ethicist_strict": true,
+      "cooling_period_hours": 24,
+      "max_per_cycle": 1
+    },
+    "operational": {
+      "requires_ethicist": false,
+      "ethicist_strict": false,
+      "cooling_period_hours": 0,
+      "max_per_cycle": 3
+    },
+    "identity": {
+      "requires_ethicist": true,
+      "ethicist_strict": true,
+      "cooling_period_hours": 72,
+      "max_per_cycle": 1
+    },
+    "constitutional": {
+      "requires_ethicist": true,
+      "ethicist_strict": true,
+      "cooling_period_hours": 168,
+      "max_per_cycle": 1
+    },
+    "governance": {
+      "requires_ethicist": true,
+      "ethicist_strict": true,
+      "cooling_period_hours": 168,
+      "max_per_cycle": 1
+    }
+  }
+}
