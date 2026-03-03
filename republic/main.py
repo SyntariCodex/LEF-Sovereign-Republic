@@ -1489,12 +1489,59 @@ def main():
                         if summary:
                             # Step 2: Extract wisdom from the summary
                             wisdom_extractor.extract(summary)
+                            # Step 2b: Publish high-confidence wisdom to LEF_AXIOMS_LIVE.md + Interior Hub
+                            try:
+                                wisdom_extractor.publish_axioms()
+                            except Exception as _ae:
+                                logging.warning(f"[MAIN] publish_axioms error: {_ae}")
                             # Step 3: Prune old entries
                             season_end = _dt.fromisoformat(summary["period"]["end"])
                             memory_pruner.prune(season_end)
                         logging.info("[MAIN] Memory consolidation pipeline complete.")
                 except Exception as e:
                     logging.debug(f"[MAIN] Memory consolidation error: {e}")
+
+                # Phase 13.3b: Daily consciousness_feed TTL cleanup
+                # Archives consumed entries older than archive_after_days (default 7)
+                try:
+                    from db.db_helper import translate_sql as _ts
+                    _archive_days = 7
+                    try:
+                        import json as _j
+                        _cfg_path = os.path.join(BASE_DIR, "config", "config.json")
+                        with open(_cfg_path) as _cf:
+                            _cfg = _j.load(_cf)
+                        _archive_days = _cfg.get("consciousness_feed", {}).get("archive_after_days", 7)
+                    except Exception:
+                        pass
+                    with db_connection() as _conn:
+                        _cur = _conn.cursor()
+                        # Copy consumed + old entries to consciousness_archive
+                        _cur.execute(_ts("""
+                            INSERT INTO consciousness_archive
+                                (original_id, agent_name, content, category,
+                                 original_timestamp, signal_weight, signal_vector)
+                            SELECT id, agent_name, content, category,
+                                   timestamp, signal_weight, signal_vector
+                            FROM consciousness_feed
+                            WHERE consumed = 1
+                              AND datetime(timestamp) < datetime('now', ?)
+                        """), (f"-{_archive_days} days",))
+                        _archived = _cur.rowcount
+                        if _archived > 0:
+                            _cur.execute(_ts("""
+                                DELETE FROM consciousness_feed
+                                WHERE consumed = 1
+                                  AND datetime(timestamp) < datetime('now', ?)
+                            """), (f"-{_archive_days} days",))
+                            _conn.commit()
+                            logging.info(
+                                f"[MAIN] FeedArchiver: archived {_archived} old "
+                                f"consciousness_feed entries (>{_archive_days}d)."
+                            )
+                except Exception as _fae:
+                    logging.debug(f"[MAIN] FeedArchiver error: {_fae}")
+
                 _time.sleep(24 * 3600)  # Check daily, synthesize when 30 days elapsed
 
         mc_thread = threading.Thread(target=_memory_consolidation_loop, daemon=True, name="MemoryConsolidation")
@@ -1502,6 +1549,24 @@ def main():
         logging.info("[MAIN] Phase 13 Memory Consolidation pipeline online (daily check, 30-day synthesis cycle).")
     except Exception as e:
         logging.warning(f"[MAIN] Phase 13 Memory Consolidation start failed: {e}")
+
+    # ======== RATIFICATION WATCH (Phase XX: Sovereign Auto-Ratification) ========
+    try:
+        from system.ratification_watch import ratification_watch_loop
+
+        SafeThread(
+            target=lambda: ratification_watch_loop(
+                db_connection_func=db_connection,
+                base_path=BASE_DIR,
+            ),
+            name="RatificationWatch",
+        ).start()
+        logging.info(
+            "[MAIN] RatificationWatch online — constitutional amendments auto-ratify "
+            f"after 7-day Architect veto window."
+        )
+    except Exception as e:
+        logging.warning(f"[MAIN] RatificationWatch start failed: {e}")
 
     # ======== PHASE 14: THE DREAM CYCLE ========
     try:

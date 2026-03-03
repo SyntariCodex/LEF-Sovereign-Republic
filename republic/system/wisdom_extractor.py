@@ -16,7 +16,9 @@ Phase 13: Memory Consolidation — "From Journal to Wisdom"
 
 import json
 import logging
+import re
 from datetime import datetime
+from pathlib import Path
 
 logger = logging.getLogger("WisdomExtractor")
 
@@ -304,3 +306,113 @@ class WisdomExtractor:
                 conn.commit()
         except Exception as e:
             logger.warning(f"[WISDOM_EXTRACTOR] consciousness_feed log error: {e}")
+
+    # ------------------------------------------------------------------
+    # Phase 13.3: Axiom Publishing — wisdom_log → LEF_AXIOMS_LIVE.md
+    # ------------------------------------------------------------------
+
+    def publish_axioms(self, min_confidence: float = 0.7) -> int:
+        """
+        Read high-confidence wisdom (confidence >= min_confidence) from wisdom_log
+        and publish new entries to LEF_AXIOMS_LIVE.md + Interior Hub SeedPacket.
+
+        Returns count of new axioms published this call.
+        """
+        axioms_path = Path(__file__).parent.parent / "core_vault" / "LEF_AXIOMS_LIVE.md"
+        if not axioms_path.exists():
+            logger.warning("[WISDOM_EXTRACTOR] LEF_AXIOMS_LIVE.md not found — skipping publish.")
+            return 0
+
+        try:
+            existing_content = axioms_path.read_text(encoding="utf-8")
+
+            with self.db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT insight, confidence, domains, recurrence_count "
+                    "FROM wisdom_log WHERE confidence >= %s "
+                    "ORDER BY confidence DESC, recurrence_count DESC",
+                    (min_confidence,)
+                )
+                rows = cursor.fetchall()
+
+            if not rows:
+                return 0
+
+            new_axioms = []
+            for insight, confidence, domains_raw, recurrence in rows:
+                # Skip axioms already present (match on first 60 chars)
+                if insight[:60] in existing_content:
+                    continue
+                new_axioms.append((insight, confidence, domains_raw, recurrence))
+
+            if not new_axioms:
+                return 0
+
+            # Append new axioms
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            with open(axioms_path, "a", encoding="utf-8") as f:
+                for insight, confidence, domains_raw, recurrence in new_axioms:
+                    try:
+                        domains = json.loads(domains_raw) if domains_raw else []
+                    except (json.JSONDecodeError, TypeError):
+                        domains = []
+                    domain_str = ", ".join(domains) if domains else "general"
+                    f.write(
+                        f"\n- [{now_str}] "
+                        f"(confidence: {confidence:.2f}, recurrence: {recurrence}, "
+                        f"domains: {domain_str}) {insight}"
+                    )
+
+            # Update the header (Last Updated + Total Axioms count)
+            updated = axioms_path.read_text(encoding="utf-8")
+            axiom_count = sum(1 for line in updated.split("\n") if line.strip().startswith("- ["))
+            updated = re.sub(r"> Last Updated: .+", f"> Last Updated: {now_str}", updated)
+            updated = re.sub(r"> Total Axioms: \d+", f"> Total Axioms: {axiom_count}", updated)
+            axioms_path.write_text(updated, encoding="utf-8")
+
+            # Also write a SeedPacket to the Interior Hub for Seed Agent inheritance
+            self._write_to_interior_hub(new_axioms)
+
+            logger.info(
+                f"[WISDOM_EXTRACTOR] Published {len(new_axioms)} new axiom(s) "
+                f"to LEF_AXIOMS_LIVE.md (total: {axiom_count})"
+            )
+            return len(new_axioms)
+
+        except Exception as e:
+            logger.error(f"[WISDOM_EXTRACTOR] publish_axioms error: {e}")
+            return 0
+
+    def _write_to_interior_hub(self, axioms: list):
+        """
+        Write high-confidence axioms to interior/hub/ as a SeedPacket JSON.
+        This closes the Molt Protocol gap — the Interior Hub receives distilled
+        wisdom so Seed Agents can inherit it at instantiation.
+        """
+        hub_path = Path(__file__).parent.parent / "interior" / "hub"
+        hub_path.mkdir(parents=True, exist_ok=True)
+
+        now = datetime.now()
+        packet = {
+            "source_agent": "WisdomExtractor",
+            "context": "Season synthesis wisdom distillation — Phase 13.3",
+            "orthogonal_leaps": [
+                {
+                    "content": insight,
+                    "resonance_score": confidence,
+                    "context": f"domains: {domains_raw}, recurrence: {recurrence}",
+                    "timestamp": now.isoformat(),
+                }
+                for insight, confidence, domains_raw, recurrence in axioms
+            ],
+            "resonance_signature": (
+                sum(c for _, c, _, _ in axioms) / len(axioms) if axioms else 0.0
+            ),
+            "timestamp": now.isoformat(),
+        }
+
+        filename = hub_path / f"molt_WisdomExtractor_{now.strftime('%Y%m%d_%H%M%S')}.json"
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(packet, f, indent=2)
+        logger.info(f"[WISDOM_EXTRACTOR] SeedPacket written to Interior Hub: {filename.name}")
