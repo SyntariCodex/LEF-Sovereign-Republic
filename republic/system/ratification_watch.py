@@ -245,11 +245,28 @@ def ratification_watch_loop(db_connection_func, base_path=None, interval_hours: 
     """
     SafeThread target.
     Checks for ratifiable amendments every `interval_hours` hours.
+    Never raises — all exceptions are caught and logged with full tracebacks.
     """
-    watcher = RatificationWatch(
-        db_connection_func=db_connection_func,
-        base_path=base_path,
-    )
+    import traceback as _tb
+
+    try:
+        watcher = RatificationWatch(
+            db_connection_func=db_connection_func,
+            base_path=base_path,
+        )
+        logging.info(
+            f"[RatificationWatch] Watcher initialized. "
+            f"Approved dir: {watcher.approved_dir} "
+            f"(exists: {watcher.approved_dir.exists()})"
+        )
+    except Exception as _init_e:
+        logging.error(
+            f"[RatificationWatch] Init failed — will retry on next SafeThread restart:\n"
+            f"{_tb.format_exc()}"
+        )
+        # Re-raise so SafeThread's backoff triggers (watcher unusable without init)
+        raise
+
     while True:
         try:
             count = watcher.scan_and_ratify()
@@ -257,6 +274,11 @@ def ratification_watch_loop(db_connection_func, base_path=None, interval_hours: 
                 logging.info(
                     f"[RatificationWatch] Ratified {count} constitutional amendment(s) this cycle."
                 )
-        except Exception as e:
-            logging.error(f"[RatificationWatch] Unexpected error in scan cycle: {e}")
-        time.sleep(interval_hours * 3600)
+        except Exception as _loop_e:
+            logging.error(
+                f"[RatificationWatch] Scan cycle error (non-fatal):\n{_tb.format_exc()}"
+            )
+        try:
+            time.sleep(interval_hours * 3600)
+        except Exception:
+            pass

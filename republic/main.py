@@ -1508,7 +1508,7 @@ def main():
                     _archive_days = 7
                     try:
                         import json as _j
-                        _cfg_path = os.path.join(BASE_DIR, "config", "config.json")
+                        _cfg_path = os.path.join(current_dir, "config", "config.json")
                         with open(_cfg_path) as _cf:
                             _cfg = _j.load(_cf)
                         _archive_days = _cfg.get("consciousness_feed", {}).get("archive_after_days", 7)
@@ -1553,12 +1553,18 @@ def main():
     # ======== RATIFICATION WATCH (Phase XX: Sovereign Auto-Ratification) ========
     try:
         from system.ratification_watch import ratification_watch_loop
+        _ratif_db_conn = db_connection  # Explicit local capture — no closure over outer scope
+
+        def _run_ratification_watch():
+            import traceback as _rtb
+            try:
+                ratification_watch_loop(db_connection_func=_ratif_db_conn)
+            except Exception as _re:
+                logging.error(f"[RatificationWatch] Fatal error:\n{_rtb.format_exc()}")
+                raise
 
         SafeThread(
-            target=lambda: ratification_watch_loop(
-                db_connection_func=db_connection,
-                base_path=BASE_DIR,
-            ),
+            target=_run_ratification_watch,
             name="RatificationWatch",
         ).start()
         logging.info(
@@ -1867,7 +1873,7 @@ def main():
             'uptime_seconds': time.time() - _shutdown_start,
             'reason': 'graceful_shutdown',
         }
-        snapshot_path = os.path.join(BASE_DIR, 'The_Bridge', 'last_shutdown.json')
+        snapshot_path = os.path.join(current_dir, '..', 'The_Bridge', 'last_shutdown.json')
         with open(snapshot_path, 'w') as f:
             _json_shutdown.dump(snapshot, f, indent=2)
     except Exception:
