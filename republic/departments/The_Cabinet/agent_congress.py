@@ -5,6 +5,7 @@ import json
 import shutil
 import logging
 from datetime import datetime
+from pathlib import Path
 
 # The Legislature
 # "The House & Senate"
@@ -313,7 +314,7 @@ class SenateOfIdentity:
                     try:
                         from departments.The_Cabinet.bill_executor import BillExecutor
                         executor = BillExecutor()
-                        result = executor.execute_bill(os.path.join(DIRS['public_approved'], filename))
+                        result = executor.execute_bill(Path(os.path.join(DIRS['public_approved'], filename)))
                         exec_status = result.get('status', 'UNKNOWN')
                         print(f"[SENATE] 🦾 Bill Executor: {exec_status}")
                         if exec_status == 'ERROR' or exec_status == 'FAILED':
