@@ -226,8 +226,11 @@ class AgentInfo:
             config['regime_updated_by'] = 'AgentInfo'
             config['regime_timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%S')
             
-            with open(config_path, 'w') as f:
+            # Atomic write: write to .tmp then rename — prevents readers seeing empty/partial file
+            tmp_path = config_path.with_suffix('.tmp')
+            with open(tmp_path, 'w') as f:
                 json.dump(config, f, indent=2)
+            os.replace(tmp_path, config_path)
             
             if old_regime != regime:
                 logging.info(f"[INFO] 🔄 Regime Shift: {old_regime} → {regime} (score: {sentiment_score})")

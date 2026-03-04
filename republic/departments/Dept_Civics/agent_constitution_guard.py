@@ -288,22 +288,38 @@ class ConstitutionGuard:
     
     def check_c002_bridge_uniqueness(self) -> RuleResult:
         """
-        C-002: Only one Bridge allowed (no nested structures)
+        C-002: Only one communication Bridge allowed (no duplicate Outbox/Inbox channels)
         Article II, Section 3
+
+        Note (Phase 39): republic/The_Bridge/ is permitted as the constitutional ratification
+        pipeline (Proposals/Approved/ and Vetoes/ only). The violation is duplicating the
+        COMMUNICATION channels (Outbox/Inbox), not having a ratification subdirectory.
         """
         try:
-            # Check for nested Bridge directories
             nested_bridge = os.path.join(BASE_DIR, 'The_Bridge')
             root_bridge = os.path.join(os.path.dirname(BASE_DIR), 'The_Bridge')
-            
-            if os.path.exists(nested_bridge) and os.path.exists(root_bridge):
+
+            if not (os.path.exists(nested_bridge) and os.path.exists(root_bridge)):
+                return RuleResult(True, "Bridge structure is unique")
+
+            # Both exist — check if the nested one has communication channels (the real violation)
+            nested_outbox = os.path.join(nested_bridge, 'Outbox')
+            nested_inbox = os.path.join(nested_bridge, 'Inbox')
+            has_comm_channels = os.path.exists(nested_outbox) or os.path.exists(nested_inbox)
+
+            if has_comm_channels:
                 return RuleResult(
                     False,
-                    f"Duplicate Bridge structures found: {nested_bridge} and {root_bridge}",
+                    f"Duplicate communication Bridge found: {nested_bridge} has Outbox/Inbox alongside {root_bridge}",
                     "VIOLATION"
                 )
-            return RuleResult(True, "Bridge structure is unique")
-            
+
+            # republic/The_Bridge/ exists but only has ratification dirs (Proposals/, Vetoes/) — permitted
+            return RuleResult(
+                True,
+                f"republic/The_Bridge/ present for constitutional ratification pipeline (Phase 39) — permitted"
+            )
+
         except Exception as e:
             return RuleResult(True, f"Could not check Bridge: {e}")
     
