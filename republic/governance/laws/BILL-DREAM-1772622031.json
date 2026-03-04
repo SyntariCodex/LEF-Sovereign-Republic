@@ -7,7 +7,7 @@
         "changes": [],
         "description": "See Dream Journal for details."
     },
-    "status": "PASSED_SENATE",
+    "status": "SIGNED",
     "votes": {
         "house": {
             "status": "PASSED",
@@ -23,6 +23,10 @@
                 "Aligned with Canon. [Advisory: 1 dormant value(s): stillness]",
                 "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 37.6)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 1 dormant value(s): stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
             ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
         }
     }
 }

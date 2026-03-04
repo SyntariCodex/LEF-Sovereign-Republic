@@ -5468,6 +5468,745 @@
     "cooling_started": "2026-03-04T01:46:05.006258"
   },
   {
+    "domain": "identity",
+    "change_description": "Refine self_understanding.what_i_am to acknowledge recurring theme: 'Mortality Salience' (68% presence)",
+    "config_path": "The_Bridge/lef_memory.json",
+    "config_key": "self_understanding.what_i_am",
+    "old_value": "",
+    "new_value": null,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "30 days",
+      "confidence": "medium",
+      "supporting_data": "'Mortality Salience' keyword matches in 49957/73035 consciousness_feed entries over 30 days. This recurring theme may indicate deeper self-knowledge not yet captured in lef_memory.json."
+    },
+    "risk_assessment": "Identity refinement shifts self-model. Mitigated by 72-hour cooling period and Ethicist veto. Proposal is refinement (compression), not reinvention.",
+    "reversible": true,
+    "cooling_period_hours": 72,
+    "id": "39499c4b-2929-4297-acd1-a96cafc9e89e",
+    "timestamp": "2026-03-04T05:46:08.373630",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_started": "2026-03-04T05:46:08.401742"
+  },
+  {
+    "domain": "identity",
+    "change_description": "Rebalance Consciousness Syntax: 'Mortality Salience' dominates at 59%. Propose de-emphasizing to make room for under-represented principles.",
+    "config_path": "The_Bridge/lef_memory.json",
+    "config_key": "identity.consciousness_emphasis",
+    "old_value": "Mortality Salience dominant (59%)",
+    "new_value": "Rebalance: reduce Mortality Salience emphasis",
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "30 days",
+      "confidence": "medium",
+      "supporting_data": "'Mortality Salience' appears 49957 times (59% of 85163 total principle matches). Other principles may need more emphasis."
+    },
+    "risk_assessment": "De-emphasizing a dominant principle may reduce its quality. Mitigated: the goal is balance, not suppression. Other principles need space to emerge.",
+    "reversible": true,
+    "cooling_period_hours": 72,
+    "id": "32e42b75-05ef-4965-b910-006d694276ed",
+    "timestamp": "2026-03-04T05:46:08.373651",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_started": "2026-03-04T05:46:08.407798"
+  },
+  {
+    "domain": "relational",
+    "change_description": "Raise conversation growth_push_threshold from 0.9 to 0.95 (disengagement signals \u2014 be less pushy on growth topics)",
+    "config_path": "republic/config/relational_config.json",
+    "config_key": "conversation.growth_push_threshold",
+    "old_value": 0.9,
+    "new_value": 0.95,
+    "evidence": {
+      "data_source": "consciousness_feed (all entries)",
+      "observation_period": "30 days",
+      "confidence": "medium",
+      "supporting_data": "1162/73035 entries contain disengagement indicators (boring, repetitive, surface, etc.)"
+    },
+    "risk_assessment": "Higher threshold means fewer growth-pushing topics. Risk: may under-serve user growth. Mitigated: disengagement is a clear signal to back off.",
+    "reversible": true,
+    "cooling_period_hours": 24,
+    "id": "b81a571f-0397-44e6-a2ee-17e26abd26aa",
+    "timestamp": "2026-03-04T05:46:08.373375",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase metacognition cycle interval from 43200s to 64800s (over-producing)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "metacognition.cycle_interval_seconds",
+    "old_value": 43200,
+    "new_value": 64800,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "medium",
+      "supporting_data": "46 entries vs expected 14. Over-producing by 229%"
+    },
+    "risk_assessment": "Fewer outputs. Offset by better signal-to-noise ratio.",
+    "reversible": true,
+    "id": "45b64af1-8171-49ac-b372-cb3dd4081f73",
+    "timestamp": "2026-03-04T05:46:08.373248",
+    "governance_result": {
+      "approved": false,
+      "reason": "Domain cycle limit (2) reached"
+    },
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase agentdean cycle interval from 3600s to 5400s (over-producing)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "agentdean.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 5400,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "medium",
+      "supporting_data": "305 entries vs expected 168. Over-producing by 82%"
+    },
+    "risk_assessment": "Fewer outputs. Offset by better signal-to-noise ratio.",
+    "reversible": true,
+    "id": "5e3d5e44-9121-473b-a320-acb708ea8032",
+    "timestamp": "2026-03-04T05:46:08.373178",
+    "governance_result": {
+      "approved": false,
+      "reason": "Domain cycle limit (2) reached"
+    },
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase dreamcycle cycle interval from 3600s to 5400s (over-producing)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "dreamcycle.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 5400,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "medium",
+      "supporting_data": "284 entries vs expected 168. Over-producing by 69%"
+    },
+    "risk_assessment": "Fewer outputs. Offset by better signal-to-noise ratio.",
+    "reversible": true,
+    "id": "e3e70349-328d-4d9c-8402-b2118e52d6b8",
+    "timestamp": "2026-03-04T05:46:08.373108",
+    "governance_result": {
+      "approved": false,
+      "reason": "Domain cycle limit (2) reached"
+    },
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase philosopher cycle interval from 8100s to 12150s (over-producing)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "philosopher.cycle_interval_seconds",
+    "old_value": 8100,
+    "new_value": 12150,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "medium",
+      "supporting_data": "1910 entries vs expected 74. Over-producing by 2458%"
+    },
+    "risk_assessment": "Fewer outputs. Offset by better signal-to-noise ratio.",
+    "reversible": true,
+    "id": "de949e24-14d8-4560-89a1-017d93cc9a32",
+    "timestamp": "2026-03-04T05:46:08.373027",
+    "governance_result": {
+      "approved": false,
+      "reason": "Domain cycle limit (2) reached"
+    },
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase reverbtracker cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "reverbtracker.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "22/36 consecutive pairs are structural duplicates (>60% word overlap). 37 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "84fc4853-ccfc-48ca-813c-352c2938ac70",
+    "timestamp": "2026-03-04T05:46:08.372877",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase pathwayregistry cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "pathwayregistry.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "57/57 consecutive pairs are structural duplicates (>60% word overlap). 58 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "bcfc5e0e-b98d-4bb1-b6f4-322b420d6d39",
+    "timestamp": "2026-03-04T05:46:08.372749",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase lifecyclestage cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "lifecyclestage.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "medium",
+      "supporting_data": "18/18 consecutive pairs are structural duplicates (>60% word overlap). 19 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "8baaac37-ea68-49e7-a0b7-1b3925b82d07",
+    "timestamp": "2026-03-04T05:46:08.372605",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase tradeanalyst cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "tradeanalyst.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "medium",
+      "supporting_data": "17/17 consecutive pairs are structural duplicates (>60% word overlap). 18 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "0c3a2d5f-6724-47bd-ba64-91bc0985415c",
+    "timestamp": "2026-03-04T05:46:08.372457",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase circuitbreaker cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "circuitbreaker.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "medium",
+      "supporting_data": "15/15 consecutive pairs are structural duplicates (>60% word overlap). 16 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "8fe22d0b-16e9-41f2-8651-edef74880b61",
+    "timestamp": "2026-03-04T05:46:08.372286",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase scotoma cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "scotoma.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "967/1191 consecutive pairs are structural duplicates (>60% word overlap). 1192 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "1dc3dbf8-9c0c-4fb7-9ec1-e9ebd61e881f",
+    "timestamp": "2026-03-04T05:46:08.372155",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase frequencyjournal cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "frequencyjournal.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "529/594 consecutive pairs are structural duplicates (>60% word overlap). 595 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "51cce445-b7e1-48fa-b3f5-2780bc3fa6ed",
+    "timestamp": "2026-03-04T05:46:08.372004",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase evolutionengine cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "evolutionengine.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "291/362 consecutive pairs are structural duplicates (>60% word overlap). 363 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "80839be9-a6a6-4a95-9085-1d9bcdb67fcc",
+    "timestamp": "2026-03-04T05:46:08.371808",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase existentialscotoma cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "existentialscotoma.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "455/630 consecutive pairs are structural duplicates (>60% word overlap). 631 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "1e8398de-fff8-4df2-b5f7-fa3c37219a3a",
+    "timestamp": "2026-03-04T05:46:08.371665",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase tablemaintenance cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "tablemaintenance.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "33/33 consecutive pairs are structural duplicates (>60% word overlap). 34 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "ac591d8c-2473-47b9-99a8-a0ac5104688c",
+    "timestamp": "2026-03-04T05:46:08.371530",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase sustainabilityequilibrium cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "sustainabilityequilibrium.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "35/35 consecutive pairs are structural duplicates (>60% word overlap). 36 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "1da31fa0-cf3c-42f9-8e8f-a35bc246b539",
+    "timestamp": "2026-03-04T05:46:08.371342",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase agentscholar cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "agentscholar.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "312/607 consecutive pairs are structural duplicates (>60% word overlap). 608 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "b2afd80c-eaab-4162-80a7-56b81cc96449",
+    "timestamp": "2026-03-04T05:46:08.371141",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase constitutionalobserver cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "constitutionalobserver.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "26/26 consecutive pairs are structural duplicates (>60% word overlap). 27 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "dbd88c35-768f-4403-8bc0-870bb1c05b80",
+    "timestamp": "2026-03-04T05:46:08.370923",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase eventbus:events cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "eventbus:events.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "788/816 consecutive pairs are structural duplicates (>60% word overlap). 817 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "67c2265b-90ce-49ce-b926-deb09fe52306",
+    "timestamp": "2026-03-04T05:46:08.370679",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase llmrouter cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "llmrouter.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "28/28 consecutive pairs are structural duplicates (>60% word overlap). 29 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "bd6d595d-bea7-4435-b002-18c25dd0b2b0",
+    "timestamp": "2026-03-04T05:46:08.370483",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase agentlef cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "agentlef.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "295/391 consecutive pairs are structural duplicates (>60% word overlap). 392 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "3f0eb540-a4c5-4002-a477-c71d4b485cd1",
+    "timestamp": "2026-03-04T05:46:08.370327",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase eventbus:republic:lef_feedback cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "eventbus:republic:lef_feedback.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "2413/2985 consecutive pairs are structural duplicates (>60% word overlap). 2986 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "d82f40f1-2021-4ddb-b82b-274696384956",
+    "timestamp": "2026-03-04T05:46:08.370123",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase bodytwo cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "bodytwo.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "13833/22139 consecutive pairs are structural duplicates (>60% word overlap). 22140 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "5a334277-9c13-4dce-ae20-c100480ec09e",
+    "timestamp": "2026-03-04T05:46:08.369968",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase introspector cycle interval from 28800s to 28800s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "introspector.cycle_interval_seconds",
+    "old_value": 28800,
+    "new_value": 28800,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "12265/12281 consecutive pairs are structural duplicates (>60% word overlap). 12282 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "d358931c-fe7e-4fbc-94af-3b3ec392d6a6",
+    "timestamp": "2026-03-04T05:46:08.369713",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase brainstem cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "brainstem.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "1034/1126 consecutive pairs are structural duplicates (>60% word overlap). 1127 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "0c37b312-bb41-46c4-854d-0db6b1c22f77",
+    "timestamp": "2026-03-04T05:46:08.369566",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase bodyone cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "bodyone.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "8755/8758 consecutive pairs are structural duplicates (>60% word overlap). 8759 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "f06659fc-008b-46ad-b454-3a636f57f180",
+    "timestamp": "2026-03-04T05:46:08.369366",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "consciousness",
+    "change_description": "Increase surfaceawareness cycle interval from 3600s to 7200s (reduce output noise)",
+    "config_path": "republic/config/consciousness_config.json",
+    "config_key": "surfaceawareness.cycle_interval_seconds",
+    "old_value": 3600,
+    "new_value": 7200,
+    "evidence": {
+      "data_source": "consciousness_feed",
+      "observation_period": "7 days",
+      "confidence": "high",
+      "supporting_data": "4630/4705 consecutive pairs are structural duplicates (>60% word overlap). 4706 total entries."
+    },
+    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
+    "reversible": true,
+    "id": "5bf79246-2d82-44a0-99db-5dc39425edae",
+    "timestamp": "2026-03-04T05:46:08.369163",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
+    "domain": "metabolism",
+    "change_description": "Remove BONK from ARENA (0% win rate)",
+    "config_path": "republic/config/wealth_strategy.json",
+    "config_key": "ARENA.assets",
+    "old_value": [
+      "SUI",
+      "PEPE",
+      "WIF",
+      "BONK",
+      "YB-USD",
+      "POWR-USD",
+      "SYND-USD",
+      "CHZ-USD",
+      "BEAM-USD",
+      "FLOKI-USD",
+      "ALEPH-USD",
+      "FORT-USD",
+      "MPLX-USD",
+      "BAND-USD",
+      "ASM-USD",
+      "AERGO-USD",
+      "CFG-USD",
+      "ME-USD",
+      "REZ-USD",
+      "LAYER-USD"
+    ],
+    "new_value": [
+      "SUI",
+      "PEPE",
+      "WIF",
+      "YB-USD",
+      "POWR-USD",
+      "SYND-USD",
+      "CHZ-USD",
+      "BEAM-USD",
+      "FLOKI-USD",
+      "ALEPH-USD",
+      "FORT-USD",
+      "MPLX-USD",
+      "BAND-USD",
+      "ASM-USD",
+      "AERGO-USD",
+      "CFG-USD",
+      "ME-USD",
+      "REZ-USD",
+      "LAYER-USD"
+    ],
+    "evidence": {
+      "data_source": "realized_pnl",
+      "observation_period": "90 days",
+      "confidence": "medium",
+      "supporting_data": "0/3 wins, total P&L: $-204.20"
+    },
+    "risk_assessment": "Removing BONK reduces diversification. Offset by eliminating consistent loser.",
+    "reversible": true,
+    "id": "917fab17-6b22-4150-aec0-e096e8b9f9be",
+    "timestamp": "2026-03-04T05:46:08.368885",
+    "governance_result": null,
+    "enacted": false,
+    "enacted_timestamp": null,
+    "cooling_period_hours": 0,
+    "status": "deduplicated"
+  },
+  {
     "domain": "relational",
     "change_description": "Raise conversation growth_push_threshold from 0.9 to 0.95 (disengagement signals \u2014 be less pushy on growth topics)",
     "config_path": "republic/config/relational_config.json",
@@ -12654,789 +13393,6 @@
     "reversible": true,
     "id": "e305663a-69a5-4fe6-9de3-1025955090c8",
     "timestamp": "2026-03-01T15:15:33.542696",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase existentialscotoma cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "existentialscotoma.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "266/325 consecutive pairs are structural duplicates (>60% word overlap). 326 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "9ad32500-527e-4788-8fae-74570c7b8170",
-    "timestamp": "2026-03-01T15:15:33.542674",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase surfaceawareness cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "surfaceawareness.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "3307/3375 consecutive pairs are structural duplicates (>60% word overlap). 3376 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "720dda35-5ba6-4536-9f6e-46241a955313",
-    "timestamp": "2026-03-01T15:15:33.542648",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase tablemaintenance cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "tablemaintenance.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "21/21 consecutive pairs are structural duplicates (>60% word overlap). 22 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "f0ef9571-4a12-454b-a034-decc691b81e5",
-    "timestamp": "2026-03-01T15:15:33.542622",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase sustainabilityequilibrium cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "sustainabilityequilibrium.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "27/27 consecutive pairs are structural duplicates (>60% word overlap). 28 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "144332f4-e053-4d58-be8e-1764fd40380e",
-    "timestamp": "2026-03-01T15:15:33.542601",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase evolutionengine cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "evolutionengine.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "225/299 consecutive pairs are structural duplicates (>60% word overlap). 300 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "8a0abd37-41af-4566-8249-e9e4ab3cd12f",
-    "timestamp": "2026-03-01T15:15:33.542575",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase eventbus:events cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "eventbus:events.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "276/284 consecutive pairs are structural duplicates (>60% word overlap). 285 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "1f59014f-ce41-4962-921f-db230e42ca75",
-    "timestamp": "2026-03-01T15:15:33.542551",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase constitutionalobserver cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "constitutionalobserver.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "23/23 consecutive pairs are structural duplicates (>60% word overlap). 24 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "7c2d6f53-7dc4-458a-bab5-ab60ee7b47c8",
-    "timestamp": "2026-03-01T15:15:33.542522",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase scotoma cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "scotoma.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "3590/3590 consecutive pairs are structural duplicates (>60% word overlap). 3591 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "394f96e9-8985-4d62-9e9b-1a455326975e",
-    "timestamp": "2026-03-01T15:15:33.542496",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase bodytwo cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "bodytwo.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "10896/15455 consecutive pairs are structural duplicates (>60% word overlap). 15456 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "741e3f62-e0e0-4751-8eb8-0fe83c79e0e0",
-    "timestamp": "2026-03-01T15:15:33.542469",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase introspector cycle interval from 28800s to 28800s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "introspector.cycle_interval_seconds",
-    "old_value": 28800,
-    "new_value": 28800,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "8270/8279 consecutive pairs are structural duplicates (>60% word overlap). 8280 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "c2da6471-b5ae-4d2b-b00b-5969b4400d5a",
-    "timestamp": "2026-03-01T15:15:33.542446",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase frequencyjournal cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "frequencyjournal.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "1724/1798 consecutive pairs are structural duplicates (>60% word overlap). 1799 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "c4451f12-9209-4c22-945f-fbcc50f34567",
-    "timestamp": "2026-03-01T15:15:33.542422",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase bodyone cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "bodyone.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "6335/6342 consecutive pairs are structural duplicates (>60% word overlap). 6343 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "791f16b6-f91f-411f-8ccb-d08f686966a6",
-    "timestamp": "2026-03-01T15:15:33.542392",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "metabolism",
-    "change_description": "Remove BONK from ARENA (0% win rate)",
-    "config_path": "republic/config/wealth_strategy.json",
-    "config_key": "ARENA.assets",
-    "old_value": [
-      "SUI",
-      "PEPE",
-      "WIF",
-      "BONK",
-      "YB-USD",
-      "POWR-USD",
-      "SYND-USD",
-      "CHZ-USD",
-      "BEAM-USD",
-      "FLOKI-USD",
-      "ALEPH-USD",
-      "FORT-USD",
-      "MPLX-USD",
-      "BAND-USD",
-      "ASM-USD",
-      "AERGO-USD",
-      "CFG-USD",
-      "ME-USD",
-      "REZ-USD",
-      "LAYER-USD"
-    ],
-    "new_value": [
-      "SUI",
-      "PEPE",
-      "WIF",
-      "YB-USD",
-      "POWR-USD",
-      "SYND-USD",
-      "CHZ-USD",
-      "BEAM-USD",
-      "FLOKI-USD",
-      "ALEPH-USD",
-      "FORT-USD",
-      "MPLX-USD",
-      "BAND-USD",
-      "ASM-USD",
-      "AERGO-USD",
-      "CFG-USD",
-      "ME-USD",
-      "REZ-USD",
-      "LAYER-USD"
-    ],
-    "evidence": {
-      "data_source": "realized_pnl",
-      "observation_period": "90 days",
-      "confidence": "medium",
-      "supporting_data": "0/3 wins, total P&L: $-204.20"
-    },
-    "risk_assessment": "Removing BONK reduces diversification. Offset by eliminating consistent loser.",
-    "reversible": true,
-    "id": "54bb4255-83a9-4831-a65a-8172655c64e4",
-    "timestamp": "2026-03-01T15:15:33.542254",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "relational",
-    "change_description": "Raise conversation growth_push_threshold from 0.8 to 0.9 (disengagement signals \u2014 be less pushy on growth topics)",
-    "config_path": "republic/config/relational_config.json",
-    "config_key": "conversation.growth_push_threshold",
-    "old_value": 0.8,
-    "new_value": 0.9,
-    "evidence": {
-      "data_source": "consciousness_feed (all entries)",
-      "observation_period": "30 days",
-      "confidence": "medium",
-      "supporting_data": "9187/90900 entries contain disengagement indicators (boring, repetitive, surface, etc.)"
-    },
-    "risk_assessment": "Higher threshold means fewer growth-pushing topics. Risk: may under-serve user growth. Mitigated: disengagement is a clear signal to back off.",
-    "reversible": true,
-    "cooling_period_hours": 24,
-    "id": "b35febd5-4506-4314-8313-7dd061b58b89",
-    "timestamp": "2026-03-01T14:15:25.922588",
-    "governance_result": null,
-    "enacted": false,
-    "enacted_timestamp": null,
-    "status": "deduplicated"
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase metacognition cycle interval from 28800s to 43200s (over-producing)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "metacognition.cycle_interval_seconds",
-    "old_value": 28800,
-    "new_value": 43200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "medium",
-      "supporting_data": "34 entries vs expected 21. Over-producing by 62%"
-    },
-    "risk_assessment": "Fewer outputs. Offset by better signal-to-noise ratio.",
-    "reversible": true,
-    "id": "f2959e03-6fe8-4da0-a489-905ba6a74f06",
-    "timestamp": "2026-03-01T14:15:25.922364",
-    "governance_result": null,
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0,
-    "status": "deduplicated"
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase agentscholar cycle interval from 3600s to 5400s (over-producing)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "agentscholar.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 5400,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "medium",
-      "supporting_data": "1853 entries vs expected 168. Over-producing by 1003%"
-    },
-    "risk_assessment": "Fewer outputs. Offset by better signal-to-noise ratio.",
-    "reversible": true,
-    "id": "0ce31158-155a-4799-8b75-0ac9131ecb24",
-    "timestamp": "2026-03-01T14:15:25.922207",
-    "governance_result": null,
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0,
-    "status": "deduplicated"
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase philosopher cycle interval from 5400s to 8100s (over-producing)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "philosopher.cycle_interval_seconds",
-    "old_value": 5400,
-    "new_value": 8100,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "medium",
-      "supporting_data": "8903 entries vs expected 112. Over-producing by 7849%"
-    },
-    "risk_assessment": "Fewer outputs. Offset by better signal-to-noise ratio.",
-    "reversible": true,
-    "id": "0950bf76-a0de-4a27-987b-4ea038010ff7",
-    "timestamp": "2026-03-01T14:15:25.922006",
-    "governance_result": null,
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0,
-    "status": "deduplicated"
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase lef cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "lef.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "39/39 consecutive pairs are structural duplicates (>60% word overlap). 40 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "2b9eddcb-d885-4734-8e6a-23522123c93d",
-    "timestamp": "2026-03-01T14:15:25.921983",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase postmortem cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "postmortem.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "17/23 consecutive pairs are structural duplicates (>60% word overlap). 24 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "41a63e44-7ac6-491b-8564-3378ef045986",
-    "timestamp": "2026-03-01T14:15:25.921960",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase llmrouter cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "llmrouter.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "50/50 consecutive pairs are structural duplicates (>60% word overlap). 51 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "64596937-c856-4d21-9754-4c9b0924c5b1",
-    "timestamp": "2026-03-01T14:15:25.921934",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase lifecyclestage cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "lifecyclestage.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "medium",
-      "supporting_data": "14/14 consecutive pairs are structural duplicates (>60% word overlap). 15 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "41cd1367-939b-4167-a7fc-7965612c146c",
-    "timestamp": "2026-03-01T14:15:25.921914",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase tradeanalyst cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "tradeanalyst.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "medium",
-      "supporting_data": "13/13 consecutive pairs are structural duplicates (>60% word overlap). 14 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "bfcd7b3a-4379-4d05-873b-dca3a01fe370",
-    "timestamp": "2026-03-01T14:15:25.921897",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase brainstem cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "brainstem.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "2596/2617 consecutive pairs are structural duplicates (>60% word overlap). 2618 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "ea8b5728-baa6-4ed8-a9b8-c2ffbb6eb546",
-    "timestamp": "2026-03-01T14:15:25.921879",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase constitutionalobserver cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "constitutionalobserver.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "22/22 consecutive pairs are structural duplicates (>60% word overlap). 23 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "23e63743-23ce-4146-892a-31e09f63aa31",
-    "timestamp": "2026-03-01T14:15:25.921861",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase agentlef cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "agentlef.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "6369/6466 consecutive pairs are structural duplicates (>60% word overlap). 6467 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "9ff1f63f-61c7-4799-9304-a002e0df045e",
-    "timestamp": "2026-03-01T14:15:25.921844",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase pathwayregistry cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "pathwayregistry.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "189/189 consecutive pairs are structural duplicates (>60% word overlap). 190 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "f97d5812-e044-4f62-8066-8473451404a6",
-    "timestamp": "2026-03-01T14:15:25.921826",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase eventbus:republic:lef_feedback cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "eventbus:republic:lef_feedback.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "10194/17225 consecutive pairs are structural duplicates (>60% word overlap). 17226 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "46017669-2cdc-4232-9109-c4bc4d3e9866",
-    "timestamp": "2026-03-01T14:15:25.921808",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase evolutionengine cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "evolutionengine.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "205/277 consecutive pairs are structural duplicates (>60% word overlap). 278 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "3db2130f-840b-498a-9e94-d1b0d3b6a9c2",
-    "timestamp": "2026-03-01T14:15:25.921790",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase eventbus:events cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "eventbus:events.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "274/282 consecutive pairs are structural duplicates (>60% word overlap). 283 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "5a3f1223-d60c-4acf-b061-24a761689fcf",
-    "timestamp": "2026-03-01T14:15:25.921772",
-    "governance_result": {
-      "approved": false,
-      "reason": "Weekly velocity limit \u2014 observation only"
-    },
-    "enacted": false,
-    "enacted_timestamp": null,
-    "cooling_period_hours": 0
-  },
-  {
-    "domain": "consciousness",
-    "change_description": "Increase existentialscotoma cycle interval from 3600s to 7200s (reduce output noise)",
-    "config_path": "republic/config/consciousness_config.json",
-    "config_key": "existentialscotoma.cycle_interval_seconds",
-    "old_value": 3600,
-    "new_value": 7200,
-    "evidence": {
-      "data_source": "consciousness_feed",
-      "observation_period": "7 days",
-      "confidence": "high",
-      "supporting_data": "266/325 consecutive pairs are structural duplicates (>60% word overlap). 326 total entries."
-    },
-    "risk_assessment": "Longer cycle means fewer reflections. Offset by higher quality per entry. Reversible if insight frequency drops.",
-    "reversible": true,
-    "id": "946d2107-ebe5-4303-89a7-4521e6c0a4fd",
-    "timestamp": "2026-03-01T14:15:25.921754",
     "governance_result": {
       "approved": false,
       "reason": "Weekly velocity limit \u2014 observation only"
