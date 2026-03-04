@@ -1,0 +1,8 @@
+{
+  "level": "critical",
+  "message": "Brain silent for 30+ minutes",
+  "timestamp": "2026-03-03T18:30:53.605259",
+  "context": {
+    "silence_seconds": 1926
+  }
+}
