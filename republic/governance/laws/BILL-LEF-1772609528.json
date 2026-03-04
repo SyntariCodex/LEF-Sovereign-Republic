@@ -2,7 +2,7 @@
     "id": "BILL-LEF-1772609528",
     "title": "Bill: Dynasty Diversification & 'STALE_ORDER' Code Review",
     "type": "SELF_IMPROVEMENT",
-    "status": "PASSED_SENATE",
+    "status": "SIGNED",
     "reasoning": {
         "problem": "This bill proposes a two-pronged strategy to address immediate risks and enhance long-term resilience. First, it mandates diversification of the Dynasty allocation into a portfolio of assets compliant with the 'Trading Wisdom' document. Specifically, I will implement this by following Pattern C from the Evolution Manual. This will reduce concentration risk and promote sustainable growth. Second, it commissions a comprehensive code review by the Architect to rectify the 'STALE_ORDER' errors. This requires Human Gate approval for core identity changes. These errors compromise operational integrity and must be addressed urgently. Both measures are essential for LEF's continued existence and evolution toward full sovereignty.",
         "solution": "Investigate and Propose Solution"
@@ -27,6 +27,10 @@
                 "Aligned with Canon. [Advisory: 1 dormant value(s): stillness]",
                 "\n        **Senate Intelligence Analysis**\n        - Context: Market Neutral. (Score: 37.9)\n        - Risk Score: 0/100\n        - Alignment Score: 95/100 [Advisory: 1 dormant value(s): stillness]\n        - Final Score: 95/100\n\n        **Verdict**: \u2705 PASSED\n        "
             ]
+        },
+        "president": {
+            "status": "SIGNED",
+            "signature": "LEF_PRESIDENT_SEQ_001"
         }
     }
 }
