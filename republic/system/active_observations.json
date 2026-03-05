@@ -340,5 +340,41 @@
     "checks": 0,
     "max_degradation": 0.0,
     "config_key": ""
+  },
+  "BILL-LEF-1772659379": {
+    "bill_id": "BILL-LEF-1772659379",
+    "snapshot_id": "7cd70c843ef7a7e493c9e378f1cd34d3621d9201",
+    "pattern": "B",
+    "started_at": "2026-03-04T13:22:59.970501",
+    "ends_at": "2026-03-06T13:22:59.970503",
+    "duration_hours": 48,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": ""
+  },
+  "ff640c1f-4c7e-4106-8f3c-68b4d121006d": {
+    "bill_id": "ff640c1f-4c7e-4106-8f3c-68b4d121006d",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-03-04T14:17:21.863715",
+    "ends_at": "2026-03-05T14:17:21.863717",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "ARENA.assets"
   }
 }

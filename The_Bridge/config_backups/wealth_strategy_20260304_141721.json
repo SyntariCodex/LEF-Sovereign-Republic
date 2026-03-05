@@ -21,6 +21,7 @@
       "SUI",
       "PEPE",
       "WIF",
+      "BONK",
       "YB-USD",
       "POWR-USD",
       "SYND-USD",
@@ -36,8 +37,7 @@
       "CFG-USD",
       "ME-USD",
       "REZ-USD",
-      "LAYER-USD",
-      "SAND-USD"
+      "LAYER-USD"
     ]
   },
   "LADDER_SELLS": [
@@ -55,7 +55,7 @@
     "pullback_pct": 0.1
   },
   "regime": "ACCUMULATION",
-  "macro_score": 47.34,
+  "macro_score": 47.62,
   "regime_updated_by": "AgentInfo",
-  "regime_timestamp": "2026-03-05T03:00:40"
+  "regime_timestamp": "2026-03-04T14:17:07"
 }
