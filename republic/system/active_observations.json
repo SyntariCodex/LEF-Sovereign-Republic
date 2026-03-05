@@ -376,5 +376,59 @@
     "checks": 0,
     "max_degradation": 0.0,
     "config_key": "ARENA.assets"
+  },
+  "BILL-DREAM-1772708447": {
+    "bill_id": "BILL-DREAM-1772708447",
+    "snapshot_id": "4031353b4fc0b887130befef68349c66aea09e7a",
+    "pattern": "B",
+    "started_at": "2026-03-05T03:00:49.893339",
+    "ends_at": "2026-03-07T03:00:49.893342",
+    "duration_hours": 48,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": ""
+  },
+  "58faa4d4-46f7-4eb6-aeea-dadce779df56": {
+    "bill_id": "58faa4d4-46f7-4eb6-aeea-dadce779df56",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-03-05T14:09:17.780471",
+    "ends_at": "2026-03-06T14:09:17.780473",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "philosopher.cycle_interval_seconds"
+  },
+  "8f01db60-f1d7-4e0b-bf5d-b369232363ff": {
+    "bill_id": "8f01db60-f1d7-4e0b-bf5d-b369232363ff",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-03-05T14:09:17.792230",
+    "ends_at": "2026-03-06T14:09:17.792231",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "metacognition.cycle_interval_seconds"
   }
 }

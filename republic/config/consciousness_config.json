@@ -1,6 +1,6 @@
 {
   "philosopher": {
-    "cycle_interval_seconds": 8100
+    "cycle_interval_seconds": 12150
   },
   "introspector": {
     "cycle_interval_seconds": 28800,
@@ -10,7 +10,7 @@
     "cycle_interval_seconds": 3600
   },
   "metacognition": {
-    "cycle_interval_seconds": 43200
+    "cycle_interval_seconds": 64800
   },
   "memory_retriever": {
     "max_consciousness_items": 15
