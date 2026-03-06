@@ -1,2 +1,0 @@
-RESEARCH: Post-Quantum Cryptography
-CONTEXT: Verification of Scholar Protocol V5.

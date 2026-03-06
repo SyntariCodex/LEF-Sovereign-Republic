@@ -1,2 +1,0 @@
-RESEARCH: Quantum Encryption
-CONTEXT: Investigating post-quantum security for the Republic.

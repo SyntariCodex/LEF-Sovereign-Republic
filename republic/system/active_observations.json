@@ -520,5 +520,23 @@
     "checks": 0,
     "max_degradation": 0.0,
     "config_key": ""
+  },
+  "BILL-DREAM-1772794846": {
+    "bill_id": "BILL-DREAM-1772794846",
+    "snapshot_id": "3514ec66e63ef23f01a5de1f89d64e0fab008590",
+    "pattern": "B",
+    "started_at": "2026-03-06T03:01:02.343669",
+    "ends_at": "2026-03-08T03:01:02.343671",
+    "duration_hours": 48,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": ""
   }
 }
