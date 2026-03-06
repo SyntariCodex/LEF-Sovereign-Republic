@@ -3,7 +3,15 @@
 republic/.env
 *.key
 *.pem
+*.secret
+*credentials*
 External Observer Reports/HACKATHON_CREDENTIALS.md
+CoinBase API.json
+Coinbase*.json
+*API*.txt
+**/*API*.json
+**/api_key*
+.claude/settings.local.json
 
 # === LARGE DATA FILES ===
 *.csv
@@ -52,7 +60,3 @@ Hackathon.txt
 
 # === NODE ===
 node_modules/
-.env
-republic/.env
-.env
-republic/.env
