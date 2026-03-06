@@ -140,7 +140,21 @@ The Republic operates under a departmental structure defined by the **LEF Chart 
 
 *Future Era:* In Living Body, becomes the hippocampus. In Living Eden, becomes the substrate all systems write to.
 
-### Section 9: Shared Services (`_services/`) *[Phase 14]*
+### Section 9: Department of Stewardship (The Steward) *[Phase 40 — DORMANT]*
+
+*Mission: Academic pattern intelligence — learning from de-identified student assessment data across Living Eden Frameworks' educational domain. Stewards human progress at population scale, not just capital.*
+
+* **The Steward** (AgentSteward): Academic pattern learning, intervention efficacy analysis, cohort-level insight generation.
+
+**Activation Conditions:** LEF Ed pilot live + NWEA MAP API + Clever Roster API connected. Until then, AgentSteward runs in dormant mode.
+
+**Privacy Law (Immutable):** Stewardship department may NEVER process individual student records. All data must pass de-identification: accepted fields are `age_range`, `hashed_student_id`, `grade_band`, `cohort_id`. Rejected fields include names, DOB, SSN, exact addresses. Aggregation minimum: 5 students per pattern. Governed by `config/lef_ed_config.json`.
+
+**Output:** Patterns written to `stewardship_feed` (DB) and `academic_patterns` (DB). Stewardship insights injected into LEF's awareness context alongside consciousness_feed.
+
+*Era trajectory:* Dormant in republic era → active in living_eden era.
+
+### Section 10: Shared Services (`_services/`) *[Phase 14]*  <!-- was Section 9 -->
 
 *Mission: Utility agents shared across all departments.*
 
@@ -149,7 +163,7 @@ The Republic operates under a departmental structure defined by the **LEF Chart 
 
 *Principle:* Services don't duplicate across departments — they're called as needed.
 
-### Section 10: Weekly Schedule
+### Section 11: Weekly Schedule  <!-- was Section 10 -->
 
 | Day | Mode | Activity |
 |-----|------|----------|

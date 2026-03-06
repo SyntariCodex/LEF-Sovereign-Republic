@@ -44,6 +44,20 @@
       "ethicist_strict": true,
       "cooling_period_hours": 168,
       "max_per_cycle": 1
+    },
+    "stewardship": {
+      "_note": "Changes to stewardship mission, academic domain policy, or data handling principles. Strict — touches human development data.",
+      "requires_ethicist": true,
+      "ethicist_strict": true,
+      "cooling_period_hours": 72,
+      "max_per_cycle": 1
+    },
+    "academic": {
+      "_note": "Pattern learning config for LEF Ed domain. Ethicist strict — student data must remain de-identified and pattern-only. No individual profiling.",
+      "requires_ethicist": true,
+      "ethicist_strict": true,
+      "cooling_period_hours": 48,
+      "max_per_cycle": 1
     }
   }
 }
