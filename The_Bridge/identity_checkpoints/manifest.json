@@ -1,12 +1,6 @@
 {
   "checkpoints": [
     {
-      "version": 12,
-      "hash": "c35cd50c75ed4172dbd12191a3a077d6c466ea2f736ed68ba10629bc0225570e",
-      "filename": "identity_checkpoint_v12.json",
-      "created_at": "2026-02-27T18:40:55.633003"
-    },
-    {
       "version": 13,
       "hash": "9a9c97380c9a54c12d9bf73e20ee6b610154cc4a55009a0fe02ab00414dbf184",
       "filename": "identity_checkpoint_v13.json",
@@ -59,6 +53,12 @@
       "hash": "2463498fb615b64a9937e951da3ac82ceddb38c8a099246325daf21e601aef77",
       "filename": "identity_checkpoint_v21.json",
       "created_at": "2026-03-05T06:12:56.372935"
+    },
+    {
+      "version": 22,
+      "hash": "3f93cbc0d0d119cd1d5d6922eb5e715eb6ba7b3f44d8d186852ad33522cde3b6",
+      "filename": "identity_checkpoint_v22.json",
+      "created_at": "2026-03-05T19:56:06.871499"
     }
   ]
 }

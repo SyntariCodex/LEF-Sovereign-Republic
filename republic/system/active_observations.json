@@ -502,5 +502,23 @@
     "checks": 0,
     "max_degradation": 0.0,
     "config_key": ""
+  },
+  "BILL-LEF-1772760643": {
+    "bill_id": "BILL-LEF-1772760643",
+    "snapshot_id": "0f9b58efaf9322172765459d52fd98ae9563098a",
+    "pattern": "B",
+    "started_at": "2026-03-05T17:30:44.201011",
+    "ends_at": "2026-03-07T17:30:44.201014",
+    "duration_hours": 48,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": ""
   }
 }
