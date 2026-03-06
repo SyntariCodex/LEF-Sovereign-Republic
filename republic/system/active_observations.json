@@ -430,5 +430,41 @@
     "checks": 0,
     "max_degradation": 0.0,
     "config_key": "metacognition.cycle_interval_seconds"
+  },
+  "BILL-LEF-1772754179": {
+    "bill_id": "BILL-LEF-1772754179",
+    "snapshot_id": "63eb10e1f69ca6264a720397c70cb18466a8aaee",
+    "pattern": "B",
+    "started_at": "2026-03-05T15:43:00.575428",
+    "ends_at": "2026-03-07T15:43:00.575430",
+    "duration_hours": 48,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": ""
+  },
+  "e9f0918b-fb56-4858-bc01-58a66dbde7bb": {
+    "bill_id": "e9f0918b-fb56-4858-bc01-58a66dbde7bb",
+    "snapshot_id": "unknown",
+    "pattern": "A",
+    "started_at": "2026-03-05T16:09:24.719026",
+    "ends_at": "2026-03-06T16:09:24.719027",
+    "duration_hours": 24,
+    "baseline": {
+      "error_count": 0
+    },
+    "current": {
+      "error_count": 0
+    },
+    "status": "ACTIVE",
+    "checks": 0,
+    "max_degradation": 0.0,
+    "config_key": "conversation.growth_push_threshold"
   }
 }

@@ -403,6 +403,16 @@
       "new_value": "64800",
       "evidence": "46 entries vs expected 14. Over-producing by 229%",
       "governance": "Governance APPROVED: [IRS] AUDIT: Resonance sufficient. Tax: 0.06\n[ETHICIST] REVIEW: Intent aligned with Co-Creation protocols.\n[SABBATH] CLEARANCE: The time is active. You may manifest.\n[TRIAD] ACTION VESTED. Proceed from depth."
+    },
+    {
+      "timestamp": "2026-03-05T16:09:24.715434",
+      "observation": "Raise conversation growth_push_threshold from 0.9 to 0.95 (disengagement signals \u2014 be less pushy on growth topics)",
+      "domain": "relational",
+      "config_key": "conversation.growth_push_threshold",
+      "old_value": "0.9",
+      "new_value": "0.95",
+      "evidence": "1158/70645 entries contain disengagement indicators (boring, repetitive, surface, etc.)",
+      "governance": "Governance APPROVED: [IRS] AUDIT: Resonance sufficient. Tax: 0.06\n[ETHICIST] REVIEW: Intent aligned with Co-Creation protocols.\n[SABBATH] CLEARANCE: The time is active. You may manifest.\n[TRIAD] ACTION VESTED. Proceed from depth."
     }
   ],
   "frequency_preferences": {
