@@ -144,7 +144,6 @@
         .donate-chip.usdc { background: #2775CA; }
         .donate-chip.dai { background: #F5AC37; }
         .donate-chip.usdt { background: #26A17B; }
-        .donate-chip.stripe { background: #635BFF; }
 
         /* ===== HERO ===== */
         .hero {
@@ -786,7 +785,6 @@
             <button class="donate-chip usdc" onclick="openModal('usdc')">USDC</button>
             <button class="donate-chip dai" onclick="openModal('dai')">DAI</button>
             <button class="donate-chip usdt" onclick="openModal('usdt')">USDT</button>
-            <button class="donate-chip stripe" onclick="openModal('stripe')">USD</button>
         </div>
         <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Menu">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
@@ -1000,7 +998,6 @@
             <button class="crypto-tab active" onclick="showCrypto('usdc')" data-crypto="usdc">USDC</button>
             <button class="crypto-tab" onclick="showCrypto('dai')" data-crypto="dai">DAI</button>
             <button class="crypto-tab" onclick="showCrypto('usdt')" data-crypto="usdt">USDT</button>
-            <button class="crypto-tab" onclick="showCrypto('stripe')" data-crypto="stripe">USD</button>
         </div>
 
         <div class="crypto-panel active" id="panel-usdc">
@@ -1027,20 +1024,9 @@
             </div>
         </div>
 
-        <div class="crypto-panel" id="panel-stripe">
-            <span class="network-badge" style="background: #635BFF;">Stripe · USD</span><br>
-            <stripe-buy-button
-              buy-button-id="buy_btn_1T8VnUQA8XXKXI4bRSm80kVk"
-              publishable-key="pk_live_51T8UqxQA8XXKXI4b8dnsjdzBkwfqmLhsUmOnXm18hr6vouiU2noVDQsBsAIWGLRhBF0PP2mEBUg3Oa6OCon8b5JO00EVjb1GYK"
-            >
-            </stripe-buy-button>
-        </div>
-
         <p class="copy-hint">Click address to copy</p>
     </div>
 </div>
-
-<script async src="https://js.stripe.com/v3/buy-button.js"></script>
 
 <script>
 // Force scroll to top on page load (prevents mobile browsers restoring old position)
