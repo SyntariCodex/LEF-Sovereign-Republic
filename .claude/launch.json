@@ -6,7 +6,7 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000,
-      "cwd": "/Users/zmoore-macbook/Desktop/LEF Ai/LEF Ai Projects/LEF Ed Logistics/lef-ed-platform/dashboard"
+      "cwd": "/Users/zmoore-macbook/Desktop/LEF Ai/LEF - Projects/LEF - Ed Logistics/lef-ed-platform/dashboard"
     }
   ]
 }
