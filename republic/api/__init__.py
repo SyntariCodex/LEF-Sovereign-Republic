@@ -1,3 +1,0 @@
-"""
-LEF API Package
-"""

@@ -1,6 +1,6 @@
 # === SECRETS ===
 .env
-republic/.env
+lef_ai/.env
 *.key
 *.pem
 *.secret
@@ -12,6 +12,10 @@ Coinbase*.json
 **/*API*.json
 **/api_key*
 .claude/settings.local.json
+Keys/
+
+# === FIREBASE CACHE ===
+.firebase/
 
 # === LARGE DATA FILES ===
 *.csv
@@ -26,21 +30,24 @@ Coinbase*.json
 *.db-shm
 *.db.bak
 *.db-backup
-republic/republic_sqlite_backup.db
+lef_ai/lef_ai_sqlite_backup.db
 
 # === LARGE DATA DIRECTORIES ===
-republic/library/
-republic/arena/
-republic/models/
-republic/venv/
-republic_archives/
+lef_ai/library/
+lef_ai/arena/
+lef_ai/models/
+lef_ai/venv/
+lef_ai_archives/
 LEF Ai Projects/
+LEF - Projects/
+Vector Traversal Reports/
+Workspace_Archive/
 backups/
 logs/
 
 # === LARGE FILES ===
-republic/republic.log
-republic/proposals/
+lef_ai/lef_ai.log
+lef_ai/proposals/
 
 # === PYTHON ===
 __pycache__/

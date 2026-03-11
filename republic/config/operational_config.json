@@ -1,8 +1,0 @@
-{
-  "agents": {
-    "default": {"enabled": true, "max_retries": 10, "base_delay": 5}
-  },
-  "logging": {
-    "default_level": "INFO"
-  }
-}
