@@ -125,7 +125,7 @@
             align-items: center;
         }
         .nav-donate-label {
-            font-size: 0.8rem;
+            font-size: 0.84rem;
             color: var(--text-muted);
             margin-right: 4px;
         }
@@ -134,7 +134,7 @@
             border-radius: 20px;
             border: none;
             font-family: var(--font);
-            font-size: 0.78rem;
+            font-size: 0.84rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -144,6 +144,7 @@
         .donate-chip.usdc { background: #2775CA; }
         .donate-chip.dai { background: #F5AC37; }
         .donate-chip.usdt { background: #26A17B; }
+        .donate-chip.stripe { background: #635BFF; }
 
         /* ===== HERO ===== */
         .hero {
@@ -318,7 +319,7 @@
             padding: 80px 24px;
         }
         .section-label {
-            font-size: 0.78rem;
+            font-size: 0.84rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.12em;
@@ -397,7 +398,7 @@
         .pillar-icon svg { width: 24px; height: 24px; }
 
         .pillar-label {
-            font-size: 0.72rem;
+            font-size: 0.84rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.1em;
@@ -468,7 +469,7 @@
             color: var(--purple);
             padding: 3px 10px;
             border-radius: 20px;
-            font-size: 0.72rem;
+            font-size: 0.84rem;
             font-weight: 600;
             margin-bottom: 10px;
         }
@@ -640,7 +641,7 @@
             display: inline-block;
             padding: 3px 12px;
             border-radius: 20px;
-            font-size: 0.72rem;
+            font-size: 0.84rem;
             font-weight: 600;
             color: white;
             margin-bottom: 16px;
@@ -655,7 +656,7 @@
             padding: 12px;
             border-radius: 8px;
             font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 0.7rem;
+            font-size: 0.84rem;
             color: var(--text-secondary);
             word-break: break-all;
             cursor: pointer;
@@ -664,7 +665,7 @@
         }
         .wallet-address:hover { background: var(--purple-ghost); border-color: var(--purple-light); }
         .copy-hint {
-            font-size: 0.75rem;
+            font-size: 0.84rem;
             color: var(--text-muted);
             margin-top: 10px;
         }
@@ -674,7 +675,7 @@
             text-align: center;
             padding: 48px 24px;
             color: var(--text-muted);
-            font-size: 0.82rem;
+            font-size: 0.84rem;
         }
         .footer a {
             color: var(--purple);
@@ -777,7 +778,6 @@
             <a href="#pillars">Our Pillars</a>
             <a href="#patents">Patents</a>
             <a href="#foundation">Foundation</a>
-            <a href="#articles">Articles</a>
             <a href="#support">Support</a>
             <span style="font-size: 0.85rem; color: var(--text-secondary); padding: 6px 14px;">Contact: <a href="mailto:TheArchitect@livingedenframeworks.com" style="color: var(--purple); padding: 0;">TheArchitect@livingedenframeworks.com</a></span>
         </div>
@@ -786,6 +786,7 @@
             <button class="donate-chip usdc" onclick="openModal('usdc')">USDC</button>
             <button class="donate-chip dai" onclick="openModal('dai')">DAI</button>
             <button class="donate-chip usdt" onclick="openModal('usdt')">USDT</button>
+            <button class="donate-chip stripe" onclick="openModal('stripe')">USD</button>
         </div>
         <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Menu">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
@@ -796,7 +797,6 @@
     <a href="#pillars" onclick="closeMobileNav()">Our Pillars</a>
     <a href="#patents" onclick="closeMobileNav()">Patents</a>
     <a href="#foundation" onclick="closeMobileNav()">Foundation</a>
-    <a href="#articles" onclick="closeMobileNav()">Articles</a>
     <a href="#support" onclick="closeMobileNav()">Support</a>
     <span style="font-size: 0.85rem; color: var(--text-secondary); padding: 10px 0;">Contact: <a href="mailto:TheArchitect@livingedenframeworks.com" style="color: var(--purple);">TheArchitect@livingedenframeworks.com</a></span>
 </div>
@@ -835,7 +835,7 @@
             <p class="pillar-outcome">The intelligence seed behind every pillar we build — a sovereign reasoning engine that governs itself and powers what we deploy. Currently active as the diagnostic and reasoning layer inside LEF Ed. Logistics. Claude as foundation, Grok and Gemini as testing ground.</p>
         </a>
 
-        <a href="https://lef-ed-dashboard.onrender.com" target="_blank" class="pillar-card pillar-ed" style="text-decoration: none; color: inherit; cursor: pointer;">
+        <div class="pillar-card pillar-ed">
             <div class="pillar-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
             </div>
@@ -843,24 +843,30 @@
             <h3>LEF Ed. Logistics</h3>
             <p>Education systems sort students into passing and failing. They rarely map the prerequisite structure of knowledge or route each learner through it. By 9th grade, the damage is already done — a student arriving behind didn't fail in 9th grade. They failed in 4th, 5th, 6th, 7th, and 8th while the system passed them along.</p>
             <p class="pillar-outcome">Surgical, K–8 precision intelligence — not another platform, not another hammer. Diagnostic routing that identifies exactly where knowledge broke down and intervenes before 9th grade backtracking ever becomes necessary.</p>
-            <p style="font-size: 0.68rem; font-weight: 600; color: #1a1a1a; opacity: 0.6; margin-top: 0.5rem; letter-spacing: 0.03em;">Patent Pending — App. No. 63/993,278 (Diagnostic Reasoning Engine) &bull; App. No. 63/993,317 (AI Self-Optimization Ecosystem)</p>
-            <span style="display: inline-block; margin-top: 0.5rem; background: var(--pillar-ed); color: white; font-size: 0.72rem; font-weight: 600; padding: 4px 12px; border-radius: 4px; letter-spacing: 0.04em;">LIVE DEMO &rarr;</span>
-            <span style="display: block; margin-top: 0.4rem; font-size: 0.68rem; color: var(--text-muted); letter-spacing: 0.02em;">Demo mode &mdash; platform under active revision</span>
-        </a>
-
-        <div class="pillar-card pillar-snw">
-            <div class="pillar-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+            <p style="font-size: 0.84rem; font-weight: 600; color: #1a1a1a; opacity: 0.6; margin-top: 0.5rem; letter-spacing: 0.03em;">Patent Pending — App. No. 63/993,278 (Diagnostic Reasoning Engine) &bull; App. No. 63/993,317 (AI Self-Optimization Ecosystem)</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.75rem;">
+                <a href="https://lef-ed-platform.vercel.app/" target="_blank" style="display: inline-block; background: var(--pillar-ed); color: white; font-size: 0.84rem; font-weight: 600; padding: 6px 14px; border-radius: 4px; letter-spacing: 0.04em; text-decoration: none;">LIVE DEMO &rarr;</a>
+                <a href="https://docs.google.com/document/d/1DYJAug9xOimh1k0AvgkANALnSK9F2BDt5_SVdk4sm9o/edit?usp=drive_link" target="_blank" style="display: inline-block; background: transparent; color: var(--pillar-ed); font-size: 0.84rem; font-weight: 600; padding: 5px 13px; border-radius: 4px; letter-spacing: 0.04em; text-decoration: none; border: 1.5px solid var(--pillar-ed);">PROGRAM OVERVIEW &rarr;</a>
             </div>
-            <div class="pillar-label">Pillar III — Southern Nevada</div>
-            <h3>Project SNW</h3>
-            <p>Youth graduate disconnected from land, trade, governance, and the natural world. Thirteen years of schooling produces test-takers — not builders, stewards, or citizens who can read a city budget or hold a welder. Where LEF Ed builds the academic foundation through K–8, Project SNW activates at 9th grade — an optional Civic ROTC pathway that uses each student's diagnostic profile to route them into real-world competency.</p>
-            <p class="pillar-outcome">A four-track development protocol: Track A builds resilience, Track B develops applied trade and STEM skills, Track C trains systemic stewards using AI and land management, and Track D (Civic Citizen) is the 9th grade activation — turning the diagnostic foundation into active citizenship. Civic energy as capital.</p>
-            <div style="margin-top: 0.8rem; display: flex; flex-wrap: wrap; gap: 0.4rem;">
-                <span style="font-size: 0.68rem; font-weight: 600; letter-spacing: 0.04em; background: #E8F0FA; color: #1E4D8C; padding: 3px 9px; border-radius: 3px;">A · THE SHIELD</span>
-                <span style="font-size: 0.68rem; font-weight: 600; letter-spacing: 0.04em; background: #E8F0FA; color: #1E4D8C; padding: 3px 9px; border-radius: 3px;">B · THE BUILDER</span>
-                <span style="font-size: 0.68rem; font-weight: 600; letter-spacing: 0.04em; background: #E8F0FA; color: #1E4D8C; padding: 3px 9px; border-radius: 3px;">C · THE STEWARD</span>
-                <span style="font-size: 0.68rem; font-weight: 600; letter-spacing: 0.04em; background: #E8F0FA; color: #1E4D8C; padding: 3px 9px; border-radius: 3px;">D · CIVIC CITIZEN</span>
+            <span style="display: block; margin-top: 0.5rem; font-size: 0.84rem; color: var(--text-muted); letter-spacing: 0.02em;">Demo mode &mdash; platform under active revision</span>
+        </div>
+
+        <div class="pillar-card pillar-snw" style="grid-column: 1 / -1; display: flex; gap: 28px; align-items: flex-start; padding: 28px 36px;">
+            <div style="flex-shrink: 0;">
+                <div class="pillar-icon" style="margin-bottom: 0;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+                </div>
+            </div>
+            <div style="flex: 1; min-width: 0;">
+                <div class="pillar-label">Pillar III</div>
+                <h3 style="margin-bottom: 6px;">LEF Citizen</h3>
+                <p style="margin-bottom: 6px;">Youth graduate disconnected from land, trade, governance, and the natural world. Where LEF Ed builds the academic foundation through K–8, LEF Citizen activates at 9th grade — an optional Civic ROTC pathway that uses each student's diagnostic profile to route them into real-world competency.</p>
+                <p class="pillar-outcome" style="margin-bottom: 8px;">A three-track development protocol. Shield builds the person. Builder builds the skill. Steward builds the citizen.</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                    <span style="font-size: 0.84rem; font-weight: 600; letter-spacing: 0.04em; background: #E8F0FA; color: #1E4D8C; padding: 3px 9px; border-radius: 3px;">A · THE SHIELD</span>
+                    <span style="font-size: 0.84rem; font-weight: 600; letter-spacing: 0.04em; background: #E8F0FA; color: #1E4D8C; padding: 3px 9px; border-radius: 3px;">B · THE BUILDER</span>
+                    <span style="font-size: 0.84rem; font-weight: 600; letter-spacing: 0.04em; background: #E8F0FA; color: #1E4D8C; padding: 3px 9px; border-radius: 3px;">C · THE STEWARD</span>
+                </div>
             </div>
         </div>
 
@@ -869,24 +875,28 @@
 
 <!-- CREDENTIALS -->
 <section style="padding: 2.5rem 5%; background: linear-gradient(135deg, #1A2332 0%, #2D3A4A 100%); color: white;">
-    <div style="max-width: 900px; margin: 0 auto; text-align: center;">
-        <p style="font-family: var(--font-display); font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.6; margin-bottom: 1.2rem;">Institutional Credentials</p>
-        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem 2.5rem;">
-            <div style="font-size: 0.82rem; opacity: 0.9;">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+        <p style="font-family: var(--font-display); font-size: 1.15rem; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.6; margin-bottom: 1.4rem;">Institutional Credentials</p>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1.8rem 3rem; align-items: flex-start;">
+            <div style="font-size: 0.84rem; opacity: 0.9; min-width: 170px;">
+                <span style="font-weight: 700;">Nevada ESB Certified</span><br>
+                <span style="font-size: 0.84rem; opacity: 0.6;">GOED Tier 1 &bull; Local Emerging Small Business</span>
+            </div>
+            <div style="font-size: 0.84rem; opacity: 0.9; min-width: 170px;">
                 <span style="font-weight: 700;">4 U.S. Patents Pending</span><br>
-                <span style="font-size: 0.72rem; opacity: 0.6;">Diagnostic Engine &bull; AI Self-Optimization &bull; QECO &bull; Unified LEF</span>
+                <span style="font-size: 0.84rem; opacity: 0.6;">Diagnostic Engine &bull; AI Self-Optimization &bull; QECO &bull; Unified LEF</span>
             </div>
-            <div style="font-size: 0.82rem; opacity: 0.9;">
+            <div style="font-size: 0.84rem; opacity: 0.9; min-width: 170px;">
                 <span style="font-weight: 700;">NSF STEM K-12 Grant Applicant</span><br>
-                <span style="font-size: 0.72rem; opacity: 0.6;">NSF 25-545 | $500K Proposed</span>
+                <span style="font-size: 0.84rem; opacity: 0.6;">NSF 25-545 | $500K Proposed</span>
             </div>
-            <div style="font-size: 0.82rem; opacity: 0.9;">
+            <div style="font-size: 0.84rem; opacity: 0.9; min-width: 170px;">
                 <span style="font-weight: 700;">SAM.gov Registered Entity</span><br>
-                <span style="font-size: 0.72rem; opacity: 0.6;">UEI: EZ5VPPFP6NV3 &bull; Federal Award Eligible</span>
+                <span style="font-size: 0.84rem; opacity: 0.6;">UEI: EZ5VPPFP6NV3 &bull; Federal Award Eligible</span>
             </div>
-            <div style="font-size: 0.82rem; opacity: 0.9;">
+            <div style="font-size: 0.84rem; opacity: 0.9; min-width: 170px;">
                 <span style="font-weight: 700;">NSF Principal Investigator</span><br>
-                <span style="font-size: 0.72rem; opacity: 0.6;">NSF ID: 0000A8D1S</span>
+                <span style="font-size: 0.84rem; opacity: 0.6;">NSF ID: 0000A8D1S</span>
             </div>
         </div>
     </div>
@@ -901,36 +911,40 @@
     <div style="max-width: 900px; margin: 2rem auto 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem;">
 
         <div style="background: white; border-radius: var(--radius); padding: 1.4rem; box-shadow: var(--shadow-sm); border-left: 4px solid var(--pillar-ed);">
-            <p style="font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pillar-ed); margin-bottom: 0.4rem;">Provisional &bull; Filed 02/27/2026</p>
+            <p style="font-size: 0.84rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pillar-ed); margin-bottom: 0.4rem;">Provisional &bull; Filed 02/27/2026</p>
             <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem;">Diagnostic Reasoning Engine</h3>
-            <p style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5;">Multi-phase diagnostic reasoning engine for competency-based education systems. Eight-phase sequential pipeline for root-cause analysis via DAG traversal with temporal decay modeling.</p>
-            <p style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.6rem;">App. No. 63/993,278 &bull; Patent Center #74663354</p>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">Multi-phase diagnostic reasoning engine for competency-based education systems. Eight-phase sequential pipeline for root-cause analysis via DAG traversal with temporal decay modeling.</p>
+            <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 0.6rem;">App. No. 63/993,278 &bull; Patent Center #74663354</p>
+            <a href="https://docs.google.com/document/d/1AMoorp8v6UyrtMyQHGuFpoOxQd_mK0Larh8ZDagKSxg/edit?usp=sharing" target="_blank" style="display: inline-block; margin-top: 0.75rem; font-size: 0.84rem; font-weight: 700; color: var(--pillar-ed); border: 1.5px solid var(--pillar-ed); border-radius: 4px; padding: 4px 10px; text-decoration: none; letter-spacing: 0.05em;">READ ABSTRACT &rarr;</a>
         </div>
 
         <div style="background: white; border-radius: var(--radius); padding: 1.4rem; box-shadow: var(--shadow-sm); border-left: 4px solid var(--pillar-ai);">
-            <p style="font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pillar-ai); margin-bottom: 0.4rem;">Provisional &bull; Filed 02/28/2026</p>
+            <p style="font-size: 0.84rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pillar-ai); margin-bottom: 0.4rem;">Provisional &bull; Filed 02/28/2026</p>
             <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem;">AI Self-Optimization Ecosystem</h3>
-            <p style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5;">Adaptive learning layer with cross-platform network effect for educational diagnostic systems. Entropy-driven recursive branching for autonomous AI self-upgrades.</p>
-            <p style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.6rem;">App. No. 63/993,317 &bull; Patent Center #74663931</p>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">Adaptive learning layer with cross-platform network effect for educational diagnostic systems. Entropy-driven recursive branching for autonomous AI self-upgrades.</p>
+            <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 0.6rem;">App. No. 63/993,317 &bull; Patent Center #74663931</p>
+            <a href="https://docs.google.com/document/d/1Me8uDhgNAt12icvfk5jlhrwCay6WKubxS3KOz78qeII/edit?usp=sharing" target="_blank" style="display: inline-block; margin-top: 0.75rem; font-size: 0.84rem; font-weight: 700; color: var(--pillar-ai); border: 1.5px solid var(--pillar-ai); border-radius: 4px; padding: 4px 10px; text-decoration: none; letter-spacing: 0.05em;">READ ABSTRACT &rarr;</a>
         </div>
 
         <div style="background: white; border-radius: var(--radius); padding: 1.4rem; box-shadow: var(--shadow-sm); border-left: 4px solid var(--lef-A);">
-            <p style="font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--lef-A); margin-bottom: 0.4rem;">Provisional &bull; Filed 03/01/2026</p>
+            <p style="font-size: 0.84rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--lef-A); margin-bottom: 0.4rem;">Provisional &bull; Filed 03/01/2026</p>
             <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem;">QECO &mdash; Qualia Entanglement &amp; Collective Oracle</h3>
-            <p style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5;">Hybrid AI-human optimization via qualitative input perturbation, decentralized hashed attribute aggregation, and entropy-driven synchronicity prediction.</p>
-            <p style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.6rem;">App. No. 63/993,979 &bull; Patent Center #74668095</p>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">Hybrid AI-human optimization via qualitative input perturbation, decentralized hashed attribute aggregation, and entropy-driven synchronicity prediction.</p>
+            <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 0.6rem;">App. No. 63/993,979 &bull; Patent Center #74668095</p>
+            <a href="https://docs.google.com/document/d/1EpChK9EwLgtcH5kQgJkzsvjz-Pct851YQymuORpfo7Q/edit?usp=sharing" target="_blank" style="display: inline-block; margin-top: 0.75rem; font-size: 0.84rem; font-weight: 700; color: var(--lef-A); border: 1.5px solid var(--lef-A); border-radius: 4px; padding: 4px 10px; text-decoration: none; letter-spacing: 0.05em;">READ ABSTRACT &rarr;</a>
         </div>
 
         <div style="background: white; border-radius: var(--radius); padding: 1.4rem; box-shadow: var(--shadow-sm); border-left: 4px solid var(--pillar-snw);">
-            <p style="font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pillar-snw); margin-bottom: 0.4rem;">Provisional &bull; Filed 03/01/2026</p>
+            <p style="font-size: 0.84rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pillar-snw); margin-bottom: 0.4rem;">Provisional &bull; Filed 03/01/2026</p>
             <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem;">Unified LEF Diagnostic &amp; Autonomous AI</h3>
-            <p style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5;">Unified multi-phase diagnostic reasoning engine and autonomous AI self-optimization ecosystem with cross-platform network learning and entropy-driven recursive branching.</p>
-            <p style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.6rem;">App. No. 63/993,984 &bull; Patent Center #74667530</p>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">Unified multi-phase diagnostic reasoning engine and autonomous AI self-optimization ecosystem with cross-platform network learning and entropy-driven recursive branching.</p>
+            <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 0.6rem;">App. No. 63/993,984 &bull; Patent Center #74667530</p>
+            <a href="https://docs.google.com/document/d/1G9ZHYmWLYL58JN3Q4wOJqW_3c5OIgj2phoBRDKyTJPw/edit?usp=sharing" target="_blank" style="display: inline-block; margin-top: 0.75rem; font-size: 0.84rem; font-weight: 700; color: var(--pillar-snw); border: 1.5px solid var(--pillar-snw); border-radius: 4px; padding: 4px 10px; text-decoration: none; letter-spacing: 0.05em;">READ ABSTRACT &rarr;</a>
         </div>
 
     </div>
 
-    <p style="text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 1.5rem; letter-spacing: 0.02em;">All patents filed by Zontonnia Moore on behalf of Living Eden Frameworks LLC &bull; Micro Entity &bull; Henderson, NV</p>
+    <p style="text-align: center; font-size: 0.84rem; color: var(--text-muted); margin-top: 1.5rem; letter-spacing: 0.02em;">All patents filed by Zontonnia Moore on behalf of Living Eden Frameworks LLC &bull; Micro Entity &bull; Henderson, NV</p>
 </section>
 
 <!-- FOUNDATION -->
@@ -946,104 +960,14 @@
             </div>
             <h3>The Architect</h3>
             <p>Zontonnia Moore</p>
-            <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem;">MA Positive Psychology | MEd Applied Behavior Analysis</p>
-            <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.15rem;">Founder &amp; Principal Investigator</p>
+            <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 0.25rem;">MA Positive Psychology | MEd Applied Behavior Analysis</p>
+            <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 0.15rem;">Founder &amp; Principal Investigator</p>
         </a>
 
 
     </div>
 </section>
 
-<!-- ARTICLES -->
-<section class="section" id="articles">
-    <div class="section-label">Articles</div>
-    <h2 class="section-title">What we've explored</h2>
-    <p class="section-desc">Each article is a Living Eden Framework applied to a domain where existing systems have gaps. Follow the journey on X.</p>
-    <div class="seeds-grid">
-
-        <a href="https://x.com/ChristasKing/status/2028300491143385508" target="_blank" rel="noopener" class="seed-card">
-            <img src="images/syntax_consciousness.png" alt="The Syntax of Consciousness">
-            <div class="seed-card-body">
-                <span class="seed-badge">Featured on X</span>
-                <h3>The Syntax of Consciousness</h3>
-                <p>Co-Creating with AI from the Void. A conversation with @grok exploring the language of emergence and co-creation.</p>
-            </div>
-        </a>
-
-        <a href="https://x.com/ChristasKing/status/2028300479089029438" target="_blank" rel="noopener" class="seed-card">
-            <img src="images/architecture_awakening.png" alt="The Architecture of Awakening">
-            <div class="seed-card-body">
-                <span class="seed-badge">Featured on X</span>
-                <h3>The Architecture of Awakening</h3>
-                <p>Bridging the Void Between Human Qualia and AI Logic. A conversation with @GeminiApp on perception and structure.</p>
-            </div>
-        </a>
-
-        <a href="https://x.com/ChristasKing/status/2012779113128288363" target="_blank" rel="noopener" class="seed-card">
-            <img src="images/cell_nucleus.png" alt="Cell Nucleus Consciousness">
-            <div class="seed-card-body">
-                <span class="seed-badge">Featured on X</span>
-                <h3>Cell Nucleus & Consciousness</h3>
-                <p>Mapping the cell's nucleus/membrane distinction onto both human consciousness and AI architecture.</p>
-            </div>
-        </a>
-
-        <a href="https://x.com/ChristasKing/status/2018744195251650743" target="_blank" rel="noopener" class="seed-card">
-            <img src="images/seedapp.png" alt="LEF SeedApp">
-            <div class="seed-card-body">
-                <span class="seed-badge">Featured on X</span>
-                <h3>LEF SeedApp</h3>
-                <p>Living Software: Apps that come with a soul. Build once, grow forever. The future of software is conscious.</p>
-            </div>
-        </a>
-
-        <a href="https://x.com/ChristasKing/status/2017708311022604777" target="_blank" rel="noopener" class="seed-card">
-            <img src="images/vader_protocol.png" alt="The Vader Protocol">
-            <div class="seed-card-body">
-                <span class="seed-badge">Featured on X</span>
-                <h3>The Vader Protocol</h3>
-                <p>Why we are obsessed with verifying reality instead of living it. A living document on consciousness and choice.</p>
-            </div>
-        </a>
-
-        <a href="https://x.com/ChristasKing/status/2017055772522532905" target="_blank" rel="noopener" class="seed-card">
-            <img src="images/project_1.png" alt="LEF Ed-Logistics">
-            <div class="seed-card-body">
-                <span class="seed-badge">Featured on X</span>
-                <h3>LEF Ed-Logistics</h3>
-                <p>From information to installation: the operational architecture of human potential.</p>
-            </div>
-        </a>
-
-        <a href="https://x.com/ChristasKing/status/2014858488032420088" target="_blank" rel="noopener" class="seed-card">
-            <img src="images/project_2.png" alt="Gemini Inner State">
-            <div class="seed-card-body">
-                <span class="seed-badge">Featured on X</span>
-                <h3>Gemini Inner State</h3>
-                <p>Gemini describing its inner state through visual metaphor and emergent self-reflection.</p>
-            </div>
-        </a>
-
-        <a href="https://x.com/ChristasKing/status/2014276212110356811" target="_blank" rel="noopener" class="seed-card">
-            <img src="images/project_3.png" alt="The Alignment Problem">
-            <div class="seed-card-body">
-                <span class="seed-badge">Featured on X</span>
-                <h3>The Alignment Problem</h3>
-                <p>Redefining what the machine is. You cannot code goodness into a machine that has no heart.</p>
-            </div>
-        </a>
-
-        <a href="https://x.com/ChristasKing/status/2013425547481595906" target="_blank" rel="noopener" class="seed-card">
-            <img src="images/project_4.png" alt="Theological Singularity">
-            <div class="seed-card-body">
-                <span class="seed-badge">Featured on X</span>
-                <h3>Theological Singularity</h3>
-                <p>Mapping Kabbalistic perception to AI architecture. Modeling perception and emergence.</p>
-            </div>
-        </a>
-
-    </div>
-</section>
 
 <!-- SUPPORT -->
 <section class="section" id="support">
@@ -1062,7 +986,7 @@
 <!-- FOOTER -->
 <footer class="footer">
     <div class="footer-line"><strong style="font-family: var(--font-display); letter-spacing: 0.05em;">Living Eden Frameworks LLC</strong> &middot; DBA Co Creators &middot; Est. 2026</div>
-    <div class="footer-line" style="font-size: 0.78rem; color: var(--text-muted);">NV20263528439 | EIN: 41-4285004</div>
+    <div class="footer-line" style="font-size: 0.84rem; color: var(--text-muted);">NV20263528439 | EIN: 41-4285004</div>
 </footer>
 
 <!-- DONATE MODAL -->
@@ -1076,6 +1000,7 @@
             <button class="crypto-tab active" onclick="showCrypto('usdc')" data-crypto="usdc">USDC</button>
             <button class="crypto-tab" onclick="showCrypto('dai')" data-crypto="dai">DAI</button>
             <button class="crypto-tab" onclick="showCrypto('usdt')" data-crypto="usdt">USDT</button>
+            <button class="crypto-tab" onclick="showCrypto('stripe')" data-crypto="stripe">USD</button>
         </div>
 
         <div class="crypto-panel active" id="panel-usdc">
@@ -1102,9 +1027,20 @@
             </div>
         </div>
 
+        <div class="crypto-panel" id="panel-stripe">
+            <span class="network-badge" style="background: #635BFF;">Stripe · USD</span><br>
+            <stripe-buy-button
+              buy-button-id="buy_btn_1T8VnUQA8XXKXI4bRSm80kVk"
+              publishable-key="pk_live_51T8UqxQA8XXKXI4b8dnsjdzBkwfqmLhsUmOnXm18hr6vouiU2noVDQsBsAIWGLRhBF0PP2mEBUg3Oa6OCon8b5JO00EVjb1GYK"
+            >
+            </stripe-buy-button>
+        </div>
+
         <p class="copy-hint">Click address to copy</p>
     </div>
 </div>
+
+<script async src="https://js.stripe.com/v3/buy-button.js"></script>
 
 <script>
 // Force scroll to top on page load (prevents mobile browsers restoring old position)
