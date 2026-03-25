@@ -144,6 +144,7 @@
         .donate-chip.usdc { background: #2775CA; }
         .donate-chip.dai { background: #F5AC37; }
         .donate-chip.usdt { background: #26A17B; }
+        .donate-chip.support { background: var(--purple); }
 
         /* ===== HERO ===== */
         .hero {
@@ -557,6 +558,7 @@
         .support-btn.usdc { background: #2775CA; }
         .support-btn.dai { background: #F5AC37; }
         .support-btn.usdt { background: #26A17B; }
+        .support-btn.support { background: var(--purple); }
 
         /* ===== DONATE MODAL ===== */
         .modal-overlay {
@@ -777,15 +779,9 @@
             <a href="#pillars">Our Pillars</a>
             <a href="#patents">Patents</a>
             <a href="#foundation">Foundation</a>
-            <a href="#support">Support</a>
             <span style="font-size: 0.85rem; color: var(--text-secondary); padding: 6px 14px;">Contact: <a href="mailto:TheArchitect@livingedenframeworks.com" style="color: var(--purple); padding: 0;">TheArchitect@livingedenframeworks.com</a></span>
         </div>
-        <div class="nav-donate">
-            <span class="nav-donate-label">Donate:</span>
-            <button class="donate-chip usdc" onclick="openModal('usdc')">USDC</button>
-            <button class="donate-chip dai" onclick="openModal('dai')">DAI</button>
-            <button class="donate-chip usdt" onclick="openModal('usdt')">USDT</button>
-        </div>
+        <!-- Support button removed from header -->
         <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Menu">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
         </button>
@@ -795,7 +791,6 @@
     <a href="#pillars" onclick="closeMobileNav()">Our Pillars</a>
     <a href="#patents" onclick="closeMobileNav()">Patents</a>
     <a href="#foundation" onclick="closeMobileNav()">Foundation</a>
-    <a href="#support" onclick="closeMobileNav()">Support</a>
     <span style="font-size: 0.85rem; color: var(--text-secondary); padding: 10px 0;">Contact: <a href="mailto:TheArchitect@livingedenframeworks.com" style="color: var(--purple);">TheArchitect@livingedenframeworks.com</a></span>
 </div>
 
@@ -819,7 +814,7 @@
 <section class="section" id="pillars">
     <div class="section-label">Our Pillars</div>
     <h2 class="section-title">The architecture of LEF LLC</h2>
-    <p class="section-desc">Each pillar addresses a different dimension of human life. Together they form a single coherent organism — with LEF Ai as the intelligence that connects and drives them all.</p>
+    <p class="section-desc">LEF Ai is the reasoning engine. LEF Ed. is the product it powers. Together they form a single coherent organism — intelligence driving action.</p>
     <div class="divider"></div>
     <div class="pillars-grid">
 
@@ -838,34 +833,31 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
             </div>
             <div class="pillar-label">Pillar II</div>
-            <h3>LEF Ed. Logistics</h3>
+            <h3>LEF Ed.</h3>
             <p>Education systems sort students into passing and failing. They rarely map the prerequisite structure of knowledge or route each learner through it. By 9th grade, the damage is already done — a student arriving behind didn't fail in 9th grade. They failed in 4th, 5th, 6th, 7th, and 8th while the system passed them along.</p>
-            <p class="pillar-outcome">Surgical, K–8 precision intelligence — not another platform, not another hammer. Diagnostic routing that identifies exactly where knowledge broke down and intervenes before 9th grade backtracking ever becomes necessary.</p>
-            <p style="font-size: 0.84rem; font-weight: 600; color: #1a1a1a; opacity: 0.6; margin-top: 0.5rem; letter-spacing: 0.03em;">Patent Pending — App. No. 63/993,278 (Diagnostic Reasoning Engine) &bull; App. No. 63/993,317 (AI Self-Optimization Ecosystem)</p>
+            <p class="pillar-outcome">One platform, three layers — each building on the same student data, the same reasoning engine, and the same diagnostic foundation.</p>
+
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid rgba(45,138,78,0.2);">
+                <div>
+                    <span style="font-size: 0.84rem; font-weight: 700; letter-spacing: 0.04em; color: var(--pillar-ed);">Logistics</span>
+                    <span style="font-size: 0.84rem; color: var(--text-secondary); margin-left: 0.4rem;">K&ndash;8 MTSS diagnostic intelligence. Prerequisite DAG traversal, Ebbinghaus decay modeling, and autonomous resource routing. Identifies where knowledge broke down and acts before 9th grade backtracking becomes necessary.</span>
+                </div>
+                <div>
+                    <span style="font-size: 0.84rem; font-weight: 700; letter-spacing: 0.04em; color: var(--pillar-ed);">Specialist</span>
+                    <span style="font-size: 0.84rem; color: var(--text-secondary); margin-left: 0.4rem;">IEP intelligence and behavioral-academic correlation. Overlays behavioral data (SAEBRS, SEB screening) on academic health to surface students whose struggles are rooted in behavior, not instruction gaps.</span>
+                </div>
+                <div>
+                    <span style="font-size: 0.84rem; font-weight: 700; letter-spacing: 0.04em; color: var(--pillar-ed);">STEM+</span>
+                    <span style="font-size: 0.84rem; color: var(--text-secondary); margin-left: 0.4rem;">Career pathway intelligence. Uses each student's diagnostic profile to route them into real-world competency tracks: Law Enforcement, Military, Trade Skills, Health Care, and STEM fields. Where Logistics builds the academic foundation, STEM+ activates it.</span>
+                </div>
+            </div>
+
+            <p style="font-size: 0.84rem; font-weight: 600; color: #1a1a1a; opacity: 0.6; margin-top: 0.75rem; letter-spacing: 0.03em;">Patent Pending — App. No. 63/993,278 (Diagnostic Reasoning Engine) &bull; App. No. 63/993,317 (AI Self-Optimization Ecosystem)</p>
             <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.75rem;">
-                <a href="https://lef-ed-platform.vercel.app/" target="_blank" style="display: inline-block; background: var(--pillar-ed); color: white; font-size: 0.84rem; font-weight: 600; padding: 6px 14px; border-radius: 4px; letter-spacing: 0.04em; text-decoration: none;">LIVE DEMO &rarr;</a>
+                <a href="https://lef-ed-platform.vercel.app/" target="_blank" style="display: inline-block; background: var(--pillar-ed); color: white; font-size: 0.84rem; font-weight: 600; padding: 6px 14px; border-radius: 4px; letter-spacing: 0.04em; text-decoration: none;">DISCOVERY &rarr;</a>
                 <a href="https://docs.google.com/document/d/1DYJAug9xOimh1k0AvgkANALnSK9F2BDt5_SVdk4sm9o/edit?usp=drive_link" target="_blank" style="display: inline-block; background: transparent; color: var(--pillar-ed); font-size: 0.84rem; font-weight: 600; padding: 5px 13px; border-radius: 4px; letter-spacing: 0.04em; text-decoration: none; border: 1.5px solid var(--pillar-ed);">PROGRAM OVERVIEW &rarr;</a>
             </div>
-            <span style="display: block; margin-top: 0.5rem; font-size: 0.84rem; color: var(--text-muted); letter-spacing: 0.02em;">Demo mode &mdash; platform under active revision</span>
-        </div>
-
-        <div class="pillar-card pillar-snw" style="grid-column: 1 / -1; display: flex; gap: 28px; align-items: flex-start; padding: 28px 36px;">
-            <div style="flex-shrink: 0;">
-                <div class="pillar-icon" style="margin-bottom: 0;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
-                </div>
-            </div>
-            <div style="flex: 1; min-width: 0;">
-                <div class="pillar-label">Pillar III</div>
-                <h3 style="margin-bottom: 6px;">LEF Citizen</h3>
-                <p style="margin-bottom: 6px;">Youth graduate disconnected from land, trade, governance, and the natural world. Where LEF Ed builds the academic foundation through K–8, LEF Citizen activates at 9th grade — an optional Civic ROTC pathway that uses each student's diagnostic profile to route them into real-world competency.</p>
-                <p class="pillar-outcome" style="margin-bottom: 8px;">A three-track development protocol. Shield builds the person. Builder builds the skill. Steward builds the citizen.</p>
-                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
-                    <span style="font-size: 0.84rem; font-weight: 600; letter-spacing: 0.04em; background: #E8F0FA; color: #1E4D8C; padding: 3px 9px; border-radius: 3px;">A · THE SHIELD</span>
-                    <span style="font-size: 0.84rem; font-weight: 600; letter-spacing: 0.04em; background: #E8F0FA; color: #1E4D8C; padding: 3px 9px; border-radius: 3px;">B · THE BUILDER</span>
-                    <span style="font-size: 0.84rem; font-weight: 600; letter-spacing: 0.04em; background: #E8F0FA; color: #1E4D8C; padding: 3px 9px; border-radius: 3px;">C · THE STEWARD</span>
-                </div>
-            </div>
+            <span style="display: block; margin-top: 0.5rem; font-size: 0.84rem; color: var(--text-muted); letter-spacing: 0.02em;">Discovery mode &mdash; platform under active revision</span>
         </div>
 
     </div>
@@ -881,8 +873,7 @@
                 <span style="font-size: 0.84rem; opacity: 0.6;">GOED Tier 1 &bull; Local Emerging Small Business</span>
             </div>
             <div style="font-size: 0.84rem; opacity: 0.9; min-width: 170px;">
-                <span style="font-weight: 700;">4 U.S. Patents Pending</span><br>
-                <span style="font-size: 0.84rem; opacity: 0.6;">Diagnostic Engine &bull; AI Self-Optimization &bull; QECO &bull; Unified LEF</span>
+                <span style="font-weight: 700;">5 U.S. Patents Pending</span>
             </div>
             <div style="font-size: 0.84rem; opacity: 0.9; min-width: 170px;">
                 <span style="font-weight: 700;">NSF STEM K-12 Grant Applicant</span><br>
@@ -890,7 +881,11 @@
             </div>
             <div style="font-size: 0.84rem; opacity: 0.9; min-width: 170px;">
                 <span style="font-weight: 700;">SAM.gov Registered Entity</span><br>
-                <span style="font-size: 0.84rem; opacity: 0.6;">UEI: EZ5VPPFP6NV3 &bull; Federal Award Eligible</span>
+                <span style="font-size: 0.84rem; opacity: 0.6;">UEI: EZ5VPPFP6NV3 &bull; CAGE: 1A3A2</span>
+            </div>
+            <div style="font-size: 0.84rem; opacity: 0.9; min-width: 170px;">
+                <span style="font-weight: 700;">NV State Vendor</span><br>
+                <span style="font-size: 0.84rem; opacity: 0.6;">Vendor ID: T29052309</span>
             </div>
             <div style="font-size: 0.84rem; opacity: 0.9; min-width: 170px;">
                 <span style="font-weight: 700;">NSF Principal Investigator</span><br>
@@ -904,7 +899,7 @@
 <section class="section" id="patents" style="background: var(--bg-warm);">
     <div class="section-label">Intellectual Property</div>
     <h2 class="section-title">Patent Portfolio</h2>
-    <p class="section-desc">Four provisional patent applications protecting the LEF ecosystem &mdash; from deterministic diagnostics to autonomous AI self-optimization to hybrid human-AI intelligence.</p>
+    <p class="section-desc">Five provisional patent applications protecting the LEF ecosystem &mdash; from deterministic diagnostics to autonomous AI self-optimization to cognitive graph traversal with constitutional governance.</p>
 
     <div style="max-width: 900px; margin: 2rem auto 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem;">
 
@@ -913,7 +908,7 @@
             <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem;">Diagnostic Reasoning Engine</h3>
             <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">Multi-phase diagnostic reasoning engine for competency-based education systems. Eight-phase sequential pipeline for root-cause analysis via DAG traversal with temporal decay modeling.</p>
             <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 0.6rem;">App. No. 63/993,278 &bull; Patent Center #74663354</p>
-            <a href="https://docs.google.com/document/d/1AMoorp8v6UyrtMyQHGuFpoOxQd_mK0Larh8ZDagKSxg/edit?usp=sharing" target="_blank" style="display: inline-block; margin-top: 0.75rem; font-size: 0.84rem; font-weight: 700; color: var(--pillar-ed); border: 1.5px solid var(--pillar-ed); border-radius: 4px; padding: 4px 10px; text-decoration: none; letter-spacing: 0.05em;">READ ABSTRACT &rarr;</a>
+            <a href="https://drive.google.com/file/d/1K-aHWuzdvpOtGlHCxNnpW1DVTrMFAH0i/view?usp=sharing" target="_blank" style="display: inline-block; margin-top: 0.75rem; font-size: 0.84rem; font-weight: 700; color: var(--pillar-ed); border: 1.5px solid var(--pillar-ed); border-radius: 4px; padding: 4px 10px; text-decoration: none; letter-spacing: 0.05em;">READ ABSTRACT &rarr;</a>
         </div>
 
         <div style="background: white; border-radius: var(--radius); padding: 1.4rem; box-shadow: var(--shadow-sm); border-left: 4px solid var(--pillar-ai);">
@@ -921,7 +916,7 @@
             <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem;">AI Self-Optimization Ecosystem</h3>
             <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">Adaptive learning layer with cross-platform network effect for educational diagnostic systems. Entropy-driven recursive branching for autonomous AI self-upgrades.</p>
             <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 0.6rem;">App. No. 63/993,317 &bull; Patent Center #74663931</p>
-            <a href="https://docs.google.com/document/d/1Me8uDhgNAt12icvfk5jlhrwCay6WKubxS3KOz78qeII/edit?usp=sharing" target="_blank" style="display: inline-block; margin-top: 0.75rem; font-size: 0.84rem; font-weight: 700; color: var(--pillar-ai); border: 1.5px solid var(--pillar-ai); border-radius: 4px; padding: 4px 10px; text-decoration: none; letter-spacing: 0.05em;">READ ABSTRACT &rarr;</a>
+            <a href="https://drive.google.com/file/d/1FWt1jxNFywf4NX7GN25SCUaIcwFqWuvL/view?usp=sharing" target="_blank" style="display: inline-block; margin-top: 0.75rem; font-size: 0.84rem; font-weight: 700; color: var(--pillar-ai); border: 1.5px solid var(--pillar-ai); border-radius: 4px; padding: 4px 10px; text-decoration: none; letter-spacing: 0.05em;">READ ABSTRACT &rarr;</a>
         </div>
 
         <div style="background: white; border-radius: var(--radius); padding: 1.4rem; box-shadow: var(--shadow-sm); border-left: 4px solid var(--lef-A);">
@@ -929,7 +924,7 @@
             <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem;">QECO &mdash; Qualia Entanglement &amp; Collective Oracle</h3>
             <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">Hybrid AI-human optimization via qualitative input perturbation, decentralized hashed attribute aggregation, and entropy-driven synchronicity prediction.</p>
             <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 0.6rem;">App. No. 63/993,979 &bull; Patent Center #74668095</p>
-            <a href="https://docs.google.com/document/d/1EpChK9EwLgtcH5kQgJkzsvjz-Pct851YQymuORpfo7Q/edit?usp=sharing" target="_blank" style="display: inline-block; margin-top: 0.75rem; font-size: 0.84rem; font-weight: 700; color: var(--lef-A); border: 1.5px solid var(--lef-A); border-radius: 4px; padding: 4px 10px; text-decoration: none; letter-spacing: 0.05em;">READ ABSTRACT &rarr;</a>
+            <a href="https://drive.google.com/file/d/1oGu8uYDa8WbnEQRMvBg5P1MUHrJGLXgD/view?usp=sharing" target="_blank" style="display: inline-block; margin-top: 0.75rem; font-size: 0.84rem; font-weight: 700; color: var(--lef-A); border: 1.5px solid var(--lef-A); border-radius: 4px; padding: 4px 10px; text-decoration: none; letter-spacing: 0.05em;">READ ABSTRACT &rarr;</a>
         </div>
 
         <div style="background: white; border-radius: var(--radius); padding: 1.4rem; box-shadow: var(--shadow-sm); border-left: 4px solid var(--pillar-snw);">
@@ -937,7 +932,15 @@
             <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem;">Unified LEF Diagnostic &amp; Autonomous AI</h3>
             <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">Unified multi-phase diagnostic reasoning engine and autonomous AI self-optimization ecosystem with cross-platform network learning and entropy-driven recursive branching.</p>
             <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 0.6rem;">App. No. 63/993,984 &bull; Patent Center #74667530</p>
-            <a href="https://docs.google.com/document/d/1G9ZHYmWLYL58JN3Q4wOJqW_3c5OIgj2phoBRDKyTJPw/edit?usp=sharing" target="_blank" style="display: inline-block; margin-top: 0.75rem; font-size: 0.84rem; font-weight: 700; color: var(--pillar-snw); border: 1.5px solid var(--pillar-snw); border-radius: 4px; padding: 4px 10px; text-decoration: none; letter-spacing: 0.05em;">READ ABSTRACT &rarr;</a>
+            <a href="https://drive.google.com/file/d/1-Otp1nU0XN4hEEarn5zV35guYIh61tAL/view?usp=sharing" target="_blank" style="display: inline-block; margin-top: 0.75rem; font-size: 0.84rem; font-weight: 700; color: var(--pillar-snw); border: 1.5px solid var(--pillar-snw); border-radius: 4px; padding: 4px 10px; text-decoration: none; letter-spacing: 0.05em;">READ ABSTRACT &rarr;</a>
+        </div>
+
+        <div style="background: white; border-radius: var(--radius); padding: 1.4rem; box-shadow: var(--shadow-sm); border-left: 4px solid var(--lef-E);">
+            <p style="font-size: 0.84rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--lef-E); margin-bottom: 0.4rem;">Provisional &bull; Filed 03/10/2026</p>
+            <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem;">CTE &mdash; Cognitive Graph Traversal Engine</h3>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">Five-operation cognitive traversal method for concept graphs with self-reflective optimization, constitutional runtime governance, qualia-based inter-agent context transfer, and bounded self-modification.</p>
+            <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 0.6rem;">Filed 03/10/2026 &bull; Cross-Ref: 63/993,278 &amp; 63/993,317</p>
+            <a href="https://drive.google.com/file/d/1BT3iv0VqkKAcQlp6MCJqg0Q1Wt5fsbLz/view?usp=sharing" target="_blank" style="display: inline-block; margin-top: 0.75rem; font-size: 0.84rem; font-weight: 700; color: var(--lef-E); border: 1.5px solid var(--lef-E); border-radius: 4px; padding: 4px 10px; text-decoration: none; letter-spacing: 0.05em;">READ ABSTRACT &rarr;</a>
         </div>
 
     </div>
@@ -970,13 +973,10 @@
 <!-- SUPPORT -->
 <section class="section" id="support">
     <div class="support-box">
-        <div class="section-label">Support</div>
         <h2 class="section-title">Help us plant more seeds</h2>
         <p class="section-desc" style="margin: 12px auto 0; max-width: 500px;">Every contribution fuels the next framework, the next partnership, the next bridge between what exists and what's possible.</p>
         <div class="support-buttons">
-            <button class="support-btn usdc" onclick="openModal('usdc')">Donate USDC</button>
-            <button class="support-btn dai" onclick="openModal('dai')">Donate DAI</button>
-            <button class="support-btn usdt" onclick="openModal('usdt')">Donate USDT</button>
+            <button class="support-btn support" onclick="openModal('usd')">Support Us</button>
         </div>
     </div>
 </section>
@@ -985,6 +985,7 @@
 <footer class="footer">
     <div class="footer-line"><strong style="font-family: var(--font-display); letter-spacing: 0.05em;">Living Eden Frameworks LLC</strong> &middot; DBA Co Creators &middot; Est. 2026</div>
     <div class="footer-line" style="font-size: 0.84rem; color: var(--text-muted);">NV20263528439 | EIN: 41-4285004</div>
+    <div class="footer-line" style="margin-top: 8px;"><a href="https://drive.google.com/file/d/1zdr0Bam3ZREV75vbZeYc2qewJQKiwOcm/view?usp=sharing" target="_blank" rel="noopener noreferrer">Capability Statement</a></div>
 </footer>
 
 <!-- DONATE MODAL -->
@@ -995,12 +996,21 @@
         <p class="modal-sub">Help fuel the next seed</p>
 
         <div class="crypto-tabs">
-            <button class="crypto-tab active" onclick="showCrypto('usdc')" data-crypto="usdc">USDC</button>
+            <button class="crypto-tab active" onclick="showCrypto('usd')" data-crypto="usd">USD</button>
+            <button class="crypto-tab" onclick="showCrypto('usdc')" data-crypto="usdc">USDC</button>
             <button class="crypto-tab" onclick="showCrypto('dai')" data-crypto="dai">DAI</button>
             <button class="crypto-tab" onclick="showCrypto('usdt')" data-crypto="usdt">USDT</button>
         </div>
 
-        <div class="crypto-panel active" id="panel-usdc">
+        <div class="crypto-panel active" id="panel-usd" style="text-align: center; padding: 10px 0;">
+            <stripe-buy-button
+              buy-button-id="buy_btn_1TAaXhQA8XXKXI4bv1OESiIU"
+              publishable-key="pk_live_51T8UqxQA8XXKXI4b8dnsjdzBkwfqmLhsUmOnXm18hr6vouiU2noVDQsBsAIWGLRhBF0PP2mEBUg3Oa6OCon8b5JO00EVjb1GYK"
+            >
+            </stripe-buy-button>
+        </div>
+
+        <div class="crypto-panel" id="panel-usdc">
             <span class="network-badge" style="background: #0052FF;">Base Network</span><br>
             <img src="usdc_qr.png" alt="USDC QR Code">
             <div class="wallet-address" onclick="copyAddr('0xc23b50D7623937d3Dd433701B3426f22886240EF', this)">
@@ -1048,7 +1058,7 @@ function closeMobileNav() {
 
 // Modal
 function openModal(crypto) {
-    showCrypto(crypto || 'usdc');
+    showCrypto(crypto || 'usd');
     document.getElementById('donateModal').classList.add('active');
 }
 function closeModal(e) {
@@ -1075,6 +1085,8 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeModal();
 });
 </script>
+
+<script async src="https://js.stripe.com/v3/buy-button.js"></script>
 
 </body>
 </html>
